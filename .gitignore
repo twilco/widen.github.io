@@ -7,3 +7,6 @@ output/
 pelican.pid
 pelicanconf.pyc
 srv.pid
+
+# Jekyll Shit
+_site/
