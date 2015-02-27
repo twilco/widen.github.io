@@ -1,9 +1,7 @@
 ---
 title: Living Style Guide
-layout: page
 permalink: /living-style-guide/
 ---
-
 # Typography
 
 ## Headings

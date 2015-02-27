@@ -1,7 +1,6 @@
 ---
-layout: post
-title:  "First Post"
-date:   2015-02-23 22:23:38
+title: "First Post"
+date: 2015-02-23 22:23:38
 categories: jekyll update
 ---
 Organic Williamsburg keffiyeh four dollar toast retro. Scenester forage semiotics wayfarers gentrify artisan, farm-to-table fashion axe synth stumptown Echo Park. Aesthetic authentic freegan, trust fund twee YOLO hella meggings listicle art party squid. Williamsburg tattooed Blue Bottle chia. Messenger bag cliche flexitarian kitsch. Crucifix Odd Future Pinterest disrupt sustainable pug. Skateboard readymade sustainable meh.
