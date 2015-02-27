@@ -2,6 +2,7 @@
 title:  Runtime Configuration for AWS' Lambda
 author: mfeltner
 categories: aws lambda
+layout: post
 ---
 
 Lately, my team and I (the A-Team) have been working on architecting a system to gather, process, and evaluate all sorts of events from Media Collective. The end goal is to provide our clients with a flexible platform for analyzing their digital asset library.
@@ -20,19 +21,19 @@ One potential downside of Lambda is that you cannot provide any sort of runtime 
 
 It _seems_ like Amazon expect you to have your function set up ahead of time, but this is a bit unreasonable because now you have to set up your function beforehand.
 
-I noticed a tiny detail about Lambdas: they can have a description. Also, Lambdas can use the [node aws-sdk]() to make requests to other AWS web services, including Lambda itself. 
+I noticed a tiny detail about Lambdas: they can have a description. Also, Lambdas can use the [node aws-sdk]() to make requests to other AWS web services, including Lambda itself.
 
 What I did was fill the description of the Lambda with valid JSON. When the Lambda is run it makes a request for information about itself. If its description is valid JSON then those values are serialized and used.
 
 Here's an example of a Lambda that is processing its own description as a sort of runtime configuration.
 
-```
+``` javascript
 console.log('Loading event');
 
 var aws = require('aws-sdk');
 
 exports.handler = function(event, context) {
-    
+
     var lambda = new aws.Lambda({apiVersion: '2014-11-11'});
     lambda.getFunctionConfiguration({ FunctionName: "whatstheenv" }, function(err, data){
         if (err) {context.done(err, err.stack); }
