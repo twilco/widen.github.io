@@ -20,6 +20,8 @@ defaults:
     values:
       layout: "page"
 
+permalink: "/blog/:year/:month/:day/:title"
+
 # PAGINATION
 paginate: 5
 paginate_path: "blog/page:num"
