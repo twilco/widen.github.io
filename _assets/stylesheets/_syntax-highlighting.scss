@@ -1,6 +1,10 @@
 /**
  * Syntax highlighting styles
  */
+pre.highlight {
+  overflow-wrap: break-word;
+}
+
 code {
     background: #fff;
     // @extend %vertical-rhythm;
