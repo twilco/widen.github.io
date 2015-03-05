@@ -9,7 +9,7 @@ Ruby, RubyGems, and Bundler.
 ## Getting Started
 
 ```sh
-git clone -b spike/jekyll git@github.com:Widen/widen.github.io.git
+git clone git@github.com:Widen/widen.github.io.git
 cd widen.github.io
 bundle install
 jekyll serve --drafts
