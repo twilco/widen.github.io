@@ -1,8 +1,12 @@
 @charset "utf-8";
 
-
-// reset
+// vendors
+@import "compass";
 @import "compass/reset";
+@import "syntax-highlighting";
+
+/* globals */
+@import "variables";
+@import "global";
 
 // partials
-@import "syntax-highlighting";

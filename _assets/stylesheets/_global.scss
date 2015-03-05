@@ -1,0 +1,14 @@
+*, *::after, *::before
+{
+  @include box-sizing(border-box);
+}
+
+html
+{
+  font-size: 140%;
+}
+
+body {
+  background-color: $body-background-color;
+  line-height: $body-line-height;
+}
