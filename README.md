@@ -4,14 +4,15 @@ Spread the love.
 
 ## Requirments
 
-Ruby and rubygems.
+Ruby, RubyGems, and Bundler.
 
 ## Getting Started
 
 ```sh
-gem install jekyll
-git clone -b spike/jekyll git@github.com:Widen/widen.github.io.git && cd widen.github.io
-jekyll serve
+git clone -b spike/jekyll git@github.com:Widen/widen.github.io.git
+cd widen.github.io
+bundle install
+jekyll serve --drafts
 ```
 
 ## Add a post
