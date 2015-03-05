@@ -2,7 +2,6 @@
 title:  Runtime Configuration for AWS' Lambda
 author: mfeltner
 categories: aws lambda hack
-layout: post
 ---
 
 Amazon recently released a new service into preview called [Lambda](http://aws.amazon.com/lambda/). Lambdas are simple, stateless node.js functions that get executed as callbacks to arbitrary AWS "events". Lambdas automatically scale up/down to process concurrently, and the only "sysadmin" type configuration you need to do is to set the maximum amount of memory it shall use (128MB-512MB), and the maximum amount of time it shall run (default is 3 seconds).
@@ -25,7 +24,7 @@ console.log('Loading event');
 var aws = require('aws-sdk');
 
 exports.handler = function(event, context) {
-    
+
     var lambda = new aws.Lambda({apiVersion: '2014-11-11'});
     lambda.getFunctionConfiguration({ FunctionName: "whatstheenv" }, function(err, data){
         if (err) {context.done(err, err.stack); }
@@ -43,5 +42,3 @@ exports.handler = function(event, context) {
 ```
 
 Now, we can simply edit the description in the console, and voilà, our next lambda run will have different data!
-
-
