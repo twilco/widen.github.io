@@ -3,4 +3,7 @@ members:
       email: mfeltner@widen.com
       github: feltnerm
       name: "Mark Feltner"
-
+    dbeg:
+      email: dbeghin@widen.com
+      github: dbeg
+      name: "Dan Beghin"
