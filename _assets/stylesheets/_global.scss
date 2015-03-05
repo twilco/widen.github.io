@@ -12,6 +12,18 @@ body {
   background-color: $body-background-color;
 }
 
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.4rem; }
+h4 { font-size: 1.2rem; }
+h5 { font-size: 1.1rem; }
+h6 { font-size: 1.0rem; }
+
 p {
   line-height: $copy-line-height;
+  margin-bottom: 1rem;
+}
+
+img {
+  max-width: 100%;
 }
