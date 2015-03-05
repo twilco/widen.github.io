@@ -10,5 +10,8 @@ html
 
 body {
   background-color: $body-background-color;
-  line-height: $body-line-height;
+}
+
+p {
+  line-height: $copy-line-height;
 }
