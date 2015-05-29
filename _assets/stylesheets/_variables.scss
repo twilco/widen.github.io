@@ -11,12 +11,17 @@ $body-background-color: $white;
 $body-width: 750px;
 
 // text
-$copy-line-height: 1.4rem;
+$copy-line-height: 2.5rem;
+$code-line-height: 1.5rem;
 
 // fonts
-$default-font: Sans-Serif;
-$header-font: Serif;
-$mono-font: Monospace;
+@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro|Source+Code+Pro|Source+Serif+Pro);
+$default-font-family: 'Source Sans Pro', Sans-Serif;
+$header-font-family: 'Source Serif Pro', Serif;
+$mono-font-family: 'Source Code Pro', Monospace;
+
+$copy-font-size: 1.8rem;
+$code-font-size: 90%;
 
 // logo
 $logo-color: $red;
