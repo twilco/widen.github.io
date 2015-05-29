@@ -1,0 +1,16 @@
+header.site-header{
+    .title {
+        $title-color: $white;
+
+        background-color: $black;
+        color: $title-color;
+        a { color: $title-color; }
+    }
+    nav {
+        background-color: $light-grey;
+        color: $black;
+        ul {
+            @include horizontal-list();
+        }
+    }
+}
