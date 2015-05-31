@@ -1,16 +1,34 @@
 header.site-header{
-    .title {
-        $title-color: $white;
 
-        background-color: $black;
-        color: $title-color;
-        a { color: $title-color; }
+    border-bottom: 1px solid black;
+
+    .logo {
+        height: 2.6rem;
+        width: 2.6rem;
     }
+
+    h2 {
+        display: inline;
+    }
+
     nav {
         background-color: $light-grey;
         color: $black;
+        height: $copy-line-height;
+        display: inline;
+
         ul {
-            @include horizontal-list();
+            @include inline-list();
+            color: $red;
+            font-size: 2.6rem;
+        }
+
+        .site-page-links {
+        }
+
+        .site-social-links {
+            float: right;
         }
     }
+
 }
