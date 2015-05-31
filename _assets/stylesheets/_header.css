@@ -12,7 +12,6 @@ header.site-header{
     }
 
     nav {
-        background-color: $light-grey;
         color: $black;
         height: $copy-line-height;
         display: inline;
