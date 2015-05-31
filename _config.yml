@@ -42,3 +42,7 @@ assets:
   compress:
     css:  sass
     js:   uglifier
+  sources:
+    - _assets/images
+    - _assets/stylesheets
+    - _assets/fonts
