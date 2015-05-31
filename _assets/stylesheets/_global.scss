@@ -38,3 +38,14 @@ p {
 img {
   max-width: 100%;
 }
+
+a {
+    text-decoration: none;
+    color: lighten($red, 20%);
+}
+
+a:hover {
+    text-decoration: underline;
+    color: lighten($red, 5%);
+}
+
