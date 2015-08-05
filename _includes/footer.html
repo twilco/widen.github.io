@@ -1,3 +1,14 @@
-<footer role="contentinfo">
-  <a href="http://widen.com">Widen</a>
+<footer class="site-footer" role="contentinfo">
+    <div class="wrapper">
+      <a href="http://widen.com">Widen</a>
+      <ul class="site-page-links">
+      {% for page in site.pages %}
+        {% if page.title %}
+        <li>
+            <a href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
+        </li>
+        {% endif %}
+      {% endfor %}
+      </ul>
+    </div>
 </footer>
