@@ -1,6 +1,6 @@
 header.site-header{
 
-    border-bottom: 1px solid black;
+    background-color: $dark-grey;
 
     .logo {
         height: 2.6rem;
