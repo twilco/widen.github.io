@@ -1,8 +1,8 @@
-title: "Widen Dev"
+title: "Widen Engineering Blog"
 description: "An open source software initiative."
 timezone: "America/Chicago"
 baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://widen.github.io"
+url: "http://engineering.widen.com"
 email: "devrel@widen.com"
 
 # DEFAULTS
