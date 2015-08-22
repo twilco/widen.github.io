@@ -16,8 +16,8 @@ publish: build cleanMerge commitSiteOnly
 	git push origin master
 
 setup:
-		gem install bundle
-		bundle install
+	gem install bundle
+	bundle install
 
 start:
 	jekyll serve --drafts
