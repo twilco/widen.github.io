@@ -1,9 +1,13 @@
 // functional colors
 $white: #fff;
-$light-grey: #eee;
+$light-grey: #77787B;
 $dark-grey: #3c3c3c;
 $black: #000;
-$red: #B72822;
+$red: #BF311A;
+$blue: #00AEEF;
+$orange: #DA5110;
+$yellow: #EBAD19;
+$green: #AACF6A;
 
 // descriptive colors
 $body-background-color: $white;
@@ -16,9 +20,10 @@ $copy-line-height: 2.5rem;
 $code-line-height: 1.5rem;
 
 // fonts
-@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro|Source+Code+Pro|Source+Serif+Pro);
+//@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro|Source+Code+Pro|Source+Serif+Pro);
+@import url(http://fonts.googleapis.com/css?family=Signika+Negative:700,400|Source+Sans+Pro|Source+Code+Pro);
 $default-font-family: 'Source Sans Pro', Sans-Serif;
-$header-font-family: 'Source Serif Pro', Serif;
+$header-font-family: 'Signika Negative', Serif;
 $mono-font-family: 'Source Code Pro', Monospace;
 
 $base-font-size: 62.5%; // so 1em = 10px
