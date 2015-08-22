@@ -1,0 +1,9 @@
+language: ruby
+script: make publish
+branches:
+  only:
+  - develop
+env:
+  global:
+    - GH_REF: github.com/Widen/widen.github.io
+    - secure: DzoNXV400QwD4W5qYN8tGmUo9EA66+ARx0w+DTI7ADwCYwp88MbNQipCZTL2i/MNV05dI0gMIFbwNMGlZh4hJR1xuDl7dLDMKz16qb5faBATauESUZhcOy/yJAH2IB2pzsYrLGLajEeOQCCnA5ePbud9oxthyKfP+CiDr+fD84A=
