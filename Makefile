@@ -34,7 +34,7 @@ travisSetup:
 	git clone "https://${GH_TOKEN}@${GH_REF}"
 	cd widen.github.io
 	git remote update
-	#for remote in `git branch -r`; do git branch --track $remote; done
+	for remote in `git branch -r`; do git branch --track $remote; done
 	git fetch --all
 	git pull --all
 	git remote show origin
