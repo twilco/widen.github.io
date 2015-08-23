@@ -36,5 +36,6 @@ travisSetup:
 	git remote show origin
 	git remote update
 	git fetch
+	git pull
 	git checkout -b master origin/master
 	git checkout develop
