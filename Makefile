@@ -41,5 +41,8 @@ travisSetup:
 	#git remote show origin
 	#git checkout -b master origin/master
 	git checkout develop
+	git fetch --all
+	git pull --all
 	git status
+	git branch -a
 	git checkout -b master origin/master
