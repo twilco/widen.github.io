@@ -33,5 +33,6 @@ travisSetup:
 	git config user.email "travis@widen.com"
 	git clone "https://${GH_TOKEN}@${GH_REF}"
 	cd widen.github.io
+	git fetch origin
 	git checkout master
 	git checkout develop
