@@ -2,7 +2,7 @@ build:
 	jekyll build
 
 cleanMerge:
-	git merge -s ours origin/master --no-edit
+	git merge -s ours master --no-edit
 	git checkout master
 
 commitSiteOnly:
