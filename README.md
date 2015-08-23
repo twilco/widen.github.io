@@ -2,7 +2,7 @@
 
 Spread the love.
 
-## Requirments
+## Requirements
 
 Ruby, RubyGems, and Bundler.
 
