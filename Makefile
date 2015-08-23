@@ -2,7 +2,7 @@ build:
 	jekyll build
 
 cleanMerge:
-	git merge -s ours master --no-edit
+	git merge -s ours origin/master --no-edit
 	git checkout master
 
 commitSiteOnly:
@@ -31,23 +31,7 @@ travisPublish: travisSetup travisBuild cleanMerge commitSiteOnly
 travisSetup:
 	git config user.name "Widen Travis-CI agent"
 	git config user.email "travis@widen.com"
-	#git clone "https://${GH_TOKEN}@${GH_REF}" blog-repo
 	git remote rm origin
 	git remote add origin "https://${GH_TOKEN}@${GH_REF}"
-	#cd blog-repo
-	#git remote update
-	#git pull --all
-	#for remote in `git branch -r | grep -v \>`; do git branch ${remote#origin/} $remote; done
 	git fetch --all
-	#git pull --all
-	git remote show origin
-	#git checkout -b master origin/master
-	git status
-	git branch -a
-	#git checkout master
 	git checkout develop
-	#git fetch --all
-	#git pull --all
-	git status
-	git branch -a
-	#git checkout -b master origin/master
