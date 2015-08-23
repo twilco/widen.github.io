@@ -46,3 +46,4 @@ assets:
     - _assets/images
     - _assets/stylesheets
     - _assets/fonts
+exclude: [Rakefile, Gemfile, Gemfile.lock, README.md, vendor]
