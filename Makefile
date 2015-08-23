@@ -22,7 +22,10 @@ setup:
 start:
 	jekyll serve --drafts
 
-travisPublish: travisSetup build cleanMerge commitSiteOnly
+travisBuild:
+	bundle exec jekyll build
+
+travisPublish: travisSetup travisBuild cleanMerge commitSiteOnly
 	git push origin master
 
 travisSetup:
