@@ -35,7 +35,8 @@ travisSetup:
 	cd widen.github.io
 	git remote update
 	git pull --all
-	for remote in `git branch -r | grep -v \>`; do git branch --track ${remote#origin/} $remote; done
+	git status
+	for remote in `git branch -r | grep -v \>`; do git branch ${remote#origin/} $remote; done
 	git fetch --all
 	git pull --all
 	git remote show origin
