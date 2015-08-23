@@ -23,11 +23,11 @@ start:
 	jekyll serve --drafts
 
 travisPublish: travisSetup build cleanMerge commitSiteOnly
-	git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master > /dev/null 2>&1
+	git push origin master
 
 travisSetup:
 	git config user.name "Widen Travis-CI agent"
 	git config user.email "travis@widen.com"
-	git clone git@github.com:Widen/widen.github.io.git
+	git clone "https://${GH_TOKEN}@${GH_REF}"
 	cd widen.github.io
 	git checkout develop
