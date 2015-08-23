@@ -32,6 +32,6 @@ travisSetup:
 	git config user.name "Widen Travis-CI agent"
 	git config user.email "travis@widen.com"
 	git remote rm origin
-	git remote add origin "https://${GH_TOKEN}@${GH_REF}"
+	@git remote add origin "https://${GH_TOKEN}@${GH_REF}"
 	git fetch --all
 	git checkout develop
