@@ -43,3 +43,8 @@ Woohoo!
 Pages are located in the project root.
 
 Same rules apply for YAML front matter and markdown support.
+
+
+## Publish to engineering.widen.com
+
+Simply push to the develop branch, and travis-ci will re-deploy the site, making your changes live within minutes. If you do _not_ want your changes to go live yet, create a branch off of develop and push to this new branch. Once you are ready to make your changes live, merge back into develop and push up to GitHub.
