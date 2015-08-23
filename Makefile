@@ -38,10 +38,11 @@ travisSetup:
 	#git remote update
 	#git pull --all
 	#for remote in `git branch -r | grep -v \>`; do git branch ${remote#origin/} $remote; done
-	#git fetch --all
-	#git pull --all
-	#git remote show origin
+	git fetch --all
+	git pull --all
+	git remote show origin
 	#git checkout -b master origin/master
+	git checkout master
 	git checkout develop
 	#git fetch --all
 	#git pull --all
