@@ -5,5 +5,5 @@ branches:
   - develop
 env:
   global:
-    - GH_REF: github.com/Widen/widen.github.io
-    - secure: DzoNXV400QwD4W5qYN8tGmUo9EA66+ARx0w+DTI7ADwCYwp88MbNQipCZTL2i/MNV05dI0gMIFbwNMGlZh4hJR1xuDl7dLDMKz16qb5faBATauESUZhcOy/yJAH2IB2pzsYrLGLajEeOQCCnA5ePbud9oxthyKfP+CiDr+fD84A=
+  - GH_REF: github.com/Widen/widen.github.io
+  - secure: HBo2et59JYhV6RfZzeLGuoLEWbzaCq4uRvEvrHAYnHlSRHVHpIIbXhn3Fr6HktA9gFqT3rXfFTe6oFkyxZ5iLEtIM5sgClZzaqtUkpCzBORkmxMVyZK4090K4xSQa6KxrQFQeyIgp5i6LF0q9F+K52Fkd7WtvPiI/SeYjUM+n60=
