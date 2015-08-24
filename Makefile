@@ -1,3 +1,5 @@
+SPACE := $(subst ,, )
+
 build:
 	jekyll build
 
@@ -11,6 +13,23 @@ commitSiteOnly:
 	rm -rf _site
 	git add .
 	git commit -a -m "publish blog update"
+
+createDraft: determineDraftPostName createPostFile
+
+createPost: determinePostName createPostFile
+
+createPostFile:
+	touch $(NEW_POST)
+	echo '---' >> $(NEW_POST)
+	echo 'title: "$(title)"' >> $(NEW_POST)
+	echo 'date: '`date +%Y-%m-%d` >> $(NEW_POST)
+	echo '---' >> $(NEW_POST)
+
+determineDraftPostName:
+	$(eval NEW_POST := _drafts/`date +%Y-%m-%d`-$(subst $(SPACE),-,$(title)).md)
+
+determinePostName:
+	$(eval NEW_POST := _posts/`date +%Y-%m-%d`-$(subst $(SPACE),-,$(title)).md)
 
 publish: build cleanMerge commitSiteOnly
 	git push origin master
