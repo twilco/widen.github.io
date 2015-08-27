@@ -47,3 +47,5 @@ assets:
     - _assets/stylesheets
     - _assets/fonts
 exclude: [Makefile, Rakefile, Gemfile, Gemfile.lock, README.md, vendor]
+repository: widen/widen.github.io
+gems: ['jekyll-git_metadata', 'jekyll-github-metadata']

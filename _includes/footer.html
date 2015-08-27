@@ -8,7 +8,22 @@
             </li>
             {% endif %}
           {% endfor %}
+          <li><a href="http://widen.com/widen.github.io" title="Source Code">Source</a></li>
           </ul>
-          <a href="http://widen.com">Widen</a>
+          <ul>
+            <li>
+                <small><a target="_blank" title="View current page" href="https://github.com/widen/widen.github.io/blob/develop/{{page.path}}">View</a></small>
+            </li>
+            <li>
+                <small><a target="_blank" title="Edit current page" href="https://github.com/widen/widen.github.io/edit/develop/{{page.path}}">Edit</a></small>
+            </li>
+            <li>
+                <small><a target="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/{{site.git.last_commit.short_sha}}">Site SHA: {{site.git.last_commit.short_sha}}</a></small>
+            </li>
+            <li>
+                <small><a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/{{page.git.last_commit.short_sha}}">Page SHA: {{page.git.last_commit.short_sha}}</a></small>
+            </li>
+          </ul>
+          <p>Powered by <a href="http://widen.com">Widen</a></p>
     </footer>
 </div>
