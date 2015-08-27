@@ -1,6 +1,7 @@
 ---
 title: "First Post"
 date: 2015-02-23 22:23:38
+author: Mark Feltner
 categories: jekyll update
 ---
 TEST 123
