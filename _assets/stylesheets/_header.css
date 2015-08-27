@@ -9,6 +9,7 @@ header.site-header{
 
     h2 {
         display: inline;
+        font-weight: 600;
     }
 
     nav {
