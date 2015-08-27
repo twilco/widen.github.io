@@ -1,5 +1,6 @@
 <div class="wrapper">
     <footer class="site-footer" role="contentinfo">
+        <nav>
           <ul class="inline">
           {% for page in site.pages %}
             {% if page.title %}
@@ -10,9 +11,21 @@
           {% endfor %}
           </ul>
           <br/>
+        </nav >
+        <nav>
+          <ul class="site-social-links inline">
+              <li><a target="_blank" title="RSS Feed" href="/feed.xml" class="ion-social-rss"></a></li>
+              <li><a target="_blank" title="GitHub" href="https://github.com/Widen" class="ion-social-github"></a></li>
+              <li><a target="_blank" title="Twitter" href="https://twitter.com/widendev" class="ion-social-twitter"></a></li>
+          </ul>
+        </nav>
+        <p>© Copyright {{ site.time | date: '%Y' }}, Widen Enterprises, Inc.</p>
+    <p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"></a>{% if page.title %}<span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">{{page.title}}</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="{{page.url}}" property="cc:attributionName" rel="cc:attributionURL">{% if page.author %}{{page.author}}{% else %}Widen Enterprises, Inc.{% endif %}</a>{% else %}Content {% endif %} licensed under the <br/><a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
+        <p><strong>Something wrong with this page?</strong> Please <a href="https://github.com/widen/widen.github.io/issues/new">file a bug</a>.</p>
+        <nav>
           <ul class="inline">
             <li>
-                <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io/">View Source</a>
+                <a class="ion-ios-search-strong" target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io/"></a>
             </li>
             <li>
                 <a class="ion-eye" target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/develop/{{page.path}}"></a>
@@ -20,18 +33,14 @@
             <li>
                 <a class="ion-edit" target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/{{page.path}}"></a>
             </li>
-          <br/>
             <li>
-                <a target="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/{{site.git.last_commit.short_sha}}">Site SHA: {{site.git.last_commit.short_sha}}</a>
+                <a target="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/{{site.git.last_commit.short_sha}}">{{site.git.last_commit.short_sha}}</a>
             </li>
             <li>
-                <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/{{page.git.last_commit.short_sha}}">Page SHA: {{page.git.last_commit.short_sha}}</a>
+                <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/{{page.git.last_commit.short_sha}}">{{page.git.last_commit.short_sha}}</a>
             </li>
           </ul>
-          <br/>
-          <p><strong>Something wrong with this page?</strong> Please <a href="https://github.com/widen/widen.github.io/issues/new">file a bug</a></p>
-          <p>© Copyright {{ site.time | date: '%Y' }}, Widen Enterprises, Inc.</p>
-          <p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"></a>{% if page.title %}<span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/Text" property="dct:title" rel="dct:type">{{page.title}}</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="{{page.url}}" property="cc:attributionName" rel="cc:attributionURL">{% if page.author %}{{page.author}}{% else %}Widen Enterprises, Inc.{% endif %}</a>{% else %}Content {% endif %} licensed under the <a target="_blank" rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p>
-          <p>Powered by <strong><a target="_blank" href="http://widen.com">Widen</a></strong></p>
+          </nav >
+          <p>Powered by <strong><a href="http://widen.com">Widen</a></strong></p>
     </footer>
 </div>
