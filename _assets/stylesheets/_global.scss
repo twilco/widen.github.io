@@ -75,3 +75,8 @@ pre > code {
     width: 100%;
 }
 
+// lists
+ul.inline {
+    @include inline-list();
+}
+
