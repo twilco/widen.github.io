@@ -1,5 +1,8 @@
 # Widen Developer Relations
 
+[![Build Status](https://travis-ci.org/Widen/widen.github.io.svg?branch=develop)](https://travis-ci.org/Widen/widen.github.io)
+
+
 Spread the love.
 
 ## Requirements
