@@ -3,7 +3,7 @@ description: "An open source software initiative."
 timezone: "America/Chicago"
 baseurl: "" # the subpath of your site, e.g. /blog/
 url: "http://engineering.widen.com"
-email: "devrel@widen.com"
+email: "engineering@widen.com"
 
 # DEFAULTS
 defaults:
