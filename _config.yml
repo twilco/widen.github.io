@@ -48,5 +48,5 @@ assets:
     - _assets/fonts
 exclude: [Makefile, Rakefile, Gemfile, Gemfile.lock, README.md, vendor]
 repository: widen/widen.github.io
-google_analytics_code:
+google_analytics_code: UA-1206716-19
 gems: ['jekyll-git_metadata', 'jekyll-github-metadata']
