@@ -20,11 +20,17 @@ jekyll serve --drafts
 
 ## Add a post
 
-Blog posts are located in `./_posts`.
+Start posting easily with the following `make` commands:
 
-Blog posts must start with their publish date (this can be changed) (i.e., `yyyy-mm-dd-{title}.md`) (e.g., `2013-12-30-Hello-World!.md`)).
+* To create a new post: `make createPost title="this is my new post"`
+* To create a new draft: `make createDraft title="this is my new draft post"`
 
-Blog posts must have YAML front matter.
+If you wish to post using a more manual approach, all posts are located in `./_posts`. You can manually create a file within that dir:
+
+* Blog posts must start with their publish date (this can be changed) (i.e., `yyyy-mm-dd-{title}.md`) (e.g., `2013-12-30-Hello-World!.md`)).
+* Blog posts must have [YAML front matter](http://jekyllrb.com/docs/frontmatter/).
+
+### Example post:
 
 ```
 ---
