@@ -4,16 +4,26 @@ header.site-header{
     padding: 14px 0 10px 0;
 
     .logo {
-        height: 3rem;
-        width: 3rem;
-        margin-right: 5px;
+
+        img {
+            height: 3rem;
+            width: 3rem;
+            margin-right: 5px;
+        }
+
+        a {
+            float: left;
+            display: inline-block;
+        }
+
     }
 
     h2 {
         display: inline;
         position: relative;
-        float: right;
+        float: left;
         font-size: 3rem;
+        margin-left: 13px;
     }
 
     nav {
