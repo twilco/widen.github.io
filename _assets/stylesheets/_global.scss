@@ -73,3 +73,7 @@ ul.inline {
     @include inline-list();
 }
 
+// clear!
+.clear {
+    clear: both;
+}
