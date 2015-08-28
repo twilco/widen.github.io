@@ -1,7 +1,7 @@
 SPACE := $(subst ,, )
 
 build:
-	jekyll build
+	bundle exec jekyll build
 
 cleanMerge:
 	git merge -s ours origin/master --no-edit
@@ -39,7 +39,7 @@ setup:
 	bundle install
 
 start:
-	jekyll serve --drafts
+	bundle exec jekyll serve --drafts
 
 travisBuild:
 	bundle exec jekyll build
