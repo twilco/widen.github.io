@@ -10,13 +10,18 @@ A while ago Amazon released its [Lambda](http://aws.amazon.com/lambda/) service.
 One thing I disliked about Lambda is that you cannot provide any sort of runtime
 configuration to it. You can at least give EC2 "user data" which will be available to the system at runtime. Because of this you are forced to build configuration into your source code either via the zip you give Lambda or through some other sort of mechanism.
 
-Lambdas can have an optional `description` [when created](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#createFunction-property). Also, Lambdas can use the [node aws-sdk](https://github.com/aws/aws-sdk-js) to make requests to other AWS web services, including Lambda itself.
+Rebuilding and re-uploading a zip every time a configuration point changed was cumbersome, and having
+configuration baked into my Lambda seemed wrong. I wanted something like Elasticbeanstalk or ECS where I can just pass in
+environment variables and write my code to adapt.
 
-What I did was fill the description of the Lambda with valid JSON. Next, when the Lambda is executed code is run which makes a request for information about the lambda itself. If its description is valid JSON then those values are serialized and used as configuration.
+Fortunately, Lambdas can have an optional `description` [when created](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#createFunction-property). Also, Lambdas can use the [node aws-sdk](https://github.com/aws/aws-sdk-js) to make requests to other AWS web services, including Lambda itself.
+
+So I filled the description of the Lambda with valid JSON. Next, when the Lambda is executed code is run which makes a request for information about the lambda itself. If its description is valid JSON then those values are serialized and used as configuration.
 
 Here's an example of a Lambda that is processing its own description as a sort of runtime configuration.
 
 ``` javascript
+// This function is called 'whatstheenv'
 console.log('Loading event');
 
 var aws = require('aws-sdk');
