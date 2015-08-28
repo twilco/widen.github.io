@@ -1,6 +1,6 @@
 header.site-header{
 
-    background-color: $light-grey;
+    background-color: $dark-grey;
     padding: 14px 0 10px 0;
 
     .logo {
