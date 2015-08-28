@@ -1,6 +1,7 @@
 ---
 title: Living Style Guide
 permalink: /living-style-guide/
+published: false
 ---
 # Typography
 
