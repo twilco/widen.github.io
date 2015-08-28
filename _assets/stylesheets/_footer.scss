@@ -3,8 +3,8 @@ footer.site-footer {
     text-align: center;
     font-size: 80%;
     nav {
-        margin-top: 13px;
-        margin-bottom: 13px;
+        margin-top: 34px;
+        margin-bottom: 34px;
     }
     li {
         margin-top: 8px;
@@ -12,5 +12,13 @@ footer.site-footer {
     li + li:before{
         content: " • ";
         padding: 0 8px;
+    }
+    .logo {
+        height: 4rem;
+        height: 4rem;
+        margin-top: 21px;
+    }
+    .site-social-links {
+        font-size: 3rem;
     }
 }
