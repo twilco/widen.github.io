@@ -23,4 +23,19 @@
     }
     h4, h5, h6 { margin-bottom: 3px; }
 
+    header {
+        h1 {
+            margin-bottom: 13px;
+        }
+        margin-bottom: 34px;
+    }
+
+}
+
+.git-info {
+    opacity: 0;
+    transition: opacity 1s ease-in;
+}
+.git-info:hover {
+    opacity: 0.5
 }
