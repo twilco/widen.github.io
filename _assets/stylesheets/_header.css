@@ -11,9 +11,11 @@ header.site-header{
             margin-right: 5px;
         }
 
+
         a {
             float: left;
             display: inline-block;
+            color: $white;
         }
 
     }
@@ -24,6 +26,10 @@ header.site-header{
         float: left;
         font-size: 3rem;
         margin-left: 13px;
+        color: $white;
+        a {
+            color: $white;
+        }
     }
 
     nav {
