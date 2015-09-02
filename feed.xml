@@ -5,9 +5,113 @@
     <description>The blog of the Widen Engineering Team.</description>
     <link>http://engineering.widen.com/</link>
     <atom:link href="http://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 02 Sep 2015 00:29:34 -0500</pubDate>
-    <lastBuildDate>Wed, 02 Sep 2015 00:29:34 -0500</lastBuildDate>
+    <pubDate>Wed, 02 Sep 2015 17:37:28 -0500</pubDate>
+    <lastBuildDate>Wed, 02 Sep 2015 17:37:28 -0500</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
+    
+      <item>
+        <title>Tomcat Hates Encoded Slashes</title>
+        <description>&lt;h2 id=&quot;setup&quot;&gt;Setup&lt;/h2&gt;
+
+&lt;p&gt;Let’s picture a small segment of a typical web application in order to better understand this problem. We’ll focus mostly on the server here, but the client plays a key role as well. On the server, we have a REST endpoint that exists to proxy information from &lt;em&gt;another&lt;/em&gt; endpoint. This handler accepts GET requests. The &lt;em&gt;other&lt;/em&gt; endpoint to proxy is included as a path parameter. The signature of our endpoint handler looks something like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@GET&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@Path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;proxy/{url}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nd&quot;&gt;@PathParam&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;url&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;In case it is not already obvious, the above code is part of a Java interface, and the annotations are part of the &lt;a href=&quot;https://docs.oracle.com/javaee/7/api/javax/ws/rs/package-summary.html&quot;&gt;javax.ws.rs package&lt;/a&gt;, which is a collection of interfaces and annotations that align with the &lt;a href=&quot;https://jcp.org/en/jsr/detail?id=311&quot;&gt;JSR 311 specification&lt;/a&gt; maintained by the &lt;a href=&quot;https://www.jcp.org/en/home/index&quot;&gt;Java Community Process group&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The exact implementation of the above endpoint method is unimportant, so I’ll omit it for the sake of brevity. When called, it will simply make a GET request to the address specified at the end of the &lt;code class=&quot;highlighter-rouge&quot;&gt;@Path&lt;/code&gt;, which is stored in the &lt;code class=&quot;highlighter-rouge&quot;&gt;url&lt;/code&gt; parameter. The response from the resource associated with this &lt;code class=&quot;highlighter-rouge&quot;&gt;url&lt;/code&gt; will return some data in the response, and this data will then be returned to whichever client called our “proxy/” endpoint. Our client code may very well be running in a browser, in which case it may look something like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;resourceToProxy&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;encodeURIComponent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'http://widen.com/careers'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;fetch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'/proxy/'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;resourceToProxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ok&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;statusText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;proxiedData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// handle proxied data in response&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;The above client-side code utilizes the native &lt;a href=&quot;http://davidwalsh.name/fetch&quot;&gt;Fetch API&lt;/a&gt;, but you could accomplish the same call with &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;XMLHttpRequest&lt;/code&gt;&lt;/a&gt;. In fact, the client doesn’t even need to be browser-based - it could very well live on a server, coded in any language under the sun.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-problem&quot;&gt;The problem&lt;/h2&gt;
+
+&lt;p&gt;After executing the above request, we would fully expect to receive a 2xx response from our server and then handle the proxied data via the success function of fetch’s returned promise. But instead, our error handler is invoked. Looking closer, we see that our server returned a response code of &lt;a href=&quot;http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.5&quot;&gt;404&lt;/a&gt;. But we’ve clearly defined our endpoint, and even verified that our request is being properly set to this endpoint. So what happened?&lt;/p&gt;
+
+&lt;h2 id=&quot;the-cause&quot;&gt;The cause&lt;/h2&gt;
+
+&lt;p&gt;I left out one &lt;em&gt;minor&lt;/em&gt; detail - our web server is &lt;a href=&quot;http://tomcat.apache.org/&quot;&gt;Apache Tomcat&lt;/a&gt;, which is very common when Java is the primary server language. In version 6.0.10 (released around February of 2007), &lt;a href=&quot;http://tomcat.apache.org/security-6.html#Fixed_in_Apache_Tomcat_6.0.10&quot;&gt;the Tomcat team patched a security hole&lt;/a&gt;. This involved treating encoded forward and backslashes in the URL as path delimiters. So, our URI of “/proxy/http%3A%2F%2Fwiden.com%2Fcareers” is being expanded to “/proxy/http%3A//widen.com/careers” &lt;em&gt;before&lt;/em&gt; it is routed to a matching endpoint handler. Of course, this endpoint is not accounted for, and our server rejects the request as a result.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-solution&quot;&gt;The solution&lt;/h2&gt;
+
+&lt;p&gt;There are two ways to work around this behavior. The first involves adjusting a Java system property on our application server. Setting the &lt;code class=&quot;highlighter-rouge&quot;&gt;org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH&lt;/code&gt; system property to &lt;code class=&quot;highlighter-rouge&quot;&gt;true&lt;/code&gt; should allow our request to go through as expected. The default value of this property is &lt;code class=&quot;highlighter-rouge&quot;&gt;false&lt;/code&gt;. Another option involves switching our GET request to a POST and including the url to proxy in the message-body. This is arguably the safest option. If we take this route, our server endpoint will look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@POST&lt;/span&gt;
+&lt;span class=&quot;nd&quot;&gt;@Path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;proxy/url&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;getData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;The body of our POST request will be made available to our handler method via the &lt;code class=&quot;highlighter-rouge&quot;&gt;url&lt;/code&gt; parameter. We will have to make a slight adjustment to our client-side code as well:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;resourceToProxy&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'http://widen.com/careers'&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;fetch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'/proxy/url'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;method&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'POST'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;body&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;resourceToProxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ok&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;text&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;statusText&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;proxiedData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// handle proxied data in response&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;catch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Note that there is no need to encode the proxy endpoint address anymore, since it is no longer part of the request URI. The changes to our JavaScript are limited to the first two lines of code. This will result in A POST request to our “/proxy/url” endpoint with a Content-Type of “text/plain”. As expected, the body of our request will contain the &lt;code class=&quot;highlighter-rouge&quot;&gt;resourceToProxy&lt;/code&gt; value. After making these changes, everything works as intended, and we are able to successfully proxy a third-party endpoint through our server.&lt;/p&gt;
+
+</description>
+        <pubDate>Wed, 02 Sep 2015 00:00:00 -0500</pubDate>
+        <link>http://engineering.widen.com/blog/tomcat-slashes/</link>
+        <guid isPermaLink="true">http://engineering.widen.com/blog/tomcat-slashes/</guid>
+        
+        
+        <category>tomcat</category>
+        
+        <category>server</category>
+        
+        <category>http</category>
+        
+        <category>rest</category>
+        
+        <category>java</category>
+        
+        <category>javascript</category>
+        
+      </item>
     
       <item>
         <title>Runtime Configuration for AWS' Lambda</title>
@@ -65,8 +169,8 @@ I wanted this model with Lambda, and it seemed to fit perfectly, but alas it was
 &lt;p&gt;As always, weigh the risks and benefits.&lt;/p&gt;
 </description>
         <pubDate>Thu, 27 Aug 2015 00:00:00 -0500</pubDate>
-        <link>http://engineering.widen.com/blog/2015/08/27/AWS-Lambda-Runtime-Configuration</link>
-        <guid isPermaLink="true">http://engineering.widen.com/blog/2015/08/27/AWS-Lambda-Runtime-Configuration</guid>
+        <link>http://engineering.widen.com/blog/AWS-Lambda-Runtime-Configuration/</link>
+        <guid isPermaLink="true">http://engineering.widen.com/blog/AWS-Lambda-Runtime-Configuration/</guid>
         
         
         <category>aws</category>
