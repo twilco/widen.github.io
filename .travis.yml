@@ -8,3 +8,6 @@ env:
   global:
   - GH_REF: github.com/Widen/widen.github.io
   - secure: HBo2et59JYhV6RfZzeLGuoLEWbzaCq4uRvEvrHAYnHlSRHVHpIIbXhn3Fr6HktA9gFqT3rXfFTe6oFkyxZ5iLEtIM5sgClZzaqtUkpCzBORkmxMVyZK4090K4xSQa6KxrQFQeyIgp5i6LF0q9F+K52Fkd7WtvPiI/SeYjUM+n60=
+notifications:
+  slack:
+    secure: NUHgzSiX/9B6Xvka8L6X4VTnWH5ybwffi9gM469kqm+SSHWow8wb1I24t//YXJFdrQ86/CYIlZefc6NCIuu0d81JaeZ1YKmvUbb+56/jiThEEjOGrBir8EeCGj1ItCy5IihF8vXMjfbh+OT/+nv8VznsJ4hlyvnMZICXuPHrX4A=
