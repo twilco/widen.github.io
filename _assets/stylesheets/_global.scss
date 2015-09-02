@@ -63,9 +63,14 @@ code {
 pre > code {
     display: block;
     white-space: pre;
-    overflow: auto;
-    overflow-x: scroll;
+    overflow-y: hidden;
+    overflow-x: auto;
     width: 100%;
+
+    > span {
+      display: inline-block;
+      padding-bottom: 3px;
+    }
 }
 
 // lists

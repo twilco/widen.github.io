@@ -26,7 +26,7 @@ defaults:
     values:
       layout: "page"
 
-permalink: "/blog/:year/:month/:day/:title"
+permalink: "/blog/:title/"
 
 # PAGINATION
 paginate: 5
