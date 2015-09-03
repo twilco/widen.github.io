@@ -2,6 +2,7 @@
 title:  Tomcat Hates Encoded Slashes
 author: Ray Nicholus
 categories: Tomcat server HTTP REST Java JavaScript
+excerpt: ""
 ---
 
 ## Setup
