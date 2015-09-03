@@ -3,6 +3,7 @@ title:  Runtime Configuration for AWS' Lambda
 author: Mark Feltner
 categories: aws lambda hack
 published: true
+permalink: /2015/08/27/AWS-Lambda-Runtime-Configuration
 ---
 
 A while ago Amazon released its [Lambda](http://aws.amazon.com/lambda/) service. Lambdas are simple, stateless  functions that get executed as callbacks to arbitrary AWS events.
