@@ -4,6 +4,7 @@ timezone: "America/Chicago"
 baseurl: "" # the subpath of your site, e.g. /blog/
 url: "http://engineering.widen.com"
 email: "engineering@widen.com"
+disqus: widen-engineering
 
 # DEFAULTS
 defaults:

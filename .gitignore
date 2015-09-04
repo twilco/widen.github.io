@@ -1,6 +1,7 @@
 _site
 .sass-cache
 .bundle
+.DS_Store
 
 # Pelican shit
 cache/
