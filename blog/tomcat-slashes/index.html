@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <title>Tomcat Hates Encoded Slashes | Widen Engineering</title>
-  <meta name="description" content="">
+  <meta name="description" content="After sending a GET request containing escaped slashes to our Tomcat-hosted endpoint, we expect to receive a 2xx response. But instead, our server responds w...">
 
   <link rel="apple-touch-icon" sizes="57x57" href="/assets/favicon/apple-icon-57x57-443078e666f8564fe94d070b2e527a4e.png">
 <link rel="apple-touch-icon" sizes="60x60" href="/assets/favicon/apple-icon-60x60-8a893e3ab71590ed3057de7e6cd3ae98.png">
@@ -64,9 +64,7 @@
 
     <article role="article">
 
-      <h2 id="setup">Setup</h2>
-
-<p>Let’s picture a small segment of a typical web application in order to better understand this problem. We’ll focus mostly on the server here, but the client plays a key role as well. On the server, we have a REST endpoint that exists to proxy information from <em>another</em> endpoint. This handler accepts GET requests. The <em>other</em> endpoint to proxy is included as a path parameter. The signature of our endpoint handler looks something like this:</p>
+      <p>Let’s picture a small segment of a typical web application in order to better understand this problem. We’ll focus mostly on the server here, but the client plays a key role as well. On the server, we have a REST endpoint that exists to proxy information from <em>another</em> endpoint. This handler accepts GET requests. The <em>other</em> endpoint to proxy is included as a path parameter. The signature of our endpoint handler looks something like this:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="nd">@GET</span>
 <span class="nd">@Path</span><span class="o">(</span><span class="s">"proxy/{url}"</span><span class="o">)</span>
@@ -194,10 +192,10 @@
         <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/_posts/2015-09-02-tomcat-slashes.md">edit</a>
     </li>
     <li>
-        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/9b67246">9b67246</a>
+        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/c8382ec">c8382ec</a>
     </li>
     <li>
-        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/9b67246">9b67246</a>
+        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/c8382ec">c8382ec</a>
     </li>
   </ul>
   </nav >

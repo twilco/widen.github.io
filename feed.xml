@@ -5,15 +5,13 @@
     <description>The blog of the Widen Engineering Team.</description>
     <link>http://engineering.widen.com/</link>
     <atom:link href="http://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 03 Sep 2015 19:59:35 -0500</pubDate>
-    <lastBuildDate>Thu, 03 Sep 2015 19:59:35 -0500</lastBuildDate>
+    <pubDate>Thu, 03 Sep 2015 23:11:43 -0500</pubDate>
+    <lastBuildDate>Thu, 03 Sep 2015 23:11:43 -0500</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
         <title>Tomcat Hates Encoded Slashes</title>
-        <description>&lt;h2 id=&quot;setup&quot;&gt;Setup&lt;/h2&gt;
-
-&lt;p&gt;Let’s picture a small segment of a typical web application in order to better understand this problem. We’ll focus mostly on the server here, but the client plays a key role as well. On the server, we have a REST endpoint that exists to proxy information from &lt;em&gt;another&lt;/em&gt; endpoint. This handler accepts GET requests. The &lt;em&gt;other&lt;/em&gt; endpoint to proxy is included as a path parameter. The signature of our endpoint handler looks something like this:&lt;/p&gt;
+        <description>&lt;p&gt;Let’s picture a small segment of a typical web application in order to better understand this problem. We’ll focus mostly on the server here, but the client plays a key role as well. On the server, we have a REST endpoint that exists to proxy information from &lt;em&gt;another&lt;/em&gt; endpoint. This handler accepts GET requests. The &lt;em&gt;other&lt;/em&gt; endpoint to proxy is included as a path parameter. The signature of our endpoint handler looks something like this:&lt;/p&gt;
 
 &lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nd&quot;&gt;@GET&lt;/span&gt;
 &lt;span class=&quot;nd&quot;&gt;@Path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;proxy/{url}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
