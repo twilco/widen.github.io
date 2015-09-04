@@ -2,10 +2,8 @@
 title:  Tomcat Hates Encoded Slashes
 author: Ray Nicholus
 categories: Tomcat server HTTP REST Java JavaScript
-excerpt: ""
+excerpt: "After sending a GET request containing escaped slashes to our Tomcat-hosted endpoint, we expect to receive a 2xx response. But instead, our server responds with a 404. What happened?"
 ---
-
-## Setup
 
 Let's picture a small segment of a typical web application in order to better understand this problem. We'll focus mostly on the server here, but the client plays a key role as well. On the server, we have a REST endpoint that exists to proxy information from _another_ endpoint. This handler accepts GET requests. The _other_ endpoint to proxy is included as a path parameter. The signature of our endpoint handler looks something like this:
 
