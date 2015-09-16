@@ -1,5 +1,5 @@
 ---
-title:  The Future of Web Development: React + Falcor + ES6
+title:  The Future of Web Development - React, Falcor, and ES6
 author: Ray Nicholus
 categories: react falcor webpack web server JSON HTTP node.js JavaScript ES6
 excerpt: "The future of web application development looks a bit different than what we are all used to. I'll show you how to build a simple full-stack JavaScript app using Node.js on the backend, React on the frontend, Webpack for client-side modules support, and Netflix's Falcor as an efficient and intuitive alternative to the traditional REST API."
@@ -30,25 +30,22 @@ In order to address each of these goals, I decided to replace my current lineup 
 
 ## A futuristic stack
 
-// More "traditional" stack = ...
-// "Futuristic" often means changing your perspective
-  // this can be frustrating at first, but is a useful step in evolution
+A more traditional stack, at least in my experience, my consist of Angular and/or jQuery and/or backbone on the frontend, with Java handling requests on the backend via some form of a REST API, perhaps using Jersey. In this article, we're going to explore an entirely new stack, one that can be considered "futuristic", at least as of September 2015.
+
+Adopting a completely new set of tools and architecture often means changing your perspective as a developer. Over time, we've all become comfortable with one or more tools. Whether that be jQuery or Angular, or Ember, or even the concept of REST, we have learned to trust and depend on our stack. We've been trained to think of web applications in a specific context though inculcation. Abadonding our stack and moving out of this comfort zone can be frustrating. Some of us may fight this urge, dismissing new choices as unnecessary or overly complex. Admittedly, I had the same thoughts about React, webpack, and Falcor before I had a strong understanding of these tools. In this section, I will briefly discuss each of the more notable tools in this futuristic stack. I'll be sure to provide resources for further investigation as well.
 
 ### React
 
-// Advantages over Angular/Ember
-// Virtual DOM
-// Simple & focused components
-// Relatively small and simple. Elegant. Small learning curve
+React differs from Angular and Ember due to its limited scope and footprint. While Angular & Ember are positioned as frameworks, React mostly concerns itself with your "view". React contains no dependency injection or support for "services". There is no "jq-lite" (Angular) nor is their a required jQuery dependency (Ember). Instead of handlebars (Ember) you write your markup alongside your JavaScript using JSX, which compiles down into a series of JavaScript calls that build your document through React's element API as part of a "virtual DOM" that React maintains. It updates the "real" DOM from this virtual model in the most efficient way possible, avoiding unnecessary reflows/repaints, as well as delegating event handlers for you (among other things). If you embrace JSX (and from my experience, you should) you are adding a compilation phase to your project. For me, this was something I have tried to avoid for a while, but made my peace with this workflow after realizing how elegant and useful React through the lens of JSX really is. At this point, the floodgates opened up, and other useful JavaScript preprocessors, such as webpack and babel, were easy to embrace. More on those later.
+
+In short, I really appreciate the relatively narrow focus of React. Dividing up a complex component into smaller widgets is something I came to love with Angular. I was excited at the possibility of native support in the form of the Web Components spec, but ultimately chose React for its elegance, ease-of-use, small footprint, and relative maturity.
+
 
 ### Falcor
 
-// Complete departure from traditional REST API
-// efficient
-// The API is the model
-  // intuitive
-  // decouple the model/API from the data source(s)
-// Mind-bending concepts, but easy to get up and running once concepts are down
+Falcor, a _very_ new library created and open-sourced by Netflix, is a complete departure from the traditional REST API. Instead of focusing on specific endpoints that return a rigid and predetermined set of data, there is only _one_ endpoint. This is how Falcor is commonly described, and it is maybe a bit misleading, though technically correct. Instead of focusing on various server endpoints to retrieve and update your model data, you instead "ask" your API server for specific model data. Do you need the first 3 user names in your customer list along with their ages? Simply "ask" your API server, in a single request, for this specific data. What if you want only the first 2 user names and no ages? Again, a single request to the same endopint. The differences in these two GET requests can be seen by examining their query parameters, which contain specifics regarding the model properties of interest. Server-side, a handler for a particular combination or pattern of model properties is codified as part of a "route". When handling the API request, the falcor router (server-side) contacts the proper router function based on the items present in the query string.
+
+Falcor promotes a more intuitive API that _is_ your model. It also ensures that extra, unnecessary model data is never returned, saving bandwidth. Furthermore, requests from multiple disparate browser-side components are combined into a single request to limit HTTP overhead. Data is cached by Falcor client-side, and subsequent requests for cached data avoid a round-trip to the server. This decoupling of the model from the data source, along with all of the efficiency considerations, is exceptionally appealing. But the underlying concepts can be a bit mind-bending. I was a little confused by Falcor until I watched [this video by Jafar Husain][why-falcor-video].
 
 
 ### Webpack
@@ -109,3 +106,5 @@ In order to address each of these goals, I decided to replace my current lineup 
 
 
 [repo]: https://github.com/Widen/fullstack-react
+
+[why-falcor-video]: https://netflix.github.io/falcor/starter/why-falcor.html

@@ -78,6 +78,16 @@ ul.inline {
     @include inline-list();
 }
 
+ol {
+  list-style-type: decimal;
+  margin-bottom: 15px;
+  margin-left: 30px;
+}
+
+li {
+  padding-bottom: 5px;
+}
+
 // clear!
 .clear {
     clear: both;
