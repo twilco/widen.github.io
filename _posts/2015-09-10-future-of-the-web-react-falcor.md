@@ -15,7 +15,7 @@ In this article, I'm going provide a glimpse into the future of web development.
 
 If you lack any of these qualities, you _may_ still be able to navigate this article and the related code, but these gaps in your knowledge will likely prevent you from extending my code to support a more realistic or non-trivial scenario. The internet is full of great resources that will provide you will the concepts necessary to master each of these items, and I encourage you to seek out resources as needed - they are only a quick Google search away.
 
-My current stack often consists of Java on the server, AngularJS for all of my browser-related code, Jersey for REST API support, along with a whole host of various libraries such as jQuery, underscore, lodash, jQuery UI, and Bootstrap. When designing the underlying sample web application, which I will be discussing shortly, I had four specific goals in mind:
+The current stack at Widen often consists of Java on the server, AngularJS for all of our browser-related code, Jersey for REST API support, along with a whole host of various libraries such as jQuery, underscore, lodash, jQuery UI, and Bootstrap. When designing the underlying sample web application, which I will be discussing shortly, I had four specific goals in mind:
 
 1. **A new and shiny approach**. Instead of developing yet another AngularJS-based UI, or deferring to jQuery, or creating a Java-based endpoint server using Jersey, or doing all three, I really wanted to make use of an entirely new set of tools. I hoped that this would allow me to gain a new perspective and help me to evolve a bit more as a developer.
 
@@ -30,7 +30,7 @@ In order to address each of these goals, I decided to replace my current lineup 
 
 ## A futuristic stack
 
-A more traditional stack, at least in my experience, my consist of Angular and/or jQuery and/or backbone on the frontend, with Java handling requests on the backend via some form of a REST API, perhaps using Jersey. In this article, we're going to explore an entirely new stack, one that can be considered "futuristic", at least as of September 2015.
+A more traditional stack, at least in my experience, my consist of Angular and/or jQuery and/or backbone on the frontend, with Java handling requests on the backend via some form of a REST API, perhaps using Jersey. In this article, we're going to explore an entirely new stack, one that can be considered "futuristic", at least as of September 2015. In fact, some of Widen's new emerging software products will make use of all of the new technologies discussed here.
 
 Adopting a completely new set of tools and architecture often means changing your perspective as a developer. Over time, we've all become comfortable with one or more tools. Whether that be jQuery or Angular, or Ember, or even the concept of REST, we have learned to trust and depend on our stack. We've been trained to think of web applications in a specific context though inculcation. Abadonding our stack and moving out of this comfort zone can be frustrating. Some of us may fight this urge, dismissing new choices as unnecessary or overly complex. Admittedly, I had the same thoughts about React, webpack, and Falcor before I had a strong understanding of these tools. In this section, I will briefly discuss each of the more notable tools in this futuristic stack. I'll be sure to provide resources for further investigation as well.
 
@@ -55,31 +55,141 @@ Webpack, a build-time node.js library, further supports modularization of small 
 
 ### ES6
 
-ECMAScript 6, also known as ECMAScript 2015, is currently the latest specification for the JavaScript language. It defines some big new features, such as fat arrow functions, classes, string interpolation, and the ability to create block scope. While ES6 support is limited to the newest browsers, it presents a host of elegant solutions and syntax that many developers find appealing and useful, myself included. Before ES6, developers that wanted to make use of some of these features had to settle for CoffeeScript or TypeScript. But now, all of the niceties in these higher-level abstractions are available in the underlying language itself. Horray! And if we want to ensure our ES6 code is executable in older browsers, a compiler named [babel][babel] can be used to transform your ES6 code into ES5 code as part of a build step. Once all of your supported browsers fully implement the specification, you can simply remove this build step and everything should work.
+ECMAScript 6, also known as ECMAScript 2015, is currently the latest specification for the JavaScript language. It defines some big new features, such as fat arrow functions, classes, string interpolation, and the ability to create block scope. While ES6 support is limited to the newest browsers, it presents a host of elegant solutions and syntax that many developers find appealing and useful, myself included. Before ES6, developers that wanted to make use of some of these features had to settle for CoffeeScript or TypeScript. But now, all of the niceties in these higher-level abstractions are available in the underlying language itself. Horray! And if we want to ensure our ES6 code is executable in older browsers, a compiler named [babel][babel] can be used to transform your ES6 code into ES5 code as part of a build step. Once all of your supported browsers fully implement the specification, you can simply remove this build step.
 
 
 ## Building a simple app
 
-// explain goals
+To demonstrate all of the new items outlined above, I've created a trivial single-page application. While this is a contrived example, it exists to help you better understand how all of these technologies work together on a basic level. From this knowledge, you should be able to expand upon my code and build something a bit more realistic. Our sample app will allow us to read and modify a list of names. The list is maintained on the server, which will contain an initial list of names to be displayed to the user on page load. Changes to the list are initiated in the browser and persisted back to the server.
 
 ### Setup
 
-// divide the app up into 2 pieces
-// design your model
-// design your UI
-  // components?
-// dependencies
+Let's start by dividing up this application into logical pieces. At the most basic level, we have 2 parts - a client and a server. Our client exists entirely in the browser, and our server is a simple API endpoint. On the client, we must expose an interface that will allow our users to see and manipulate the names list. This list will be represented by a model that is understood by both the client and server. Essentially, our model will be expressed in JSON format in our "database", and will consist of an array of objects, with each object having a `name` property. While it is certainly _not_ a requirement for our model to be expressed in JSON format in our backing storage system, this will make our example app a bit easier to setup and understand.
+
+Another important step, before diving into the code, is to think of our application in terms of reusable components that are not dependent on each other wherever possible. Client-side, I can see three components - one that lists the names, another that allows names to be added, and a third that ties these two components together. This third component is important, as it allows us to forgo coding an explicit dependency between the list and "add name" components. Of these three components, two are reusable outside of our application.
+
+The server itself can be divided up into multiple pieces. At the highest level, we have an HTTP server that exposes static resources and routes API requests. We will also need a series of code blocks that service the various API requests from our client. We can perhaps think of each such request handler, or route, as a separate piece. Finally, we have our backing store of data which also provides initial values. Our API endpoint handlers will delegate to this backing store for lookup and persistence of data.
+
+I'll go over all of the dependencies in the following sections, but our most basic libraries and frameworks consist of:
+
+- React
+- Falcor
+- Express
+- Babel
+- Webpack
+- Node.js
+
+You can see all dependencies for this sample application in the project's [package.json file][package.json].
 
 
 ### Creating a server
 
-// HTTP server
-// static files
-// graph endpoint
-  // implement your routes
+Please use the [server.js file][server.js] in the project's GitHub repository for reference as I discuss the server-side portion of our example app. Our server will handle API requests and serve up static resources (such as our JavaScript and HTML files). It will be written in JavaScript using Node.js, and will rely on the following technologies:
+
+- Falcor
+- Express
 
 
-### The browser client
+#### Getting started
+
+We will represent our server using a single JavaScript file for simplicity. The first logic step may be to pull in all of our dependencies:
+
+```javascript
+var FalcorServer = require('falcor-express'),
+    bodyParser = require('body-parser'),
+    express = require('express'),
+    Router = require('falcor-router'),
+    app = express()
+```
+
+There are two Falcor-related dependencies. The first, `FalcorServer`, will be used to forward API requests to the most appropriate handler. The `Router` is what we will use to _define_ all these handlers. Each handler will be tied to a route string, which defines the type of model data associated with the request. While this may all seem a bit mysterious now, it will become clearer before the server-side section is complete.
+
+The other three dependencies help us to server static resources and parse HTTP requests into a more manageable form. For example, `express` listens to all HTTP requests on a specific port and either serves up static resources (such as our JS and HTML files) or routes the request to a more specific handler, such as our Falcor `Router`.
+
+Let's also define our data store. Again, for simplicity, let's just maintain our data directly in our node server via a simple JavaScript object:
+
+```javascript
+var data = {
+  names: [
+    {name: 'a'},
+    {name: 'b'},
+    {name: 'c'}
+  ]
+}
+```
+
+The above store also contains an initial list of names to be displayed to the user.
+
+
+#### Request handlers
+
+Let's continue by configuring our request handlers:
+
+```javascript
+app.use(bodyParser.urlencoded({extended: false}));
+app.use('/model.json', FalcorServer.dataSourceRoute(() => new NamesRouter()))
+app.use(express.static('.'))
+app.listen(9090, (err) => {
+    if (err) {
+        console.error(err)
+        return
+    }
+    console.log('navigate to http://localhost:9090')
+});
+```
+
+In the first line, we're asking the `bodyParser` library to take any requests that contain application/x-www-form-urlencoded message bodies and parse the contents into a JavaScript object. This object is passed along as [a `body` property on the `Request` object][request.body] maintained by express. In our application, POST requests, which add new names to the list will contain URL-encoded name data, will be parsed by this handler before being forwarded on to a more specific handler by express.
+
+The second line instructs express to delegate _any_ request to the "model.json" endpoint to our Falcor router, which we have not yet defined (we will soon). So, a GET request to "http://localhost:9090/model.json" will be handled here, as will POST requests to the same endpoint. For POST requests to this endpoint with a URL-encoded body, the body will first be parsed by `bodyParser` before being forwarded on to our router.
+
+The third line serves up any static resources in the root of our project. While this wildcard is probably not appropriate for production, it is sufficient for this type of simple demo. Ideally, you should restrict access to static resources instead of allowing all source files to be served up.
+
+Finally, the above code instructs express to listen to all HTTP requests on port 9090. This is the port that you must use client-side for access to static resources, as well as the API. Notice that we are making use of some ECMAScript 6 syntax here, specifically an [arrow function][es6-arrow]. In this case, an arrow function is simply a more elegant way of expressing a function argument. In ES5 syntax, our listener function is equivalent to:
+
+```javascript
+app.listen(9090, function(err) {
+    if (err) {
+        console.error(err)
+        return
+    }
+    console.log('navigate to http://localhost:9090')
+});
+```
+
+#### API route handlers
+
+Here we will create routes for three different API requests.
+
+
+##### Number of names
+
+First, we can expect our client to ask for the number of names in the list. The necessity of this information will become clear when we define our next route. The names list length route looks like this:
+
+```javascript
+var NamesRouter = Router.createClass([
+  route: 'names.length',
+  get () => {
+    {path: ['names', 'length'], value: data.names.length}
+  }
+]);
+```
+
+Remember the `NamesRouter` we referenced in the previous section? This is our Falcor request router, and express will forward all appropriate API requests here. Our length route is simple, but exposes some Falcor-specific syntax that I have not yet explained. The `route` property identifies the "signature" of the request. If our Falcor client asks for the length of all names, the server-side Falcor router will match on this route string and execute the `get` function, which will describe the data to be returned to our Falcor client.
+
+The response consists of two properties. The first such property, `path`, in our case, simply mirrors the route signature. This `path` becomes more useful if our route handler must delegate to another route to obtain the requested information. By returning the path of the actual target route, our Falcor client can "learn" and instead target a more appropriate route next time. For example, suppose this route handled a request for a specific name record given the display name. Looking up the name record by display name may be less efficient than looking it up using a unique ID. It may have to lookup the ID using the name and then forward this ID onto another route in order to obtain the approbate name data. In that case, we can return a new route path, perhaps something like `path: ['name', 123]`. So, the next time our client needs to address this specific name record, it will send a request that targets a route designated for a name record lookup using a unique ID.
+
+The second property in our route's `get` handler is `value`. As you might expect, this holds the actual number of names in our list. We're simply pulling this value by checking the `length` property on our data store array.
+
+##### Display names for `n` name records
+
+TODO
+
+##### Add a new name record
+
+TODO
+
+
+### The client
 
 // index page
 // implement your components
@@ -104,5 +214,9 @@ ECMAScript 6, also known as ECMAScript 2015, is currently the latest specificati
 
 
 [babel]: https://github.com/babel/babel
+[es6-arrow]: http://www.ecma-international.org/ecma-262/6.0/#sec-arrow-function-definitions
+[package.json]: https://github.com/Widen/fullstack-react/blob/1.0.1/package.json
 [repo]: https://github.com/Widen/fullstack-react
+[request.body]: http://expressjs.com/api.html#req.body
+[server.js]: https://github.com/Widen/fullstack-react/blob/1.0.1/server.js
 [why-falcor-video]: https://netflix.github.io/falcor/starter/why-falcor.html
