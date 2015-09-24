@@ -2,13 +2,3 @@ _site
 .sass-cache
 .bundle
 .DS_Store
-
-# Pelican shit
-cache/
-output/
-pelican.pid
-pelicanconf.pyc
-srv.pid
-
-# Jekyll Shit
-_site/
