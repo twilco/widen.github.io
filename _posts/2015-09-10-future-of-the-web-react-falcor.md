@@ -32,7 +32,7 @@ In order to address each of these goals, I decided to replace my current lineup 
 
 A more traditional stack, at least in my experience, my consist of Angular and/or jQuery and/or backbone on the frontend, with Java handling requests on the backend via some form of a REST API, perhaps using Jersey. In this article, we're going to explore an entirely new stack, one that can be considered "futuristic", at least as of September 2015. In fact, some of Widen's new emerging software products will make use of all of the new technologies discussed here.
 
-Adopting a completely new set of tools and architecture often means changing your perspective as a developer. Over time, we've all become comfortable with one or more tools. Whether that be jQuery or Angular, or Ember, or even the concept of REST, we have learned to trust and depend on our stack. We've been trained to think of web applications in a specific context though inculcation. Abadonding our stack and moving out of this comfort zone can be frustrating. Some of us may fight this urge, dismissing new choices as unnecessary or overly complex. Admittedly, I had the same thoughts about React, webpack, and Falcor before I had a strong understanding of these tools. In this section, I will briefly discuss each of the more notable tools in this futuristic stack. I'll be sure to provide resources for further investigation as well.
+Adopting a completely new set of tools and architecture often means changing your perspective as a developer. Over time, we've all become comfortable with one or more tools. Whether that be jQuery or Angular, or Ember, or even the concept of REST, we have learned to trust and depend on our stack. We've been trained to think of web applications in a specific context though inculcation. Abandoning our stack and moving out of this comfort zone can be frustrating. Some of us may fight this urge, dismissing new choices as unnecessary or overly complex. Admittedly, I had the same thoughts about React, webpack, and Falcor before I had a strong understanding of these tools. In this section, I will briefly discuss each of the more notable tools in this futuristic stack. I'll be sure to provide resources for further investigation as well.
 
 ### React
 
@@ -267,12 +267,192 @@ So the client doesn't have to ask the server about the index of this new name or
 
 ### The client
 
-// index page
-// implement your components
-// config webpack
+Our server code is quite simple - it serves up static resources, such as our JavaScript and HTML files, _and_ it responds to API requests using Falcor. Next, I'll explain the client-side portion of our app, which, of course, runs in the browser.
 
 
-### Building and using your new app
+#### Simplicity in our index page 
+
+Our index page is _very_ simple: just the usual boilerplate along with one line to serve as the container for our entire React-generated app, followed by a second line import _all_ of our JavaScript.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <div id="demo"></div>
+    <script src="/site/bundle.js"></script>
+</body>
+</html>
+```
+
+The only interesting line are the `<div>` and `<script>`. I can tell you that we _will_ split the source of our app among multiple JavaScript files, but in the end, we will only serve up one file that contains all of our code. There is some overhead associated with every HTTP request, so reducing the number of requests is beneficial. 
+ 
+Perhaps you are wondering why the `<script>` tag is listed at the bottom of the document, instead of inside of the `<head>` tag, as is customary. First, this allows the static markup to be loaded and displayed to the user immediately, instead of after all of our JavaScript source is loaded and parsed. In this case, there isn't much to speak of in terms of initial static content, but we could certainly add something that sets up the page, or perhaps even a "loading" message. On a related note, placing the script tag below the container element ensures our container element is already available in the DOM by the time our code executes. Since our code will render all dynamic content inside of this container element, this is important.
+ 
+
+#### Dividing roles into components with React
+
+We can divide the frontend of our application into three logical components: a "name adder", a "names list", and a component that ties these two standalone components together. Each of these will be represented as self-contained React components. As you might imagine, each of these components need some way to communicate with our server. We'll make use of Falcor for that common task.
+ 
+ 
+##### Using Falcor to communicate with our server
+
+Falcor will not only make it easy for us to communicate with our server, it will also manage our data model and ensure that all trips to the server are both efficient and prudent. Our entire Falcor "helper" can be created with a few lines of code. We'll do this in a "model.js" file:
+ 
+```javascript
+var Falcor = require('falcor'),
+    FalcorDataSource = require('falcor-http-datasource'),
+    model = new Falcor.Model({
+        source: new FalcorDataSource('/model.json')
+    })
+
+module.exports = model
+```
+
+If you are not very familiar with Node.js or its native module system - CommonJS - at least a few lines in the above code fragment may seem mysterious. The first two lines "import" Falcor and Falcor's HTTP data source modules. We will need these to setup our Falcor "helper". The last line in our file essentially creates a new module. This module represents our client-side Falcor model/helper, and can be `require`d by other modules that need to query the model through Falcor. Our exported module will be an object that has all of the properties defined in [Falcor's DataSource interface][falcor-ds]. The methods on this interface will be used by our React components to communicate with our model. You'll see how that works in a bit. 
+
+Our `model` is defined to be a wrapper around a Falcor HTTP `DataSource`. When defining the `DataSource`, we're including a path to our API server endpoint - "/model.json". For all calls to our API, we have _one_ HTTP endpoint. The type of operation and associated data is encoded as query parameters by Falcor for GET requests and the message body for POSTs.     
+
+
+##### Names list component
+
+Now that we have our model defined, let's start building up our UI with a component that lists all of the names in our store. This will be a React component. We'll keep it simple and implement it as a simple HTML list. This code is housed in a names-list.jsx file.
+
+```javascript
+var React = require('react'),
+    model = require('./model.js');
+
+class NamesList extends React.Component {
+    constructor() {
+        super()
+        this.state = {names: {}}
+    }
+
+    componentWillMount() {
+        this.update()
+    }
+
+    render() {
+        var names = Object.keys(this.state.names).map(idx => {
+            return <li key={idx}>{this.state.names[idx].name}</li>
+        })
+        return (
+            <ul>{names}</ul>
+        )
+    }
+
+    update() {
+        model.getValue(['names', 'length'])
+           .then(length => model.get(['names', {from: 0, to: length-1}, 'name']))
+           .then(response => this.setState({names: response.json.names}))
+    }
+}
+
+module.exports = NamesList
+```
+
+In the first two lines, we're importing the React module, for obvious reasons, along with the Falcor model we defined in the previous step. If you are a Java developer, the component definition looks surprisingly familiar. ECMAScript 6 brings classes to JavaScript, and we're defining our names list component to be a type of React component. Again, similar to Java, we must define a constructor. We'll simply initialize our `state` object in this constructor. The `state` object will be used to feed data to our rendered markup, which will be re-rendered (as efficiently as possible by React) whenever it changes. Not that we must invoke the `React.Component` constructor by called `super()` before we can access the context of this component.
+
+Our first class method, `componentWillMount` is part of `React.Component`. It will be called by React _just before_ when our markup is first "rendered" by React. That is, before the `render` method is invoked for the first time and the markup has been added to the DOM. At this point, we're calling the `update` method that grabs the list of names from Falcor.
+
+The `update` method performs a few operations. First, it asks Faclor for the number of names in our list. Then, it sends a request for all names, given the result of the previous length request. Each of these calls returns a promise, since they are asynchronous. When the first call to get the number of names is resolved, our first `then` function is called with the result - the number of names in our list. We are then using a "fat arrow function" to ask Falcor for all names between 0 and the last index of our list, which we know after resolving the length request. There is an implicit return keyword in this function, and we return a promise. Once this promise is resolved, the next and final handler in our chained of model operations is invoked. The call to our length route was made using `getValue` which results in a single value as a the response (in this case, the number of names in our list). But our call to retrieve all names in the list is a `get`, which will return a JSON response containing all matching name objects with the specific property, `name`, filled in with a value. Notice we are calling `setState` with this collection of names. This updates our component's state object and instructs React to re-render the component with the new list of names.
+
+Moving on to the `render` method - this is where the actual HTML elements are rendered to the DOM. React calls this when our component first mounts, and then again whenever our component's `state` property changes. The `names` property, part of our component's state` is an object with keys that represent the index of each name on our server and values equal to the each name record. Since we only asked Falcor for the `name` property in each record, that is the only property we will find in each name record. The markup in this method may look a bit strange - it's JSX, which is an extension to the ECMAScript langauge specification created and maintained by Facebook. It allows you to easily include HTML-like content alongside JavaScript code. Before it is delivered to the browser, we will have webpack compile this JSX down to standardized JavaScript. More on that later on. The result of this build step will look like a bunch of method calls that build up out HTML. We could have taken that approach as well, but using JSX makes our lives a lot easier and the code much simpler to follow. 
+
+The last line in our file allows our NamesList component to be pulled into another module and actually used. We'll do just that very soon.
+
+
+##### Name adder component
+
+We have a component that will list our names, but we want to be able to add new names to our list. So, we'll create a name added React component, which will be stored in a file named "name-adder.jsx".
+
+```javascript
+var React = require('react'),
+    model = require('./model.js');
+
+class NameAdder extends React.Component {
+    handleSubmit(event) {
+        event.preventDefault()
+
+        var input = this.refs.input
+
+        model.
+            call(['names', 'add'],
+                [input.value],
+                ["name"]).
+            then(() => {
+                input.value = null
+                input.focus()
+                this.props.onAdded()
+            })
+    }
+
+    render() {
+        return (
+            <form onSubmit={this.handleSubmit.bind(this)}>
+                <input ref="input"/>
+                <button>add name</button>
+            </form>
+        )
+    }
+}
+
+module.exports = NameAdder
+```
+
+In our `render` method, we're defining a simple HTML form that contains a text input and a submit button. When the user submits the form, either by clicking the submit button or hitting the enter key after typing text into the input field. When the form is submitted, the `handleSubmit` method in our component class is called, passing the submit `Event`. Notice we are creating a new function that binds the component as context. This is needed when utilizing ES6 classes in React components. Otherwise, the value of `this` inside our event handler will be `window` in this case, which is _not_ what we want.
+
+The other method in our React component is `handleSubmit`, which is called when our rendered form is submitted, of course. First, we must prevent the browser's default action. In other words, we don't want to _actually_ submit the form. Instead, we need to funnel the entered data to Falcor. Next, we are looking up our input element. We'll need this to determine what the user entered. Notice that we included a `ref` attribute on the text input in our `render` method. This allows us to easily get a handle on the underlying DOM element, without resorting to a CSS selector. Finally, we must tell send this new name to our server. We want to hit the "names.add" call route we defined earlier, passing the new name. Once our server persists the new name and responds, Falcor will update its internal representation of our model using the information provided by our server. It now knows that there is one more name in our list, and it knows the index of the name we just added. But why is this important?
+
+After Falcor has determined that the name has been successfully added to our server, it will invoke our "success" function. This gives us the opportunity to reset our text input and ensure it retains focus so that our user can easily enter a new name. But we also want to be sure our list of names is current. It looks like there is an `onAdded` function on a `props` property attached to our component. Where did that come from? The component that rendered our name adder component passed this to us, which we will see next. Any parameters passed to a React component are available on the `props` property. We can expect that an `onAdded` function is passed to our component, and we should always invoke it when a new name has been added. I can tell you now that this function will trigger the `update` method on our `NamesList` component, which, as you might remember, will result in a call to Falcor for our list of names. This is exactly what we want to do - update our list of names after a name is added so our user sees the current list. You might be surprised to know that, after adding this name, Falcor does _not_ contact our server for this list of names. It already knows exactly how the list has changed, thanks to the information provided by our server's response to the "names.add" call. It pulls this data from its internal represntation of our model, saving a couple round-trips to the server (one for the lengh request, and another for the list of names request).
+  
+Perhaps you are starting to see the elegance of this stack. React allows us to componse our UI in terms of focused components, and Falcor lets us think about our model in terms of the actual model properties, all while ensuring that communication with the server is minimized.
+
+
+##### Name manager component
+
+We have a component to list all of our names, and another to add a new name. These two components don't have any direct knowledge of each other. This is a good thing, as it makes them easier to test and re-usable. But we need some way to tie these two components together without making them directly aware of each other. The solution: a "glue" component. We'll call this third React component `NameManager`, stored in a file appropriately named "name-manager.jsx".
+
+```javascript
+var React = require('react'),
+    ReactDom = require('react-dom'),
+    NameAdder = require('./name-adder.jsx'),
+    NamesList = require('./names-list.jsx');
+
+class NameManager extends React.Component {
+    handleNameAdded() {
+        this.refs.namesList.update()
+    }
+
+    render() {
+        return (
+            <div>
+                <NameAdder onAdded={this.handleNameAdded.bind(this)}/>
+                <NamesList ref="namesList"/>
+            </div>
+        )
+    }
+}
+
+ReactDom.render(<NameManager/>, document.querySelector('#demo'))
+```
+
+As expected, we must first import React, our NameAdder, and NamesList components. We'll also need ReactDom, which we must use to render our finished UI to the DOM. Note that we are selecting the container element we defined in our index.html file earlier, and rendering our entire set of React components as children/descendants.
+
+The `render` method, which is called when `ReactDom` attempts to render our component to the DOM, is largely a set of references to the two other components we already defined. Remember how our NameAdder component was able to ask the NamesList component to update its list of names? This is made possible by our NameManager component. You can see that is passed a property, `onAdded`, to this component. When it is called by NameAdder, the `handleNameAdded` method is called in NameManager, which in turn delegates to the NamesList component's `update` method, which was exposed as a public class method.
+
+And that's about it for our React components. Pretty simple, eh? The next section will cover how webpack allows us to build and organize our UI components.
+
+
+#### Modularizing our components and simplifying the build process with webpack
+
+
+
+
+### Building and using our app
 
 // building
 // running
@@ -292,6 +472,7 @@ So the client doesn't have to ask the server about the index of this new name or
 [babel]: https://github.com/babel/babel
 [es6-arrow]: http://www.ecma-international.org/ecma-262/6.0/#sec-arrow-function-definitions
 [falcor-call]: http://netflix.github.io/falcor/doc/DataSource.html#call
+[falcor-ds]: http://netflix.github.io/falcor/doc/DataSource.html
 [package.json]: https://github.com/Widen/fullstack-react/blob/1.0.1/package.json
 [repo]: https://github.com/Widen/fullstack-react
 [request.body]: http://expressjs.com/api.html#req.body
