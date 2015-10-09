@@ -449,24 +449,61 @@ And that's about it for our React components. Pretty simple, eh? The next sectio
 
 #### Modularizing our components and simplifying the build process with webpack
 
+We'll use webpack as a build toold to accomplish a few goals:
+1. Compile our JSX to standardized JavaScript.
+2. Combine all needed JavaScript into a single file.
+3. Ensure debugging our code in the browser is simple by providing access to the original pre-compiled/combined source files.
 
+We have defined webpack, along with all other dependencies, in a [package.json file][package.json]. All that is left is a bit of configuration. Have a look:
+ 
+```javascript
+module.exports = {
+    entry: './name-manager.jsx',
+    output: {
+        filename: './site/bundle.js'
+    },
+    module: {
+        loaders: [
+            {
+                test: /\.js/,
+                loader: 'babel',
+                exclude: /node_modules/
+            }
+        ]
+    },
+    devtool: 'source-map'
+}
+```
 
+If we name the file "webpack.config.js", webapck will be able to easily discover and use our configuration. The main entry point of our app, "name-manager.jsx" is used as the value of the `entry` configuration property. Webpack will use this "main" class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the `output.filename` config property. 
+
+Next, a set of "loaders" are specified. We're using the babel loader, which ensures ECMAScript 6 code is compiled down to ECMAScript 5 syntax, which allows us to write purely ES6 code without having to worry about which portions of the spec our target browsers support. The `test` property on our loader is a regular expression, and it results in webpack passing an .js or .jsx files in our source tree to the babel loader for processing. The babel loader processes our source before webpack combines everything to a single resource.
+ 
+Finally, the last line of our configuration instructs webpack to generate source maps. This satisfiest #3 in our goal list. Source maps are only loaded by the browser when the developer tools console is open. These maps allow us to see the original source files, and even set breakpoints anywhere in these files. We don't even have to look at the combined and compiled bundle.js file. Webpack will annotate the bottom of the generated bundle.js file with a pointer to the source map file, so our browser's dev tools know how to find it.
+ 
 
 ### Building and using our app
 
-// building
-// running
-// using
+All of our code is in place, our server is ready, and have a build tool setup. How do we get our app up and running?
+
+First, we need to pull in all project dependencies. In the root of our project, we simply run `npm install`, which will parse our [package.json file][package.json] and install all registered dependencies inside of a "node_modules" folder. This will also install a webpack binary, which we will need to build the client-side source bundles. 
+
+The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing `$(npm bin)/webpack` from the root of our project. `$(npm bin)` expands to the directory that contains all binaries pulled in by `npm install`.
+
+Finally, we must start our server, which handles API requests and serves up our index.html, bundle.js, and source map files. To start the Node.js server, execute `node --harmony server`. The `--harmony` switch tells node that we are using syntax included in the newest ECMAScript specifications, known as "harmony". ECMAScript 6 is one such entry in the harmony set of specifications. You may not need this switch if you are using a very recent version of node.js.
+
+After starting up the server, our app will be accessible on port 9090. So, navigate to http://localhost:9090 and test it out!
 
 
 ## Going further
 
-// allowing names to be edited
-  // changes to component(s) or new component
-  // new graph route(s)
-// allowing names to be re-ordered
-  // changes to component(s) or new component
-  // new graph route(s)
+There's a lot more we can do with Falcor, React, Webpack, and ECMAScript 6, of course. This post and the associated example exist simply to get you started. Here are some ways that you could improve our simple names app, if you are interested in further honing your skills:
+
+* Allow existing names to be edited. This will require an "edit names" React component, as well as a Falcor "set" route.
+* Allow existing names to be re-ordered. You'll probably need to add code to the NamesList component, along with another Falcor route to handle index updates.
+* Support name deleting. This is best handled by an additional React component and a new "call" route in the Falcor backend.
+
+Feel free to issue pull requests to the underlying [GitHub repository][repo] if you'd like to share your changes and additions.
 
 
 [babel]: https://github.com/babel/babel
