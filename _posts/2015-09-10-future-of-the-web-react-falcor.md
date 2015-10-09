@@ -510,8 +510,8 @@ Feel free to issue pull requests to the underlying [GitHub repository][repo] if 
 [es6-arrow]: http://www.ecma-international.org/ecma-262/6.0/#sec-arrow-function-definitions
 [falcor-call]: http://netflix.github.io/falcor/doc/DataSource.html#call
 [falcor-ds]: http://netflix.github.io/falcor/doc/DataSource.html
-[package.json]: https://github.com/Widen/fullstack-react/blob/1.0.1/package.json
+[package.json]: https://github.com/Widen/fullstack-react/blob/1.1.0/package.json
 [repo]: https://github.com/Widen/fullstack-react
 [request.body]: http://expressjs.com/api.html#req.body
-[server.js]: https://github.com/Widen/fullstack-react/blob/1.0.1/server.js
+[server.js]: https://github.com/Widen/fullstack-react/blob/1.1.0/server.js
 [why-falcor-video]: https://netflix.github.io/falcor/starter/why-falcor.html
