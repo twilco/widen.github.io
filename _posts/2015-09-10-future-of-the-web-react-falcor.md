@@ -2,7 +2,7 @@
 title:  The Future of Web Development - React, Falcor, and ES6
 author: Ray Nicholus
 categories: react falcor webpack web server JSON HTTP node.js JavaScript ES6
-excerpt: "The future of web application development looks a bit different than what we are all used to. I'll show you how to build a simple full-stack JavaScript app using Node.js on the backend, React on the frontend, Webpack for client-side modules support, and Netflix's Falcor as an efficient and intuitive alternative to the traditional REST API."
+excerpt: "The future of web application development looks a bit different than what we are all used to. I'll show you how to build a simple full-stack JavaScript app using Node.js on the backend, React on the frontend, Webpack for client-side module support, and Netflix's Falcor as an efficient and intuitive alternative to the traditional REST API."
 ---
 
 In this article, I'm going provide a glimpse into the future of web development. You will gain a new perspective on structuring a user interface, server, and data endpoints. In other words, I will cover the full "stack" - both the browser and server code - and you will be able to examine and execute all of the referenced code in [a fully-functional GitHub repository][repo]. I must assume that you, as a developer, posses the following qualities:
