@@ -64,7 +64,7 @@
 
     <article role="article">
 
-      <p>In this article, I’m going provide a glimpse into the future of web development. You will gain a new perspective on structuring a user interface, server, and data endpoints. In other words, I will cover the full “stack” - both the browser and server code - and you will be able to examine and execute all of the referenced code in <a href="https://github.com/Widen/fullstack-react">a fully-functional GitHub repository</a>. I must assume that you, as a developer, posses the following qualities:</p>
+      <p>In this article, I’m going provide a glimpse into the future of web development. You will gain a new perspective on structuring a user interface, server, and data endpoints. In other words, I will cover the full “stack” - both the browser and server code - and you will be able to examine and execute all of the referenced code in <a href="https://github.com/Widen/fullstack-react">a fully-functional GitHub repository</a>. I must assume that you, as a developer, possess the following qualities:</p>
 
 <ol>
   <li>Intermediate understanding of JavaScript.</li>
@@ -142,11 +142,11 @@
   <li>Node.js</li>
 </ol>
 
-<p>You can see all dependencies for this sample application in the project’s <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/package.json">package.json file</a>.</p>
+<p>You can see all dependencies for this sample application in the project’s <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/package.json">package.json file</a>.</p>
 
 <h3 id="creating-a-server">Creating a server</h3>
 
-<p>Please use the <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/server.js">server.js file</a> in the project’s GitHub repository for reference as I discuss the server-side portion of our example app. Our server will handle API requests and serve up static resources (such as our JavaScript and HTML files). It will be written in JavaScript using Node.js, and will rely on Falcor and Express.</p>
+<p>Please use the <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/server.js">server.js file</a> in the project’s GitHub repository for reference as I discuss the server-side portion of our example app. Our server will handle API requests and serve up static resources (such as our JavaScript and HTML files). It will be written in JavaScript using Node.js, and will rely on Falcor and Express.</p>
 
 <h4 id="getting-started">Getting started</h4>
 
@@ -324,7 +324,7 @@
 
 <h4 id="simplicity-in-our-index-page">Simplicity in our index page</h4>
 
-<p><a href="https://github.com/Widen/fullstack-react/blob/1.1.1/index.html">Our index page</a> is <em>very</em> simple: just the usual HTML-related structuring along with one line to serve as the container for our entire React-generated app, followed by a second line that imports <em>all</em> of our JavaScript.</p>
+<p><a href="https://github.com/Widen/fullstack-react/blob/1.2.0/index.html">Our index page</a> is <em>very</em> simple: just the usual HTML-related structuring along with one line to serve as the container for our entire React-generated app, followed by a second line that imports <em>all</em> of our JavaScript.</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
@@ -350,7 +350,7 @@
 
 <h5 id="using-falcor-to-communicate-with-our-server">Using Falcor to communicate with our server</h5>
 
-<p>Falcor will not only make it easy for us to communicate with our server, it will also manage our data model and ensure that all trips to the server are both efficient and prudent. Our entire Falcor “helper” can be created with a few lines of code. We’ll do this in a <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/model.js">model.js file</a>:</p>
+<p>Falcor will not only make it easy for us to communicate with our server, it will also manage our data model and ensure that all trips to the server are both efficient and prudent. Our entire Falcor “helper” can be created with a few lines of code. We’ll do this in a <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/model.js">model.js file</a>:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">Falcor</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor'</span><span class="p">),</span>
     <span class="nx">FalcorDataSource</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor-http-datasource'</span><span class="p">),</span>
@@ -368,7 +368,7 @@
 
 <h5 id="names-list-component">Names list component</h5>
 
-<p>Now that we have our model defined, let’s start building up our UI with a component that lists all of the names in our store. This will be a React component. We’ll keep it simple and implement it as a simple HTML list. This code is housed in a <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/names-list.jsx">names-list.jsx file</a>.</p>
+<p>Now that we have our model defined, let’s start building up our UI with a component that lists all of the names in our store. This will be a React component. We’ll keep it simple and implement it as a simple HTML list. This code is housed in a <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/names-list.jsx">names-list.jsx file</a>.</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">),</span>
     <span class="nx">model</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./model.js'</span><span class="p">);</span>
@@ -403,7 +403,7 @@
 </code></pre>
 </div>
 
-<p>In the first two lines, we’re importing the React module, for obvious reasons, along with the Falcor model we defined in the previous step. If you are a Java developer, the component definition looks surprisingly familiar. ECMAScript 6 brings classes to JavaScript, and we’re defining our names list component to be a type of React component. Again, similar to Java, we must define a constructor. We’ll simply initialize our <code class="highlighter-rouge">state</code> object in this constructor. The <code class="highlighter-rouge">state</code> object will be used to feed data to our rendered markup, which will be re-rendered (as efficiently as possible by React) whenever it changes. Note that we <em>must</em> invoke the <code class="highlighter-rouge">React.Component</code> constructor by called <code class="highlighter-rouge">super()</code> <em>before</em> we can access the context of our component. We access the context of our component using the <code class="highlighter-rouge">this</code> keyword.</p>
+<p>In the first two lines, we’re importing the React module, for obvious reasons, along with the Falcor model we defined in the previous step. If you are a Java developer, the component definition looks surprisingly familiar. ECMAScript 6 brings classes to JavaScript, and we’re defining our names list component to be a type of React component. Again, similar to Java, we must define a constructor. We’ll simply initialize our <code class="highlighter-rouge">state</code> object in this constructor. The <code class="highlighter-rouge">state</code> object will be used to feed data to our rendered markup, which will be re-rendered (as efficiently as possible by React) whenever it changes. Note that we <em>must</em> invoke the <code class="highlighter-rouge">React.Component</code> constructor by calling <code class="highlighter-rouge">super()</code> <em>before</em> we can access the context of our component. We access the context of our component using the <code class="highlighter-rouge">this</code> keyword.</p>
 
 <p>Our first class method, <code class="highlighter-rouge">componentWillMount,</code> is inherited from the <code class="highlighter-rouge">React.Component</code> class. It will be called by React <em>just before</em> when our markup is first “rendered” by React. That is, before the <code class="highlighter-rouge">render</code> method is invoked for the first time and the markup has been added to the DOM. At this point, we’re calling the <code class="highlighter-rouge">update</code> method that grabs the list of names from Falcor.</p>
 
@@ -419,7 +419,7 @@
 
 <h5 id="name-adder-component">Name adder component</h5>
 
-<p>We have a component that will list our names, but we also want to be able to add new names to our list. So, next we will need to create a “name adder” React component, which will be stored in a file appropriately called <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/name-adder.jsx">name-adder.jsx</a>.</p>
+<p>We have a component that will list our names, but we also want to be able to add new names to our list. So, next we will need to create a “name adder” React component, which will be stored in a file appropriately called <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/name-adder.jsx">name-adder.jsx</a>.</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">),</span>
     <span class="nx">model</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./model.js'</span><span class="p">);</span>
@@ -453,6 +453,10 @@
     <span class="p">}</span>
 <span class="p">}</span>
 
+<span class="nx">NameAdder</span><span class="p">.</span><span class="nx">propTypes</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">onAdded</span><span class="p">:</span> <span class="nx">React</span><span class="p">.</span><span class="nx">PropTypes</span><span class="p">.</span><span class="nx">func</span><span class="p">.</span><span class="nx">isRequired</span>
+<span class="p">}</span>
+
 <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">NameAdder</span>
 </code></pre>
 </div>
@@ -461,13 +465,15 @@
 
 <p>The other method in our React component is <code class="highlighter-rouge">handleSubmit</code>, which is called when our rendered form is submitted, as I mentioned above. First, we must prevent the browser’s default action. In other words, we don’t want to <em>actually</em> submit the form; we don’t want the page to reload. Instead, we need to funnel the submitted data to Falcor. Next, we must look up our input element. We’ll need this to determine what text the user entered. Notice that we included a <code class="highlighter-rouge">ref</code> attribute on the text input in our <code class="highlighter-rouge">render</code> method. This allows us to easily get a handle on the underlying DOM element without resorting to a CSS selector. Finally, we must send this new name to our server. We want to hit the “names.add” call route we defined earlier, passing the new name. Once our server persists the new name and responds, Falcor will update its internal representation of our model using the information provided by our server. It now knows that there is one more name in our list, and it knows the index of the name we just added. But why is this important?</p>
 
-<p>After Falcor has determined that the name has been successfully added to our server, it will invoke our “success” function, which is the first (and only) function we have passed when calling <code class="highlighter-rouge">then</code> after invoking <code class="highlighter-rouge">call</code> on our Falcor model. This gives us the opportunity to reset our text input and ensure it retains focus so that our user can easily enter a new name. But we also want to be sure our list of names is current. It looks like there is an <code class="highlighter-rouge">onAdded</code> function on a <code class="highlighter-rouge">props</code> property attached to our component. Where did that come from? The component that rendered our name adder component passed this to us, which we will see next. Any parameters passed to a React component are available on the <code class="highlighter-rouge">props</code> property. We can expect that an <code class="highlighter-rouge">onAdded</code> function is passed to our component, and we should always invoke it when a new name has been added. I can tell you now that this function will trigger the <code class="highlighter-rouge">update</code> method on our <code class="highlighter-rouge">NamesList</code> component, which, as you might remember, will result in a call to Falcor for our list of names. This is exactly what we want to do - update our list of names after a name is added so our user sees the current list. You might be surprised to know that, after adding this name, Falcor does <em>not</em> contact our server for this list of names. It already knows exactly how the list has changed, thanks to the information provided by our server’s response to the “names.add” call. It pulls this data from its internal represntation of our model, saving a couple round-trips to the server (one for the lengh request, and another for the list of names).</p>
+<p>After Falcor has determined that the name has been successfully added to our server, it will invoke our “success” function, which is the first (and only) function we have passed when calling <code class="highlighter-rouge">then</code> after invoking <code class="highlighter-rouge">call</code> on our Falcor model. This gives us the opportunity to reset our text input and ensure it retains focus so that our user can easily enter a new name. But we also want to be sure our list of names is current. It looks like there is an <code class="highlighter-rouge">onAdded</code> function on a <code class="highlighter-rouge">props</code> property attached to our component. Where did that come from? The component that rendered our name adder component passed this to us, which we will see next. Any parameters passed to a React component are available on the <code class="highlighter-rouge">props</code> property. We can expect that an <code class="highlighter-rouge">onAdded</code> function is passed to our component, and we should always invoke it when a new name has been added. I can tell you now that this function will trigger the <code class="highlighter-rouge">update</code> method on our <code class="highlighter-rouge">NamesList</code> component, which, as you might remember, will result in a call to Falcor for our list of names. This is exactly what we want to do - update our list of names after a name is added so our user sees the current list. You might be surprised to know that, after adding this name, Falcor does <em>not</em> contact our server for this list of names. It already knows exactly how the list has changed, thanks to the information provided by our server’s response to the “names.add” call. It pulls this data from its internal representation of our model, saving a couple round-trips to the server (one for the length request, and another for the list of names).</p>
 
-<p>Perhaps you are starting to see the elegance of this modern stack. React allows us to componse our UI in terms of focused components, and Falcor lets us think about our model in terms of the actual model properties, all while ensuring that communication with the server is minimized.</p>
+<p>Finally, we are making use of <a href="https://facebook.github.io/react/docs/reusable-components.html#prop-validation">React’s property validation</a> feature. Have a look at the line at the end of the file that starts with <code class="highlighter-rouge">NameAdder.propTypes = {</code>. If the component that renders our <code class="highlighter-rouge">NameAdder</code> does not pass a callback function property to our component, React will log a warning message to the developer console in your browser. This is a useful way to alert any developers integrating your component when they have inadvertently omitted a vital property. Defining these property validations in your component also serves as a form of documentation.</p>
+
+<p>Perhaps you are starting to see the elegance of this modern stack. React allows us to compose our UI in terms of focused components, and Falcor lets us think about our model in terms of the actual model properties, all while ensuring that communication with the server is minimized.</p>
 
 <h5 id="name-manager-component">Name manager component</h5>
 
-<p>We have a component to list all of our names, and another to add a new name. These two components don’t have any direct knowledge of each other. This is a good thing, as it makes them easier to test and re-use. But we still need some way to tie these two components together. The solution: a “glue” component. We’ll call this third React component <code class="highlighter-rouge">NameManager</code>, stored in a <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/name-manager.jsx">name-manager.jsx</a> file.</p>
+<p>We have a component to list all of our names, and another to add a new name. These two components don’t have any direct knowledge of each other. This is a good thing, as it makes them easier to test and re-use. But we still need some way to tie these two components together. The solution: a “glue” component. We’ll call this third React component <code class="highlighter-rouge">NameManager</code>, stored in a <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/name-manager.jsx">name-manager.jsx</a> file.</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">),</span>
     <span class="nx">ReactDom</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react-dom'</span><span class="p">),</span>
@@ -495,7 +501,7 @@
 </code></pre>
 </div>
 
-<p>As expected, we must first import <code class="highlighter-rouge">React</code>, our <code class="highlighter-rouge">NameAdder</code>, and <code class="highlighter-rouge">NamesList</code> components. We’ll also need ReactDom, which we must use to render our finished UI into the DOM. Note that we are selecting the container element we defined in our <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/index.html">index.html</a> file earlier, and rendering our entire set of React components as children/descendants.</p>
+<p>As expected, we must first import <code class="highlighter-rouge">React</code>, our <code class="highlighter-rouge">NameAdder</code>, and <code class="highlighter-rouge">NamesList</code> components. We’ll also need ReactDom, which we must use to render our finished UI into the DOM. Note that we are selecting the container element we defined in our <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/index.html">index.html</a> file earlier, and rendering our entire set of React components as children/descendants.</p>
 
 <p>The <code class="highlighter-rouge">render</code> method, which is called when <code class="highlighter-rouge">ReactDom</code> attempts to render our component to the DOM, is largely a set of references to the two other components we already defined. Remember how our <code class="highlighter-rouge">NameAdder</code> component was able to ask the <code class="highlighter-rouge">NamesList</code> component to update its list of names? This is made possible by our <code class="highlighter-rouge">NameManager</code> component. You can see that is passed a property, <code class="highlighter-rouge">onAdded</code>, to this component. When it is called by <code class="highlighter-rouge">NameAdder</code>, the <code class="highlighter-rouge">handleNameAdded</code> method is called on <code class="highlighter-rouge">NameManager</code>, which in turn delegates to the <code class="highlighter-rouge">NamesList</code> component’s <code class="highlighter-rouge">update</code> method, which has been exposed as a public class instance method.</p>
 
@@ -512,7 +518,7 @@
   <li>Ensure debugging our code in the browser is simple by providing access to the original pre-compiled/combined source files.</li>
 </ol>
 
-<p>We have defined webpack, along with all other dependencies, in a <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/package.json">package.json file</a>. All that is left is a bit of configuration. Have a look:</p>
+<p>We have defined webpack, along with all other dependencies, in a <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/package.json">package.json file</a>. All that is left is a bit of configuration. Have a look:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
     <span class="na">entry</span><span class="p">:</span> <span class="s1">'./name-manager.jsx'</span><span class="p">,</span>
@@ -533,7 +539,7 @@
 </code></pre>
 </div>
 
-<p>If we name the file <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/webpack.config.js">webpack.config.js</a>, webapck will be able to easily discover and use our configuration. The main entry point of our app, “name-manager.jsx” is used as the value of the <code class="highlighter-rouge">entry</code> configuration property. Webpack will use this “main” class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the <code class="highlighter-rouge">output.filename</code> config property.</p>
+<p>If we name the file <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/webpack.config.js">webpack.config.js</a>, webapck will be able to easily discover and use our configuration. The main entry point of our app, “name-manager.jsx” is used as the value of the <code class="highlighter-rouge">entry</code> configuration property. Webpack will use this “main” class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the <code class="highlighter-rouge">output.filename</code> config property.</p>
 
 <p>Next, a set of “loaders” are specified. We’re using the babel loader, which ensures ECMAScript 6 code is compiled down to ECMAScript 5 syntax, which allows us to write purely ES6 code without having to worry about which portions of the spec our target browsers support. The <code class="highlighter-rouge">test</code> property on our loader is a regular expression, and it results in webpack passing any .js or .jsx files in our source tree to the babel loader for processing. The babel loader processes our source before webpack combines everything to a single resource.</p>
 
@@ -543,7 +549,7 @@
 
 <p>All of our code is in place, our server is ready, <em>and</em> we have a build tool in place. How do we get our app up and running?</p>
 
-<p>First, we need to pull in all project dependencies. In the root of our project, we simply run <code class="highlighter-rouge">npm install</code>, which will parse our <a href="https://github.com/Widen/fullstack-react/blob/1.1.1/package.json">package.json file</a> and install all registered dependencies inside of a “node_modules” folder. This will also install a webpack binary, which we will need to build the client-side source bundles.</p>
+<p>First, we need to pull in all project dependencies. In the root of our project, we simply run <code class="highlighter-rouge">npm install</code>, which will parse our <a href="https://github.com/Widen/fullstack-react/blob/1.2.0/package.json">package.json file</a> and install all registered dependencies inside of a “node_modules” folder. This will also install a webpack binary, which we will need to build the client-side source bundles.</p>
 
 <p>The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing <code class="highlighter-rouge">$(npm bin)/webpack</code> from the root of our project. <code class="highlighter-rouge">$(npm bin)</code> expands to the directory that contains all binaries pulled in by <code class="highlighter-rouge">npm install</code>.</p>
 
@@ -634,10 +640,10 @@
         <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/_posts/2015-10-12-future-of-the-web-react-falcor.md">edit</a>
     </li>
     <li>
-        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/b95614e">b95614e</a>
+        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/776b920">776b920</a>
     </li>
     <li>
-        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/b95614e">b95614e</a>
+        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/776b920">776b920</a>
     </li>
   </ul>
   </nav >
