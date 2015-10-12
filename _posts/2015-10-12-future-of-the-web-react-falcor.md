@@ -5,7 +5,7 @@ categories: react falcor webpack web server JSON HTTP node.js JavaScript ES6
 excerpt: "The future of web application development looks a bit different than what we are all used to. I'll show you how to build a simple full-stack JavaScript app using Node.js on the backend, React on the frontend, Webpack for client-side module support, and Netflix's Falcor as an efficient and intuitive alternative to the traditional REST API."
 ---
 
-In this article, I'm going provide a glimpse into the future of web development. You will gain a new perspective on structuring a user interface, server, and data endpoints. In other words, I will cover the full "stack" - both the browser and server code - and you will be able to examine and execute all of the referenced code in [a fully-functional GitHub repository][repo]. I must assume that you, as a developer, posses the following qualities:
+In this article, I'm going provide a glimpse into the future of web development. You will gain a new perspective on structuring a user interface, server, and data endpoints. In other words, I will cover the full "stack" - both the browser and server code - and you will be able to examine and execute all of the referenced code in [a fully-functional GitHub repository][repo]. I must assume that you, as a developer, possess the following qualities:
 
 1. Intermediate understanding of JavaScript.
 2. Intermediate understanding of HTML.
@@ -349,7 +349,7 @@ class NamesList extends React.Component {
 module.exports = NamesList
 ```
 
-In the first two lines, we're importing the React module, for obvious reasons, along with the Falcor model we defined in the previous step. If you are a Java developer, the component definition looks surprisingly familiar. ECMAScript 6 brings classes to JavaScript, and we're defining our names list component to be a type of React component. Again, similar to Java, we must define a constructor. We'll simply initialize our `state` object in this constructor. The `state` object will be used to feed data to our rendered markup, which will be re-rendered (as efficiently as possible by React) whenever it changes. Note that we _must_ invoke the `React.Component` constructor by called `super()` _before_ we can access the context of our component. We access the context of our component using the `this` keyword.
+In the first two lines, we're importing the React module, for obvious reasons, along with the Falcor model we defined in the previous step. If you are a Java developer, the component definition looks surprisingly familiar. ECMAScript 6 brings classes to JavaScript, and we're defining our names list component to be a type of React component. Again, similar to Java, we must define a constructor. We'll simply initialize our `state` object in this constructor. The `state` object will be used to feed data to our rendered markup, which will be re-rendered (as efficiently as possible by React) whenever it changes. Note that we _must_ invoke the `React.Component` constructor by calling `super()` _before_ we can access the context of our component. We access the context of our component using the `this` keyword.
 
 Our first class method, `componentWillMount,` is inherited from the `React.Component` class. It will be called by React _just before_ when our markup is first "rendered" by React. That is, before the `render` method is invoked for the first time and the markup has been added to the DOM. At this point, we're calling the `update` method that grabs the list of names from Falcor.
 
@@ -401,6 +401,10 @@ class NameAdder extends React.Component {
     }
 }
 
+NameAdder.propTypes = {
+    onAdded: React.PropTypes.func.isRequired
+}
+
 module.exports = NameAdder
 ```
 
@@ -408,9 +412,11 @@ In our `render` method, we're defining a simple HTML form that contains a text i
 
 The other method in our React component is `handleSubmit`, which is called when our rendered form is submitted, as I mentioned above. First, we must prevent the browser's default action. In other words, we don't want to _actually_ submit the form; we don't want the page to reload. Instead, we need to funnel the submitted data to Falcor. Next, we must look up our input element. We'll need this to determine what text the user entered. Notice that we included a `ref` attribute on the text input in our `render` method. This allows us to easily get a handle on the underlying DOM element without resorting to a CSS selector. Finally, we must send this new name to our server. We want to hit the "names.add" call route we defined earlier, passing the new name. Once our server persists the new name and responds, Falcor will update its internal representation of our model using the information provided by our server. It now knows that there is one more name in our list, and it knows the index of the name we just added. But why is this important?
 
-After Falcor has determined that the name has been successfully added to our server, it will invoke our "success" function, which is the first (and only) function we have passed when calling `then` after invoking `call` on our Falcor model. This gives us the opportunity to reset our text input and ensure it retains focus so that our user can easily enter a new name. But we also want to be sure our list of names is current. It looks like there is an `onAdded` function on a `props` property attached to our component. Where did that come from? The component that rendered our name adder component passed this to us, which we will see next. Any parameters passed to a React component are available on the `props` property. We can expect that an `onAdded` function is passed to our component, and we should always invoke it when a new name has been added. I can tell you now that this function will trigger the `update` method on our `NamesList` component, which, as you might remember, will result in a call to Falcor for our list of names. This is exactly what we want to do - update our list of names after a name is added so our user sees the current list. You might be surprised to know that, after adding this name, Falcor does _not_ contact our server for this list of names. It already knows exactly how the list has changed, thanks to the information provided by our server's response to the "names.add" call. It pulls this data from its internal represntation of our model, saving a couple round-trips to the server (one for the lengh request, and another for the list of names).
-  
-Perhaps you are starting to see the elegance of this modern stack. React allows us to componse our UI in terms of focused components, and Falcor lets us think about our model in terms of the actual model properties, all while ensuring that communication with the server is minimized.
+After Falcor has determined that the name has been successfully added to our server, it will invoke our "success" function, which is the first (and only) function we have passed when calling `then` after invoking `call` on our Falcor model. This gives us the opportunity to reset our text input and ensure it retains focus so that our user can easily enter a new name. But we also want to be sure our list of names is current. It looks like there is an `onAdded` function on a `props` property attached to our component. Where did that come from? The component that rendered our name adder component passed this to us, which we will see next. Any parameters passed to a React component are available on the `props` property. We can expect that an `onAdded` function is passed to our component, and we should always invoke it when a new name has been added. I can tell you now that this function will trigger the `update` method on our `NamesList` component, which, as you might remember, will result in a call to Falcor for our list of names. This is exactly what we want to do - update our list of names after a name is added so our user sees the current list. You might be surprised to know that, after adding this name, Falcor does _not_ contact our server for this list of names. It already knows exactly how the list has changed, thanks to the information provided by our server's response to the "names.add" call. It pulls this data from its internal representation of our model, saving a couple round-trips to the server (one for the length request, and another for the list of names).
+
+Finally, we are making use of [React's property validation][react-prop-validation] feature. Have a look at the line at the end of the file that starts with `NameAdder.propTypes = {`. If the component that renders our `NameAdder` does not pass a callback function property to our component, React will log a warning message to the developer console in your browser. This is a useful way to alert any developers integrating your component when they have inadvertently omitted a vital property. Defining these property validations in your component also serves as a form of documentation. 
+
+Perhaps you are starting to see the elegance of this modern stack. React allows us to compose our UI in terms of focused components, and Falcor lets us think about our model in terms of the actual model properties, all while ensuring that communication with the server is minimized.
 
 
 ##### Name manager component
@@ -520,16 +526,17 @@ Feel free to issue pull requests to the underlying [GitHub repository][repo] if 
 [falcor-call]: http://netflix.github.io/falcor/doc/DataSource.html#call
 [falcor-ds]: http://netflix.github.io/falcor/doc/DataSource.html
 [falcor-ref]: http://netflix.github.io/falcor/documentation/jsongraph.html#reference
-[index.html]: https://github.com/Widen/fullstack-react/blob/1.1.1/index.html
-[model.js]: https://github.com/Widen/fullstack-react/blob/1.1.1/model.js
-[name-adder.jsx]: https://github.com/Widen/fullstack-react/blob/1.1.1/name-adder.jsx
-[name-manager.jsx]: https://github.com/Widen/fullstack-react/blob/1.1.1/name-manager.jsx
-[names-list.jsx]: https://github.com/Widen/fullstack-react/blob/1.1.1/names-list.jsx
-[package.json]: https://github.com/Widen/fullstack-react/blob/1.1.1/package.json
+[index.html]: https://github.com/Widen/fullstack-react/blob/1.2.0/index.html
+[model.js]: https://github.com/Widen/fullstack-react/blob/1.2.0/model.js
+[name-adder.jsx]: https://github.com/Widen/fullstack-react/blob/1.2.0/name-adder.jsx
+[name-manager.jsx]: https://github.com/Widen/fullstack-react/blob/1.2.0/name-manager.jsx
+[names-list.jsx]: https://github.com/Widen/fullstack-react/blob/1.2.0/names-list.jsx
+[package.json]: https://github.com/Widen/fullstack-react/blob/1.2.0/package.json
 [promise-mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
+[react-prop-validation]: https://facebook.github.io/react/docs/reusable-components.html#prop-validation
 [repo]: https://github.com/Widen/fullstack-react
 [request.body]: http://expressjs.com/api.html#req.body
-[server.js]: https://github.com/Widen/fullstack-react/blob/1.1.1/server.js
-[webpack.config.js]: https://github.com/Widen/fullstack-react/blob/1.1.1/webpack.config.js
+[server.js]: https://github.com/Widen/fullstack-react/blob/1.2.0/server.js
+[webpack.config.js]: https://github.com/Widen/fullstack-react/blob/1.2.0/webpack.config.js
 [widen]: http://widen.com
 [why-falcor-video]: https://netflix.github.io/falcor/starter/why-falcor.html
