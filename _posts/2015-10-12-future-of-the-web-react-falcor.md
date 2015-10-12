@@ -502,7 +502,9 @@ After starting up the server, our app will be accessible on port 9090. So, navig
 
 ## Going further
 
-There's a lot more we can do with Falcor, React, Webpack, and ECMAScript 6, of course. This post and the associated example exists simply to get you started. Here are some ways that you could improve our simple names app, if you are interested in further honing your skills:
+There's a lot more we can do with Falcor, React, Webpack, and ECMAScript 6, of course. This post and the associated example exists simply to get you started. In particular, you should read up on a Falcor topic that I omitted from my example for the sake of simplicity: [reference routes][falcor-ref]. When you develop a _real_ web application backed by non-trivial data, you'll find yourself making use of the reference type in Falcor quite often. I encourage you to spend some time following the Falcor and React tutorials as well. And if you need more information regarding ECMAScript 6, [Mozilla Developer Network is a _great_ reference][es6-mdn].
+
+Here are some ways that you can improve our simple names app, if you are interested in further honing your skills:
 
 1. Allow existing names to be edited. This will require an "edit names" React component, as well as a Falcor "set" route.
 2. Allow existing names to be re-ordered. You'll probably need to add code to the NamesList component, along with another Falcor route to handle index updates.
@@ -513,9 +515,11 @@ Feel free to issue pull requests to the underlying [GitHub repository][repo] if 
 
 [babel]: https://github.com/babel/babel
 [es6-arrow]: http://www.ecma-international.org/ecma-262/6.0/#sec-arrow-function-definitions
+[es6-mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/New_in_JavaScript/ECMAScript_6_support_in_Mozilla
 [event-mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Event
 [falcor-call]: http://netflix.github.io/falcor/doc/DataSource.html#call
 [falcor-ds]: http://netflix.github.io/falcor/doc/DataSource.html
+[falcor-ref]: http://netflix.github.io/falcor/documentation/jsongraph.html#reference
 [index.html]: https://github.com/Widen/fullstack-react/blob/1.1.1/index.html
 [model.js]: https://github.com/Widen/fullstack-react/blob/1.1.1/model.js
 [name-adder.jsx]: https://github.com/Widen/fullstack-react/blob/1.1.1/name-adder.jsx
