@@ -13,39 +13,37 @@ In this article, I'm going provide a glimpse into the future of web development.
 4. Basic knowledge of JSON.
 5. Basic knowledge of node.js.
 
-If you lack any of these qualities, you _may_ still be able to navigate this article and the related code, but these gaps in your knowledge will likely prevent you from extending my code to support a more realistic or non-trivial scenario. The internet is full of great resources that will provide you will the concepts necessary to master each of these items, and I encourage you to seek out resources as needed - they are only a quick Google search away.
+If you lack any of these qualities, you _may_ still be able to navigate this article and the related code, but these gaps in your knowledge will likely prevent you from extending my code to support a more realistic or non-trivial scenario. The internet is full of great resources that will provide you will the concepts necessary to master each of these items, and I encourage you to seek them out as needed - they are only a quick Google search away.
 
-The current stack at Widen often consists of Java on the server, AngularJS for all of our browser-related code, Jersey for REST API support, along with a whole host of various libraries such as jQuery, underscore, lodash, jQuery UI, and Bootstrap. When designing the underlying sample web application, which I will be discussing shortly, I had four specific goals in mind:
+The current stack at [Widen][widen] has traditionally consisted of Java on the server, AngularJS for all of our browser-related code (within the last few years), Jersey for REST API support, and a whole host of other various libraries such as jQuery, underscore, lodash, jQuery UI, and Bootstrap. When designing the underlying sample web application, which I will be discussing shortly, I had four specific goals in mind:
 
-1. **A new and shiny approach**. Instead of developing yet another AngularJS-based UI, or deferring to jQuery, or creating a Java-based endpoint server using Jersey, or doing all three, I really wanted to make use of an entirely new set of tools. I hoped that this would allow me to gain a new perspective and help me to evolve a bit more as a developer.
+1. **A _new_ and shiny approach**. Instead of developing yet another AngularJS-based UI, or deferring to jQuery, or creating a Java-based endpoint server using Jersey, or doing all three, I really wanted to make use of an entirely new set of tools. I hoped that this would allow me to gain a new perspective and evolve a bit more as a developer.
 
-2. **Simplicity** is another desire of mine. I very much have grown to dislike the substantial learning curve associated with AngularJS 1.x, and am disappointed to discover that the learning curve for v2 is even more steep. The same is true of Java, which I have traditionally used server-side. I'd like to avoid as much boilerplate code as possible and get my application up and running as quickly as possible without sacrificing scalability. Being able to easily describe my frontend as a collection of standalone focused components is also part of this goal. And traditional REST APIs are awkward to maintain and evolve. The frontend developers must coordinate with the backend developers to expose a set of API endpoints that properly support the browser-side representation of the model. As the needs of the UI change, this often requires the API to change as well. Surely there must be a better approach!
+2. **Simplicity** is another desire of mine. I very much have grown to dislike the substantial learning curve associated with AngularJS 1.x, and am disappointed to discover that the learning curve for v2 is even more steep. The same is true of Java, which I have traditionally used server-side. I'd like to avoid as much boilerplate code as possible and get my application up and running fast without sacrificing scalability. Being able to easily describe my frontend as a collection of standalone focused components is also part of this goal. Also, traditional REST APIs are awkward to maintain and evolve. The frontend developers must coordinate with the backend developers to expose a set of API endpoints that properly support the browser-side representation of the model. As the needs of the UI change, this often requires the API to change as well. Surely there must be a better approach!
 
-3. Some of the issues associated with a traditional REST API in terms of unnecessary request overhead and number of requests and response payloads, were a concern. I was less concerned about client-side rendering performance, which React and AngularJS both handle fairly well, though React is much more monolithic and complex, making it easier to unknowingly introduce serious performance issues into an app. So, **efficiency** is my fourth goal.
+3. Some of the issues associated with a traditional REST API include unnecessary request overhead, large number of requests, and needlessly large response payloads. I was less concerned about client-side rendering performance, which React and AngularJS both handle fairly well, though Angular is much more monolithic and complex, making it easier to unknowingly introduce serious performance issues into an app. So, **efficiency** is my fourth goal.
 
-4. Finally, I was looking for some approaches or tools that allow me to write uncharacteristically **elegant** code. The code itself should be easy to follow. Looking up and changing data from the UI should be intuitive. Ideally I would like to think about my model, and only my model - not in terms of available API endpoints. I'd also like to avoid much of the noisy boilerplate that is required of my current stack.
+4. Finally, I was looking for some approaches or tools that allow me to write uncharacteristically **elegant** code. The code itself should be easy to follow. Looking up and changing data from the UI should be intuitive. Ideally I would like to think about my model, and only my model - not in terms of available API endpoints. I'd also like to avoid much of the noisy boilerplate that is required of my traditional stack.
 
-In order to address each of these goals, I decided to replace my current lineup of tools with an _entirely_ new set, some of which I initially had never used before. This was very much a learning experience, one which I would like to share with you. Next, I'll document each notable new tool. After the stack is clear, I'll walk you though, from start to finish, creation of a simple web application that is both functional and idiomatic of all items involved in this new stack.
+In order to address each of these goals, I decided to replace my current lineup of tools with an _entirely_ new set, some of which I  had never used before. This was very much a learning experience, one which I would like to share with you. In fact, some of Widen's emerging software products will make use of all of the new technologies discussed in this article. Next, I'll document each notable new tool. After the stack is clear, I'll walk you though, from start to finish, creation of a simple web application that is both functional and idiomatic of all items involved in this new stack.
 
 
 ## A futuristic stack
 
-A more traditional stack, at least in my experience, may consist of Angular and/or jQuery and/or backbone on the frontend, with Java handling requests on the backend via some form of a REST API, perhaps using Jersey. In this article, we're going to explore an entirely new stack, one that can be considered "futuristic", at least as of September 2015. In fact, some of Widen's new emerging software products will make use of all of the new technologies discussed here.
-
-Adopting a completely new set of tools and architecture often means changing your perspective as a developer. Over time, we've all become comfortable with one or more tools. Whether that be jQuery or Angular, or Ember, or even the concept of REST, we have learned to trust and depend on our stack. We've been trained to think of web applications in a specific context though inculcation. Abandoning our stack and moving out of this comfort zone can be frustrating. Some of us may fight this urge, dismissing new choices as unnecessary or overly complex. Admittedly, I had the same thoughts about React, webpack, and Falcor before I had a strong understanding of these tools. In this section, I will briefly discuss each of the more notable tools in this futuristic stack. I'll be sure to provide resources for further investigation as well.
+Adopting a completely new set of tools and architecture often means changing your perspective as a developer. Over time, we've all become comfortable with one or more tools. Whether that be jQuery or Angular, or Ember, or even the concept of REST, we have learned to trust and depend on our stack. We've been trained to think of web applications in a specific context though inculcation. Abandoning our stack and moving out of this comfort zone can be frustrating. Some of us may fight this urge, dismissing new choices as unnecessary or overly complex. Admittedly, I had the same thoughts about React, webpack, and Falcor before I had a strong understanding of them. In this section, I will briefly discuss each of the more notable tools in this futuristic stack.
 
 ### React
 
-React differs from Angular and Ember due to its limited scope and footprint. While Angular & Ember are positioned as frameworks, React mostly concerns itself with your "view". React contains no dependency injection or support for "services". There is no "jq-lite" (Angular) nor is their a required jQuery dependency (Ember). Instead of handlebars (Ember) you write your markup alongside your JavaScript using JSX, which compiles down into a series of JavaScript calls that build your document through React's element API as part of a "virtual DOM" that React maintains. It updates the "real" DOM from this virtual model in the most efficient way possible, avoiding unnecessary reflows/repaints, as well as delegating event handlers for you (among other things). If you embrace JSX (and from my experience, you should) you are adding a compilation phase to your project. For me, this was something I have tried to avoid for a while, but made my peace with this workflow after realizing how elegant and useful React through the lens of JSX really is. At this point, the floodgates opened up, and other useful JavaScript preprocessors, such as webpack and babel, were easy to embrace. More on those later.
+React differs from Angular and Ember due to its limited scope and footprint. While Angular & Ember are positioned as frameworks, React mostly concerns itself with the application "view". React contains no dependency injection or support for "services". There is no "jq-lite" (Angular) nor is their a required jQuery dependency (Ember). Instead of handlebars (Ember) you write your markup alongside your JavaScript using JSX, which compiles down into a series of JavaScript calls that build your document through React's element API as part of a "virtual DOM" that React maintains. It updates the "real" DOM from this virtual model in the most efficient way possible, avoiding unnecessary reflows/repaints, as well as delegating event handlers for you (among other things). If you embrace JSX (and from my experience, you should) you are adding a compilation phase to your project. For me, this was something I have tried to avoid for a while, but made my peace with this workflow after realizing how elegant and useful React through the lens of JSX really is. At this point, the floodgates opened up, and other useful JavaScript preprocessors, such as webpack and babel, were easy to embrace. More on those later.
 
-In short, I really appreciate the relatively narrow focus of React. Dividing up a complex component into smaller widgets is something I came to love with Angular. I was excited at the possibility of native support in the form of the Web Components spec, but ultimately chose React for its elegance, ease-of-use, small footprint, and relative maturity.
+In short, I really appreciate the relatively narrow focus of React. Dividing up a complex application into smaller components is something I grew to love with Angular. I was excited at the possibility of native support in the form of the Web Components spec, but ultimately chose React for its elegance, ease-of-use, small footprint, and relative maturity.
 
 
 ### Falcor
 
-Falcor, a _very_ new library created and open-sourced by Netflix, is a complete departure from the traditional REST API. Instead of focusing on specific endpoints that return a rigid and predetermined set of data, there is only _one_ endpoint. This is how Falcor is commonly described, and it is maybe a bit misleading, though technically correct. Instead of focusing on various server endpoints to retrieve and update your model data, you instead "ask" your API server for specific model data. Do you need the first 3 user names in your customer list along with their ages? Simply "ask" your API server, in a single request, for this specific data. What if you want only the first 2 user names and no ages? Again, a single request to the same endopint. The differences in these two GET requests can be seen by examining their query parameters, which contain specifics regarding the model properties of interest. Server-side, a handler for a particular combination or pattern of model properties is codified as part of a "route". When handling the API request, the falcor router (server-side) contacts the proper router function based on the items present in the query string.
+Falcor, a _very_ new library created and open-sourced by Netflix, is a complete departure from the traditional REST API. Instead of focusing on specific endpoints that return a rigid and predetermined set of data, there is only _one_ endpoint. This is how Falcor is commonly described, and it is a bit misleading, though technically correct. Instead of focusing on various server endpoints to retrieve and update your model data, you instead "ask" your API server for specific model data. Do you need the first 3 user names in your customer list along with their ages? Simply "ask" your API server, in a single request, for this specific data. What if you want only the first 2 user names and no ages? Again, a single request to the same endopint. The differences in these two GET requests can be seen by examining their query parameters, which contain specifics regarding the model properties of interest. Server-side, a handler for a particular combination or pattern of model properties is codified as part of a "route". When handling the API request, the falcor router (server-side) contacts the proper router function based on the items present in the query string.
 
-Falcor promotes a more intuitive API that _is_ your model. It also ensures that extra, unnecessary model data is never returned, saving bandwidth. Furthermore, requests from multiple disparate browser-side components are combined into a single request to limit HTTP overhead. Data is cached by Falcor client-side, and subsequent requests for cached data avoid a round-trip to the server. This decoupling of the model from the data source, along with all of the efficiency considerations, is exceptionally appealing. But the underlying concepts can be a bit mind-bending. I was a little confused by Falcor until I watched [this video by Jafar Husain][why-falcor-video].
+Falcor promotes a more intuitive API that _is_ your model. It also ensures that extra, unnecessary model data is never returned, saving bandwidth. Furthermore, requests from multiple disparate browser-side components are combined into a single request to limit HTTP overhead. Data is cached by Falcor client-side, and subsequent requests for cached data avoid a round-trip to the server. This decoupling of the model from the data source, along with all of the efficiency considerations, is exceptionally appealing. But the underlying concepts can be a bit mind-bending. I was a little confused by Falcor until I watched [this video by Jafar Husain][why-falcor-video], Falcor's lead developer.
 
 
 ### Webpack
@@ -64,35 +62,32 @@ To demonstrate all of the new items outlined above, I've created a trivial singl
 
 ### Setup
 
-Let's start by dividing up this application into logical pieces. At the most basic level, we have 2 parts - a client and a server. Our client exists entirely in the browser, and our server is a simple API endpoint. On the client, we must expose an interface that will allow our users to see and manipulate the names list. This list will be represented by a model that is understood by both the client and server. Essentially, our model will be expressed in JSON format in our "database", and will consist of an array of objects, with each object having a `name` property. While it is certainly _not_ a requirement for our model to be expressed in JSON format in our backing storage system, this will make our example app a bit easier to setup and understand.
+Let's start by dividing up this application into logical pieces. At the most basic level, we have 2 segments - a client and a server. Our client exists entirely in the browser, and our server is a simple API endpoint. On the client, we must expose an interface that will allow our users to see and manipulate the names list. This list will be represented by a model that is understood by both the client and server. Essentially, our model will be expressed in JSON format in our "database", and will consist of an array of objects, with each object having a `name` property. While it is certainly _not_ a requirement for our model to be expressed in JSON format in our backing storage system, this will make our example app a bit easier to setup and understand.
 
-Another important step, before diving into the code, is to think of our application in terms of reusable components that are not dependent on each other wherever possible. Client-side, I can see three components - one that lists the names, another that allows names to be added, and a third that ties these two components together. This third component is important, as it allows us to forgo coding an explicit dependency between the list and "add name" components. Of these three components, two are reusable outside of our application.
+Another important step, before diving into the code, is to think of our application in terms of reusable components that are not dependent on each other (wherever possible). Client-side, I can see three components - one that lists the names, another that allows names to be added, and a third that ties these two components together. This third component is important, as it allows us to forgo coding an explicit dependency between the list and "add name" components. Of these three components, at least two are reusable outside of our application.
 
-The server itself can be divided up into multiple pieces. At the highest level, we have an HTTP server that exposes static resources and routes API requests. We will also need a series of code blocks that service the various API requests from our client. We can perhaps think of each such request handler, or route, as a separate piece. Finally, we have our backing store of data which also provides initial values. Our API endpoint handlers will delegate to this backing store for lookup and persistence of data.
+The server itself can be divided up into multiple pieces. At the highest level, we have an HTTP server that exposes static resources and routes API requests. We will also need a series of code blocks that service the various model requests from our Falcor client. We can perhaps think of each such request handler, or route, as a separate piece. Finally, we have our backing store of data which also provides initial values. Our API endpoint handlers will delegate to this backing store for lookup and persistence of data.
 
 I'll go over all of the dependencies in the following sections, but our most basic libraries and frameworks consist of:
 
-- React
-- Falcor
-- Express
-- Babel
-- Webpack
-- Node.js
+1. React
+2. Falcor
+3. Express
+4. Babel
+5. Webpack
+6. Node.js
 
 You can see all dependencies for this sample application in the project's [package.json file][package.json].
 
 
 ### Creating a server
 
-Please use the [server.js file][server.js] in the project's GitHub repository for reference as I discuss the server-side portion of our example app. Our server will handle API requests and serve up static resources (such as our JavaScript and HTML files). It will be written in JavaScript using Node.js, and will rely on the following technologies:
-
-- Falcor
-- Express
+Please use the [server.js file][server.js] in the project's GitHub repository for reference as I discuss the server-side portion of our example app. Our server will handle API requests and serve up static resources (such as our JavaScript and HTML files). It will be written in JavaScript using Node.js, and will rely on Falcor and Express.
 
 
 #### Getting started
 
-We will represent our server using a single JavaScript file for simplicity. The first logic step may be to pull in all of our dependencies:
+We will represent our server using a single JavaScript file for simplicity. The first logical step is to reference all of our dependencies:
 
 ```javascript
 var FalcorServer = require('falcor-express'),
@@ -104,9 +99,9 @@ var FalcorServer = require('falcor-express'),
 
 There are two Falcor-related dependencies. The first, `FalcorServer`, will be used to forward API requests to the most appropriate handler. The `Router` is what we will use to _define_ all these handlers. Each handler will be tied to a route string, which defines the type of model data associated with the request. While this may all seem a bit mysterious now, it will become clearer before the server-side section is complete.
 
-The other three dependencies help us to server static resources and parse HTTP requests into a more manageable form. For example, `express` listens to all HTTP requests on a specific port and either serves up static resources (such as our JS and HTML files) or routes the request to a more specific handler, such as our Falcor `Router`.
+The other three dependencies help us to serve static resources and parse HTTP requests into a more manageable form. For example, `express` listens to all HTTP requests on a specific port and either serves up static resources (such as our JS and HTML files) or routes the request to a more specific handler, such as our Falcor `Router`.
 
-Let's also define our data store. Again, for simplicity, let's just maintain our data directly in our node server via a simple JavaScript object:
+Let's also define our data store. Again, for simplicity, we will maintain our data directly in our node server via a simple JavaScript object:
 
 ```javascript
 var data = {
@@ -514,4 +509,5 @@ Feel free to issue pull requests to the underlying [GitHub repository][repo] if 
 [repo]: https://github.com/Widen/fullstack-react
 [request.body]: http://expressjs.com/api.html#req.body
 [server.js]: https://github.com/Widen/fullstack-react/blob/1.1.0/server.js
+[widen]: http://widen.com
 [why-falcor-video]: https://netflix.github.io/falcor/starter/why-falcor.html
