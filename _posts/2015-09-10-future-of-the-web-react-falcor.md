@@ -124,7 +124,7 @@ Let's continue by configuring our request handlers:
 app.use(bodyParser.urlencoded({extended: false}));
 app.use('/model.json', FalcorServer.dataSourceRoute(() => new NamesRouter()))
 app.use(express.static('.'))
-app.listen(9090, (err) => {
+app.listen(9090, err => {
     if (err) {
         console.error(err)
         return
@@ -133,9 +133,9 @@ app.listen(9090, (err) => {
 });
 ```
 
-In the first line, we're asking the `bodyParser` library to take any requests that contain application/x-www-form-urlencoded message bodies and parse the contents into a JavaScript object. This object is passed along as [a `body` property on the `Request` object][request.body] maintained by express. In our application, POST requests, which add new names to the list will contain URL-encoded name data, will be parsed by this handler before being forwarded on to a more specific handler by express.
+In the first line, we're asking the `bodyParser` library to take any requests that contain application/x-www-form-urlencoded message bodies and parse the contents into a JavaScript object. This object is passed along as [a `body` property on the `Request` object][request.body] maintained by express. In our application, POST requests, which add new names to the list and contain URL-encoded name data, will be parsed by this handler before being forwarded on to a more specific handler by express.
 
-The second line instructs express to delegate _any_ request to the "model.json" endpoint to our Falcor router, which we have not yet defined (we will soon). So, a GET request to "http://localhost:9090/model.json" will be handled here, as will POST requests to the same endpoint. For POST requests to this endpoint with a URL-encoded body, the body will first be parsed by `bodyParser` before being forwarded on to our router.
+The second line instructs express to delegate _any_ request for the "model.json" endpoint to our Falcor router, which we have not yet defined (we will soon). So, a GET request to "http://localhost:9090/model.json" will be handled here, as will POST requests to the same endpoint. For POST requests to this endpoint with a URL-encoded body, the body will first be parsed by `bodyParser` before being forwarded on to our router.
 
 The third line serves up any static resources in the root of our project. While this wildcard is probably not appropriate for production, it is sufficient for this type of simple demo. Ideally, you should restrict access to static resources instead of allowing all source files to be served up.
 
@@ -153,12 +153,12 @@ app.listen(9090, function(err) {
 
 #### API route handlers
 
-Here we will create routes for three different API requests.
+Next, we will create routes for three different API requests.
 
 
 ##### Number of names
 
-First, we can expect our client to ask for the number of names in the list. The necessity of this information will become clear when we define our next route. The names list length route looks like this:
+First, we can expect our client to ask for the number of names in the list. The necessity of this information will become clear when we define our next route. The Falcor route that supplies the number of names in our list looks like this:
 
 ```javascript
 var NamesRouter = Router.createClass([
@@ -183,7 +183,7 @@ When our page loads, we will want to display at least some of the names in our d
     route: 'names[{integers:nameIndexes}]["name"]',
     get: (pathSet) => {
         var results = [];
-        pathSet.nameIndexes.forEach(function(nameIndex) {
+        pathSet.nameIndexes.forEach(nameIndex => {
             if (data.names.length > nameIndex) {
                 results.push({
                     path: ['names', nameIndex, 'name'],
@@ -198,7 +198,7 @@ When our page loads, we will want to display at least some of the names in our d
 
 Above, the `route` property identifies this route as one that will be invoked if the client requests a range of names. More specifically, a client request that is interested in only the `name` property of one or more name records. Our route handler generates an object containing a `path` and `value` property for each index in the range parameter. 
 
-For example, if we request the first two names in our DB, with `name` properties of "Joe" and "Jane", then our route handler will generate an array that looks like this:
+For example, if we request the first two names in our DB, and these two records have respective `name` properties of "Joe" and "Jane", then our route handler will generate an array that looks like this:
 
 ```javascript
 [
@@ -213,12 +213,12 @@ For example, if we request the first two names in our DB, with `name` properties
 ]
 ```
 
-This will be returned to the falcor response handler client-side, which will result in an update of the model cache. The caller will be provided with these names as well.
+This will be returned to the Falcor response handler client-side, which will result in an update of the model cache. The caller will be provided with these names as well.
 
 
 ##### Add a new name record
 
-Our simple names widget also allows us to add new names. I'll cover the client-side portion of this operation shortly. First, take a look at the server-side falcor route:
+Our simple names widget also allows us to add new names. I'll cover the client-side portion of this operation shortly. First, take a look at the server-side Falcor route:
 
 ```javascript
 {
@@ -242,7 +242,7 @@ Our simple names widget also allows us to add new names. I'll cover the client-s
 }
 ```
 
-This is an example of [a Falcor "call"][falcor-call] route. The client will include "names.add" as the path parameter, along with the name to add, as part of a "POST" request. The endpoint described above will be hit, resulting in a new name in our DB. That is expected and straightforward, but the response to this request is interesting. Notice that we are returning two path elements to the client - both describe changes that have occurred to our data set as a result of this new name. The first item in the set indicates that there is a new name added to the end of our names collection. The second item indicates that the number of names in our set has changed. If we were to add a new name of "Bob" to our existing names list of "Joe" and "Jane", the response generated by this route would look like this:
+This is an example of a [Falcor "call"][falcor-call] route. The client will include "names.add" as the path parameter, along with the name to add, as part of a "POST" request. The endpoint described above will be hit, resulting in a new name in our DB. That is expected and straightforward, but the response to this request is interesting. Notice that we are returning two path elements to the client - both which describe changes that have occurred to our data set as a result of this new name. The first item in the set indicates that there is a new name added to the end of our names collection. The second item indicates that the number of names in our set has changed. If we were to add a new name of "Bob" to our existing names list of "Joe" and "Jane", the response generated by this route would look like this:
 
 ```javascript
 [
@@ -257,17 +257,17 @@ This is an example of [a Falcor "call"][falcor-call] route. The client will incl
 ]
 ```
 
-So the client doesn't have to ask the server about the index of this new name or the length of the names collection later on - it will be cached by Falcor client-side thanks to the information provided in the response of this "call" request.
+So the client doesn't have to ask the server about the index of this new name or the length of the names collection later on - it will be cached by Falcor client-side thanks to the information provided in the response to this "call" request.
 
 
 ### The client
 
-Our server code is quite simple - it serves up static resources, such as our JavaScript and HTML files, _and_ it responds to API requests using Falcor. Next, I'll explain the client-side portion of our app, which, of course, runs in the browser.
+Our server code is quite simple - it serves up static resources, such as our JavaScript and HTML files, _and_ it responds to API requests from our client using Falcor. Next, I'll explain the client-side portion of our app, which, of course, runs in the browser.
 
 
 #### Simplicity in our index page 
 
-Our index page is _very_ simple: just the usual boilerplate along with one line to serve as the container for our entire React-generated app, followed by a second line import _all_ of our JavaScript.
+Our index page is _very_ simple: just the usual HTML-related structuring along with one line to serve as the container for our entire React-generated app, followed by a second line that imports _all_ of our JavaScript.
 
 ```html
 <!DOCTYPE html>
@@ -283,19 +283,19 @@ Our index page is _very_ simple: just the usual boilerplate along with one line 
 </html>
 ```
 
-The only interesting line are the `<div>` and `<script>`. I can tell you that we _will_ split the source of our app among multiple JavaScript files, but in the end, we will only serve up one file that contains all of our code. There is some overhead associated with every HTTP request, so reducing the number of requests is beneficial. 
+The only interesting lines reference the `<div>` and `<script>` elements. I can tell you that we _will_ compose the source of our app among multiple JavaScript files, but in the end, we will only serve up one file that contains all of our code. There is some overhead associated with every HTTP request, so reducing the number of requests on page load is beneficial. 
  
-Perhaps you are wondering why the `<script>` tag is listed at the bottom of the document, instead of inside of the `<head>` tag, as is customary. First, this allows the static markup to be loaded and displayed to the user immediately, instead of after all of our JavaScript source is loaded and parsed. In this case, there isn't much to speak of in terms of initial static content, but we could certainly add something that sets up the page, or perhaps even a "loading" message. On a related note, placing the script tag below the container element ensures our container element is already available in the DOM by the time our code executes. Since our code will render all dynamic content inside of this container element, this is important.
+Perhaps you are wondering why the `<script>` tag is listed at the bottom of the document, instead of inside of the `<head>` tag, as is customary. First, this allows the static markup to be loaded and displayed to the user immediately, instead of after all of our JavaScript source is loaded and parsed. In this case, there isn't much to speak of in terms of initial static content, but we could certainly add something that sets up the page, or perhaps even a "loading" message. Also, placing the script tag below the container element ensures this element is already available in the DOM by the time our code executes. Since our code will render all dynamic content inside of this container element, this is important.
  
 
-#### Dividing roles into components with React
+#### Dividing UI roles into components with React
 
-We can divide the frontend of our application into three logical components: a "name adder", a "names list", and a component that ties these two standalone components together. Each of these will be represented as self-contained React components. As you might imagine, each of these components need some way to communicate with our server. We'll make use of Falcor for that common task.
+We can divide the frontend of our application into three logical components: a "name adder", a "names list", and a component that ties these two standalone components together. Each of these will be represented as self-contained React components. As you might imagine, each of these may need some way to communicate with our server. We'll make use of Falcor for that common task.
  
  
 ##### Using Falcor to communicate with our server
 
-Falcor will not only make it easy for us to communicate with our server, it will also manage our data model and ensure that all trips to the server are both efficient and prudent. Our entire Falcor "helper" can be created with a few lines of code. We'll do this in a "model.js" file:
+Falcor will not only make it easy for us to communicate with our server, it will also manage our data model and ensure that all trips to the server are both efficient and prudent. Our entire Falcor "helper" can be created with a few lines of code. We'll do this in a [model.js file][model.js]:
  
 ```javascript
 var Falcor = require('falcor'),
@@ -307,14 +307,14 @@ var Falcor = require('falcor'),
 module.exports = model
 ```
 
-If you are not very familiar with Node.js or its native module system - CommonJS - at least a few lines in the above code fragment may seem mysterious. The first two lines "import" Falcor and Falcor's HTTP data source modules. We will need these to setup our Falcor "helper". The last line in our file essentially creates a new module. This module represents our client-side Falcor model/helper, and can be `require`d by other modules that need to query the model through Falcor. Our exported module will be an object that has all of the properties defined in [Falcor's DataSource interface][falcor-ds]. The methods on this interface will be used by our React components to communicate with our model. You'll see how that works in a bit. 
+If you are not very familiar with Node.js or its native module system - CommonJS - at least a few lines in the above code fragment may seem mysterious. The first two lines "import" Falcor and Falcor's HTTP data source modules. We will need these to setup our Falcor "helper". The last line in our file essentially creates a new module. This module represents our client-side Falcor model/helper, and can be `require`d by other modules that need to query the model through Falcor. Our exported module will be an object that has all of the properties defined in [Falcor's DataSource interface][falcor-ds]. The methods on this interface will be used by our React components to communicate with our model. You'll see how that works soon. 
 
 Our `model` is defined to be a wrapper around a Falcor HTTP `DataSource`. When defining the `DataSource`, we're including a path to our API server endpoint - "/model.json". For all calls to our API, we have _one_ HTTP endpoint. The type of operation and associated data is encoded as query parameters by Falcor for GET requests and the message body for POSTs.     
 
 
 ##### Names list component
 
-Now that we have our model defined, let's start building up our UI with a component that lists all of the names in our store. This will be a React component. We'll keep it simple and implement it as a simple HTML list. This code is housed in a names-list.jsx file.
+Now that we have our model defined, let's start building up our UI with a component that lists all of the names in our store. This will be a React component. We'll keep it simple and implement it as a simple HTML list. This code is housed in a [names-list.jsx file][names-list.jsx].
 
 ```javascript
 var React = require('react'),
@@ -349,13 +349,17 @@ class NamesList extends React.Component {
 module.exports = NamesList
 ```
 
-In the first two lines, we're importing the React module, for obvious reasons, along with the Falcor model we defined in the previous step. If you are a Java developer, the component definition looks surprisingly familiar. ECMAScript 6 brings classes to JavaScript, and we're defining our names list component to be a type of React component. Again, similar to Java, we must define a constructor. We'll simply initialize our `state` object in this constructor. The `state` object will be used to feed data to our rendered markup, which will be re-rendered (as efficiently as possible by React) whenever it changes. Not that we must invoke the `React.Component` constructor by called `super()` before we can access the context of this component.
+In the first two lines, we're importing the React module, for obvious reasons, along with the Falcor model we defined in the previous step. If you are a Java developer, the component definition looks surprisingly familiar. ECMAScript 6 brings classes to JavaScript, and we're defining our names list component to be a type of React component. Again, similar to Java, we must define a constructor. We'll simply initialize our `state` object in this constructor. The `state` object will be used to feed data to our rendered markup, which will be re-rendered (as efficiently as possible by React) whenever it changes. Note that we _must_ invoke the `React.Component` constructor by called `super()` _before_ we can access the context of our component. We access the context of our component using the `this` keyword.
 
-Our first class method, `componentWillMount` is part of `React.Component`. It will be called by React _just before_ when our markup is first "rendered" by React. That is, before the `render` method is invoked for the first time and the markup has been added to the DOM. At this point, we're calling the `update` method that grabs the list of names from Falcor.
+Our first class method, `componentWillMount,` is inherited from the `React.Component` class. It will be called by React _just before_ when our markup is first "rendered" by React. That is, before the `render` method is invoked for the first time and the markup has been added to the DOM. At this point, we're calling the `update` method that grabs the list of names from Falcor.
 
-The `update` method performs a few operations. First, it asks Faclor for the number of names in our list. Then, it sends a request for all names, given the result of the previous length request. Each of these calls returns a promise, since they are asynchronous. When the first call to get the number of names is resolved, our first `then` function is called with the result - the number of names in our list. We are then using a "fat arrow function" to ask Falcor for all names between 0 and the last index of our list, which we know after resolving the length request. There is an implicit return keyword in this function, and we return a promise. Once this promise is resolved, the next and final handler in our chained of model operations is invoked. The call to our length route was made using `getValue` which results in a single value as a the response (in this case, the number of names in our list). But our call to retrieve all names in the list is a `get`, which will return a JSON response containing all matching name objects with the specific property, `name`, filled in with a value. Notice we are calling `setState` with this collection of names. This updates our component's state object and instructs React to re-render the component with the new list of names.
+The `update` method performs a few operations. First, it asks Faclor for the number of names in our list. Then, it sends a request for all names, given the result of the previous length request. Each of these calls returns a promise, since they are asynchronous. When the first call to get the number of names is resolved, our first `then` function is called with the result - the number of names in our list. Once we know that number of names, we go on to ask Falcor for all names between 0 and the last index of our list. 
 
-Moving on to the `render` method - this is where the actual HTML elements are rendered to the DOM. React calls this when our component first mounts, and then again whenever our component's `state` property changes. The `names` property, part of our component's state` is an object with keys that represent the index of each name on our server and values equal to the each name record. Since we only asked Falcor for the `name` property in each record, that is the only property we will find in each name record. The markup in this method may look a bit strange - it's JSX, which is an extension to the ECMAScript langauge specification created and maintained by Facebook. It allows you to easily include HTML-like content alongside JavaScript code. Before it is delivered to the browser, we will have webpack compile this JSX down to standardized JavaScript. More on that later on. The result of this build step will look like a bunch of method calls that build up out HTML. We could have taken that approach as well, but using JSX makes our lives a lot easier and the code much simpler to follow. 
+There is an implicit `return` keyword in our single-line ES6 arrow functions - each of these returns a [`Promise`][promise-mdn]. Once the second promise is resolved for our names list request, the next and final handler in our chain of model operations is invoked. The call to our length route was made using `getValue` which results in a single value as the resolved response (in this case, the number of names in our list). But our call to retrieve all names in the list is a `get`, which will return a JSON response containing all matching name objects with the specific property, `name`, filled in with a value. Notice we are calling `setState` with this collection of names. This updates our component's state object and instructs React to re-render the component with the new list of names.
+
+Moving on to the `render` method - this is where the actual HTML elements are rendered to the DOM. React calls this when our component first mounts, and then again whenever our component's `state` property changes. The `names` property, part of our component's state, is an object with keys that represent the index of each name on our server and values containing each name record. Since we only asked Falcor for the `name` property in each record, that is the only property we will find in returned name record. 
+
+The markup in our `render` method may look a bit strange - it's JSX, which is an extension to the ECMAScript language specification created and maintained by Facebook. It allows you to easily include HTML-like content alongside JavaScript code. Before it is delivered to the browser, we will have webpack compile this JSX down to standardized JavaScript. More on that later. The result of this build step will look like a bunch of method calls that build up out HTML. We could have taken that approach as well and built up our HTML using React's DOM API instead of using JSX, but JSX makes our lives a _lot_ easier and the code much simpler to follow. 
 
 The last line in our file allows our NamesList component to be pulled into another module and actually used. We'll do just that very soon.
 
@@ -505,7 +509,10 @@ Feel free to issue pull requests to the underlying [GitHub repository][repo] if 
 [es6-arrow]: http://www.ecma-international.org/ecma-262/6.0/#sec-arrow-function-definitions
 [falcor-call]: http://netflix.github.io/falcor/doc/DataSource.html#call
 [falcor-ds]: http://netflix.github.io/falcor/doc/DataSource.html
+[model.js]: https://github.com/Widen/fullstack-react/blob/1.1.0/model.js
+[names-list.jsx]: https://github.com/Widen/fullstack-react/blob/1.1.0/names-list.jsx
 [package.json]: https://github.com/Widen/fullstack-react/blob/1.1.0/package.json
+[promise-mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 [repo]: https://github.com/Widen/fullstack-react
 [request.body]: http://expressjs.com/api.html#req.body
 [server.js]: https://github.com/Widen/fullstack-react/blob/1.1.0/server.js
