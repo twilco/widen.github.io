@@ -267,7 +267,7 @@ Our server code is quite simple - it serves up static resources, such as our Jav
 
 #### Simplicity in our index page 
 
-Our index page is _very_ simple: just the usual HTML-related structuring along with one line to serve as the container for our entire React-generated app, followed by a second line that imports _all_ of our JavaScript.
+[Our index page][index.html] is _very_ simple: just the usual HTML-related structuring along with one line to serve as the container for our entire React-generated app, followed by a second line that imports _all_ of our JavaScript.
 
 ```html
 <!DOCTYPE html>
@@ -366,7 +366,7 @@ The last line in our file allows our NamesList component to be pulled into anoth
 
 ##### Name adder component
 
-We have a component that will list our names, but we want to be able to add new names to our list. So, we'll create a name added React component, which will be stored in a file named "name-adder.jsx".
+We have a component that will list our names, but we also want to be able to add new names to our list. So, next we will need to create a "name adder" React component, which will be stored in a file appropriately called [name-adder.jsx][name-adder.jsx].
 
 ```javascript
 var React = require('react'),
@@ -394,7 +394,9 @@ class NameAdder extends React.Component {
             <form onSubmit={this.handleSubmit.bind(this)}>
                 <input ref="input"/>
                 <button>add name</button>
+                
             </form>
+            
         )
     }
 }
@@ -402,18 +404,18 @@ class NameAdder extends React.Component {
 module.exports = NameAdder
 ```
 
-In our `render` method, we're defining a simple HTML form that contains a text input and a submit button. When the user submits the form, either by clicking the submit button or hitting the enter key after typing text into the input field. When the form is submitted, the `handleSubmit` method in our component class is called, passing the submit `Event`. Notice we are creating a new function that binds the component as context. This is needed when utilizing ES6 classes in React components. Otherwise, the value of `this` inside our event handler will be `window` in this case, which is _not_ what we want.
+In our `render` method, we're defining a simple HTML form that contains a text input and a submit button. The user is able to submit the form either by clicking the submit button or hitting the enter key after typing text into the input field. When the form is submitted, the `handleSubmit` method in our component class is called, passing the submit [`Event`][event-mdn]. Notice we are creating a new function that binds the component as context. This is needed when utilizing ES6 classes in React components. Otherwise, the value of `this` inside our event handler will be `window` in this case, which is _not_ what we want.
 
-The other method in our React component is `handleSubmit`, which is called when our rendered form is submitted, of course. First, we must prevent the browser's default action. In other words, we don't want to _actually_ submit the form. Instead, we need to funnel the entered data to Falcor. Next, we are looking up our input element. We'll need this to determine what the user entered. Notice that we included a `ref` attribute on the text input in our `render` method. This allows us to easily get a handle on the underlying DOM element, without resorting to a CSS selector. Finally, we must tell send this new name to our server. We want to hit the "names.add" call route we defined earlier, passing the new name. Once our server persists the new name and responds, Falcor will update its internal representation of our model using the information provided by our server. It now knows that there is one more name in our list, and it knows the index of the name we just added. But why is this important?
+The other method in our React component is `handleSubmit`, which is called when our rendered form is submitted, as I mentioned above. First, we must prevent the browser's default action. In other words, we don't want to _actually_ submit the form; we don't want the page to reload. Instead, we need to funnel the submitted data to Falcor. Next, we must look up our input element. We'll need this to determine what text the user entered. Notice that we included a `ref` attribute on the text input in our `render` method. This allows us to easily get a handle on the underlying DOM element without resorting to a CSS selector. Finally, we must send this new name to our server. We want to hit the "names.add" call route we defined earlier, passing the new name. Once our server persists the new name and responds, Falcor will update its internal representation of our model using the information provided by our server. It now knows that there is one more name in our list, and it knows the index of the name we just added. But why is this important?
 
-After Falcor has determined that the name has been successfully added to our server, it will invoke our "success" function. This gives us the opportunity to reset our text input and ensure it retains focus so that our user can easily enter a new name. But we also want to be sure our list of names is current. It looks like there is an `onAdded` function on a `props` property attached to our component. Where did that come from? The component that rendered our name adder component passed this to us, which we will see next. Any parameters passed to a React component are available on the `props` property. We can expect that an `onAdded` function is passed to our component, and we should always invoke it when a new name has been added. I can tell you now that this function will trigger the `update` method on our `NamesList` component, which, as you might remember, will result in a call to Falcor for our list of names. This is exactly what we want to do - update our list of names after a name is added so our user sees the current list. You might be surprised to know that, after adding this name, Falcor does _not_ contact our server for this list of names. It already knows exactly how the list has changed, thanks to the information provided by our server's response to the "names.add" call. It pulls this data from its internal represntation of our model, saving a couple round-trips to the server (one for the lengh request, and another for the list of names request).
+After Falcor has determined that the name has been successfully added to our server, it will invoke our "success" function, which is the first (and only) function we have passed when calling `then` after invoking `call` on our Falcor model. This gives us the opportunity to reset our text input and ensure it retains focus so that our user can easily enter a new name. But we also want to be sure our list of names is current. It looks like there is an `onAdded` function on a `props` property attached to our component. Where did that come from? The component that rendered our name adder component passed this to us, which we will see next. Any parameters passed to a React component are available on the `props` property. We can expect that an `onAdded` function is passed to our component, and we should always invoke it when a new name has been added. I can tell you now that this function will trigger the `update` method on our `NamesList` component, which, as you might remember, will result in a call to Falcor for our list of names. This is exactly what we want to do - update our list of names after a name is added so our user sees the current list. You might be surprised to know that, after adding this name, Falcor does _not_ contact our server for this list of names. It already knows exactly how the list has changed, thanks to the information provided by our server's response to the "names.add" call. It pulls this data from its internal represntation of our model, saving a couple round-trips to the server (one for the lengh request, and another for the list of names).
   
-Perhaps you are starting to see the elegance of this stack. React allows us to componse our UI in terms of focused components, and Falcor lets us think about our model in terms of the actual model properties, all while ensuring that communication with the server is minimized.
+Perhaps you are starting to see the elegance of this modern stack. React allows us to componse our UI in terms of focused components, and Falcor lets us think about our model in terms of the actual model properties, all while ensuring that communication with the server is minimized.
 
 
 ##### Name manager component
 
-We have a component to list all of our names, and another to add a new name. These two components don't have any direct knowledge of each other. This is a good thing, as it makes them easier to test and re-usable. But we need some way to tie these two components together without making them directly aware of each other. The solution: a "glue" component. We'll call this third React component `NameManager`, stored in a file appropriately named "name-manager.jsx".
+We have a component to list all of our names, and another to add a new name. These two components don't have any direct knowledge of each other. This is a good thing, as it makes them easier to test and re-use. But we still need some way to tie these two components together. The solution: a "glue" component. We'll call this third React component `NameManager`, stored in a [name-manager.jsx][name-manager.jsx] file.
 
 ```javascript
 var React = require('react'),
@@ -430,8 +432,10 @@ class NameManager extends React.Component {
         return (
             <div>
                 <NameAdder onAdded={this.handleNameAdded.bind(this)}/>
+                
                 <NamesList ref="namesList"/>
             </div>
+        
         )
     }
 }
@@ -439,19 +443,21 @@ class NameManager extends React.Component {
 ReactDom.render(<NameManager/>, document.querySelector('#demo'))
 ```
 
-As expected, we must first import React, our NameAdder, and NamesList components. We'll also need ReactDom, which we must use to render our finished UI to the DOM. Note that we are selecting the container element we defined in our index.html file earlier, and rendering our entire set of React components as children/descendants.
+As expected, we must first import `React`, our `NameAdder`, and `NamesList` components. We'll also need ReactDom, which we must use to render our finished UI into the DOM. Note that we are selecting the container element we defined in our [index.html][index.html] file earlier, and rendering our entire set of React components as children/descendants.
 
-The `render` method, which is called when `ReactDom` attempts to render our component to the DOM, is largely a set of references to the two other components we already defined. Remember how our NameAdder component was able to ask the NamesList component to update its list of names? This is made possible by our NameManager component. You can see that is passed a property, `onAdded`, to this component. When it is called by NameAdder, the `handleNameAdded` method is called in NameManager, which in turn delegates to the NamesList component's `update` method, which was exposed as a public class method.
+The `render` method, which is called when `ReactDom` attempts to render our component to the DOM, is largely a set of references to the two other components we already defined. Remember how our `NameAdder` component was able to ask the `NamesList` component to update its list of names? This is made possible by our `NameManager` component. You can see that is passed a property, `onAdded`, to this component. When it is called by `NameAdder`, the `handleNameAdded` method is called on `NameManager`, which in turn delegates to the `NamesList` component's `update` method, which has been exposed as a public class instance method.
 
-And that's about it for our React components. Pretty simple, eh? The next section will cover how webpack allows us to build and organize our UI components.
+And that's about it for our React components. Pretty simple, eh? The next section will cover how webpack allows us to build our frontend components into a single bundle file, which will be usable in all of our supported browsers.
 
 
 #### Modularizing our components and simplifying the build process with webpack
 
-We'll use webpack as a build toold to accomplish a few goals:
+We'll use webpack as a build tool to accomplish a few goals:
+
 1. Compile our JSX to standardized JavaScript.
 2. Combine all needed JavaScript into a single file.
-3. Ensure debugging our code in the browser is simple by providing access to the original pre-compiled/combined source files.
+3. Ensure our ES6 syntax works in all browsers, regardless of the completeness of their implementation of the specification. 
+4. Ensure debugging our code in the browser is simple by providing access to the original pre-compiled/combined source files.
 
 We have defined webpack, along with all other dependencies, in a [package.json file][package.json]. All that is left is a bit of configuration. Have a look:
  
@@ -474,47 +480,52 @@ module.exports = {
 }
 ```
 
-If we name the file "webpack.config.js", webapck will be able to easily discover and use our configuration. The main entry point of our app, "name-manager.jsx" is used as the value of the `entry` configuration property. Webpack will use this "main" class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the `output.filename` config property. 
+If we name the file [webpack.config.js][webpack.config.js], webapck will be able to easily discover and use our configuration. The main entry point of our app, "name-manager.jsx" is used as the value of the `entry` configuration property. Webpack will use this "main" class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the `output.filename` config property. 
 
-Next, a set of "loaders" are specified. We're using the babel loader, which ensures ECMAScript 6 code is compiled down to ECMAScript 5 syntax, which allows us to write purely ES6 code without having to worry about which portions of the spec our target browsers support. The `test` property on our loader is a regular expression, and it results in webpack passing an .js or .jsx files in our source tree to the babel loader for processing. The babel loader processes our source before webpack combines everything to a single resource.
+Next, a set of "loaders" are specified. We're using the babel loader, which ensures ECMAScript 6 code is compiled down to ECMAScript 5 syntax, which allows us to write purely ES6 code without having to worry about which portions of the spec our target browsers support. The `test` property on our loader is a regular expression, and it results in webpack passing any .js or .jsx files in our source tree to the babel loader for processing. The babel loader processes our source before webpack combines everything to a single resource.
  
-Finally, the last line of our configuration instructs webpack to generate source maps. This satisfiest #3 in our goal list. Source maps are only loaded by the browser when the developer tools console is open. These maps allow us to see the original source files, and even set breakpoints anywhere in these files. We don't even have to look at the combined and compiled bundle.js file. Webpack will annotate the bottom of the generated bundle.js file with a pointer to the source map file, so our browser's dev tools know how to find it.
+Finally, the last line of our configuration instructs webpack to generate source maps. This satisfies #4 in our list of goals. Source maps are only loaded by the browser when the developer tools console is open, so you don't have to worry about wasting bandwidth on page load when your users visit the app. These maps allow us to see the original source files, and even set breakpoints anywhere in these files. We don't even have to look at the combined and compiled bundle.js file. Webpack will annotate the bottom of the generated bundle.js file with a pointer to the source map file, so our browser's dev tools know how to find it. This becomes even more useful when we generate a minified bundle file for use in production. While I'm not generating a minified bundle in the example webpack config, you can easily do this simply by running webpack with a `-p` command-line option. The "p" is short for "production".
  
 
 ### Building and using our app
 
-All of our code is in place, our server is ready, and have a build tool setup. How do we get our app up and running?
+All of our code is in place, our server is ready, _and_ we have a build tool in place. How do we get our app up and running?
 
 First, we need to pull in all project dependencies. In the root of our project, we simply run `npm install`, which will parse our [package.json file][package.json] and install all registered dependencies inside of a "node_modules" folder. This will also install a webpack binary, which we will need to build the client-side source bundles. 
 
 The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing `$(npm bin)/webpack` from the root of our project. `$(npm bin)` expands to the directory that contains all binaries pulled in by `npm install`.
 
-Finally, we must start our server, which handles API requests and serves up our index.html, bundle.js, and source map files. To start the Node.js server, execute `node --harmony server`. The `--harmony` switch tells node that we are using syntax included in the newest ECMAScript specifications, known as "harmony". ECMAScript 6 is one such entry in the harmony set of specifications. You may not need this switch if you are using a very recent version of node.js.
+Finally, we need to start our web server, which handles API requests and serves up our index.html, bundle.js, and source map files. To start the Node.js server, execute `node --harmony server`. The `--harmony` switch tells node that we are using syntax included in the newest ECMAScript specifications, known as "harmony". ECMAScript 6 is one such entry in the harmony set of specifications. You may not need this switch if you are using a very recent version of node.js.
 
 After starting up the server, our app will be accessible on port 9090. So, navigate to http://localhost:9090 and test it out!
 
 
 ## Going further
 
-There's a lot more we can do with Falcor, React, Webpack, and ECMAScript 6, of course. This post and the associated example exist simply to get you started. Here are some ways that you could improve our simple names app, if you are interested in further honing your skills:
+There's a lot more we can do with Falcor, React, Webpack, and ECMAScript 6, of course. This post and the associated example exists simply to get you started. Here are some ways that you could improve our simple names app, if you are interested in further honing your skills:
 
-* Allow existing names to be edited. This will require an "edit names" React component, as well as a Falcor "set" route.
-* Allow existing names to be re-ordered. You'll probably need to add code to the NamesList component, along with another Falcor route to handle index updates.
-* Support name deleting. This is best handled by an additional React component and a new "call" route in the Falcor backend.
+1. Allow existing names to be edited. This will require an "edit names" React component, as well as a Falcor "set" route.
+2. Allow existing names to be re-ordered. You'll probably need to add code to the NamesList component, along with another Falcor route to handle index updates.
+3. Support name deleting. This is best handled by an additional React component and a new "call" route in the Falcor backend.
 
 Feel free to issue pull requests to the underlying [GitHub repository][repo] if you'd like to share your changes and additions.
 
 
 [babel]: https://github.com/babel/babel
 [es6-arrow]: http://www.ecma-international.org/ecma-262/6.0/#sec-arrow-function-definitions
+[event-mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Event
 [falcor-call]: http://netflix.github.io/falcor/doc/DataSource.html#call
 [falcor-ds]: http://netflix.github.io/falcor/doc/DataSource.html
-[model.js]: https://github.com/Widen/fullstack-react/blob/1.1.0/model.js
-[names-list.jsx]: https://github.com/Widen/fullstack-react/blob/1.1.0/names-list.jsx
-[package.json]: https://github.com/Widen/fullstack-react/blob/1.1.0/package.json
+[index.html]: https://github.com/Widen/fullstack-react/blob/1.1.1/index.html
+[model.js]: https://github.com/Widen/fullstack-react/blob/1.1.1/model.js
+[name-adder.jsx]: https://github.com/Widen/fullstack-react/blob/1.1.1/name-adder.jsx
+[name-manager.jsx]: https://github.com/Widen/fullstack-react/blob/1.1.1/name-manager.jsx
+[names-list.jsx]: https://github.com/Widen/fullstack-react/blob/1.1.1/names-list.jsx
+[package.json]: https://github.com/Widen/fullstack-react/blob/1.1.1/package.json
 [promise-mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 [repo]: https://github.com/Widen/fullstack-react
 [request.body]: http://expressjs.com/api.html#req.body
-[server.js]: https://github.com/Widen/fullstack-react/blob/1.1.0/server.js
+[server.js]: https://github.com/Widen/fullstack-react/blob/1.1.1/server.js
+[webpack.config.js]: https://github.com/Widen/fullstack-react/blob/1.1.1/webpack.config.js
 [widen]: http://widen.com
 [why-falcor-video]: https://netflix.github.io/falcor/starter/why-falcor.html
