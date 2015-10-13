@@ -553,12 +553,10 @@
 
 <p>The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing <code class="highlighter-rouge">$(npm bin)/webpack</code> from the root of our project. <code class="highlighter-rouge">$(npm bin)</code> expands to the directory that contains all binaries pulled in by <code class="highlighter-rouge">npm install</code>. Note that this path expansion only works in linux/unix environments. A cross-platform option involves adding a reference to the webpack binary inside of your <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/package.json">package.json file</a>. For example, if you include the following <code class="highlighter-rouge">"scripts"</code> property, you can run webpack <em>and</em> allow it to re-generate your bundles whenever code changes on <em>any</em> platform by running <code class="highlighter-rouge">npm run webpack</code>:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="s2">"scripts"</span><span class="err">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-
-    </span><span class="s2">"webpack"</span><span class="p">:</span><span class="w"> </span><span class="s2">"webpack -w"</span><span class="w">
-    
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s2">"scripts"</span><span class="err">:</span> <span class="p">{</span>
+    <span class="s2">"webpack"</span><span class="err">:</span> <span class="s2">"webpack -w"</span> 
+<span class="p">}</span>
+</code></pre>
 </div>
 
 <p>Finally, we need to start our web server, which handles API requests and serves up our index.html, bundle.js, and source map files. To start the Node.js server, execute <code class="highlighter-rouge">node --harmony server</code>. The <code class="highlighter-rouge">--harmony</code> switch tells node that we are using syntax included in the newest ECMAScript specifications, known as “harmony”. ECMAScript 6 is one such entry in the harmony set of specifications. You may not need this switch if you are using a very recent version of node.js.</p>
@@ -648,10 +646,10 @@
         <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/_posts/2015-10-12-future-of-the-web-react-falcor.md">edit</a>
     </li>
     <li>
-        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/775a8b3">775a8b3</a>
+        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/1664aa3">1664aa3</a>
     </li>
     <li>
-        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/775a8b3">775a8b3</a>
+        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/1664aa3">1664aa3</a>
     </li>
   </ul>
   </nav >

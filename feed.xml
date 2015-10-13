@@ -5,8 +5,8 @@
     <description>The blog of the Widen Engineering Team.</description>
     <link>http://engineering.widen.com/</link>
     <atom:link href="http://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 13 Oct 2015 12:14:36 -0500</pubDate>
-    <lastBuildDate>Tue, 13 Oct 2015 12:14:36 -0500</lastBuildDate>
+    <pubDate>Tue, 13 Oct 2015 12:20:24 -0500</pubDate>
+    <lastBuildDate>Tue, 13 Oct 2015 12:20:24 -0500</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -500,12 +500,10 @@
 
 &lt;p&gt;The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing &lt;code class=&quot;highlighter-rouge&quot;&gt;$(npm bin)/webpack&lt;/code&gt; from the root of our project. &lt;code class=&quot;highlighter-rouge&quot;&gt;$(npm bin)&lt;/code&gt; expands to the directory that contains all binaries pulled in by &lt;code class=&quot;highlighter-rouge&quot;&gt;npm install&lt;/code&gt;. Note that this path expansion only works in linux/unix environments. A cross-platform option involves adding a reference to the webpack binary inside of your &lt;a href=&quot;https://github.com/Widen/fullstack-react/blob/1.2.1/package.json&quot;&gt;package.json file&lt;/a&gt;. For example, if you include the following &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;scripts&quot;&lt;/code&gt; property, you can run webpack &lt;em&gt;and&lt;/em&gt; allow it to re-generate your bundles whenever code changes on &lt;em&gt;any&lt;/em&gt; platform by running &lt;code class=&quot;highlighter-rouge&quot;&gt;npm run webpack&lt;/code&gt;:&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s2&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-
-    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;webpack&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;webpack -w&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-    
-&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s2&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;s2&quot;&gt;&quot;webpack&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;webpack -w&quot;&lt;/span&gt; 
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
 &lt;p&gt;Finally, we need to start our web server, which handles API requests and serves up our index.html, bundle.js, and source map files. To start the Node.js server, execute &lt;code class=&quot;highlighter-rouge&quot;&gt;node --harmony server&lt;/code&gt;. The &lt;code class=&quot;highlighter-rouge&quot;&gt;--harmony&lt;/code&gt; switch tells node that we are using syntax included in the newest ECMAScript specifications, known as “harmony”. ECMAScript 6 is one such entry in the harmony set of specifications. You may not need this switch if you are using a very recent version of node.js.&lt;/p&gt;
