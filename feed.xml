@@ -5,8 +5,8 @@
     <description>The blog of the Widen Engineering Team.</description>
     <link>http://engineering.widen.com/</link>
     <atom:link href="http://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 13 Oct 2015 12:20:24 -0500</pubDate>
-    <lastBuildDate>Tue, 13 Oct 2015 12:20:24 -0500</lastBuildDate>
+    <pubDate>Tue, 13 Oct 2015 14:18:15 -0500</pubDate>
+    <lastBuildDate>Tue, 13 Oct 2015 14:18:15 -0500</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -55,6 +55,8 @@
 &lt;h3 id=&quot;falcor&quot;&gt;Falcor&lt;/h3&gt;
 
 &lt;p&gt;Falcor, a &lt;em&gt;very&lt;/em&gt; new library created and open-sourced by Netflix, is a complete departure from the traditional REST API. Instead of focusing on specific endpoints that return a rigid and predetermined set of data, there is only &lt;em&gt;one&lt;/em&gt; endpoint. This is how Falcor is commonly described, and it is a bit misleading, though technically correct. Instead of focusing on various server endpoints to retrieve and update your model data, you instead “ask” your API server for specific model data. Do you need the first 3 user names in your customer list along with their ages? Simply “ask” your API server, in a single request, for this specific data. What if you want only the first 2 user names and no ages? Again, a single request to the same endopint. The differences in these two GET requests can be seen by examining their query parameters, which contain specifics regarding the model properties of interest. Server-side, a handler for a particular combination or pattern of model properties is codified as part of a “route”. When handling the API request, the falcor router (server-side) contacts the proper router function based on the items present in the query string.&lt;/p&gt;
+
+&lt;p&gt;It expects you to be able to model your data in as a &lt;a href=&quot;http://netflix.github.io/falcor/documentation/jsongraph.html&quot;&gt;JSON graph&lt;/a&gt;. Your underlying data source does not necessarily have to maintain all data as a JSON graph, and in most cases it probably will not, but your Falcor API endpoint must translate your data into this format when responding to a request from your client. The necessity of this structure will become clearer as you go through this article and read a bit more about Falcor. The importance of organizing your data as a JSON graph will become even more obvious once you begin to explore &lt;a href=&quot;http://netflix.github.io/falcor/documentation/jsongraph.html#reference&quot;&gt;reference routes&lt;/a&gt;, which I have left out of this post in order to keep it simple.&lt;/p&gt;
 
 &lt;p&gt;Falcor promotes a more intuitive API that &lt;em&gt;is&lt;/em&gt; your model. It also ensures that extra, unnecessary model data is never returned, saving bandwidth. Furthermore, requests from multiple disparate browser-side components are combined into a single request to limit HTTP overhead. Data is cached by Falcor client-side, and subsequent requests for cached data avoid a round-trip to the server. This decoupling of the model from the data source, along with all of the efficiency considerations, is exceptionally appealing. But the underlying concepts can be a bit mind-bending. I was a little confused by Falcor until I watched &lt;a href=&quot;https://netflix.github.io/falcor/starter/why-falcor.html&quot;&gt;this video by Jafar Husain&lt;/a&gt;, Falcor’s lead developer.&lt;/p&gt;
 
@@ -263,7 +265,7 @@
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;So the client doesn’t have to ask the server about the index of this new name or the length of the names collection later on - it will be cached by Falcor client-side thanks to the information provided in the response to this “call” request.&lt;/p&gt;
+&lt;p&gt;So the client doesn’t have to ask the server about the index of this new name or the length of the names collection later on - it will be cached by Falcor client-side thanks to the information provided in the response to this “call” request. For small or simple data sets, it may make sense to return the changed paths &lt;em&gt;and&lt;/em&gt; values, but for larger data sets it may be advisable to &lt;em&gt;only&lt;/em&gt; return the changed paths. Your client may not care about &lt;em&gt;all&lt;/em&gt; of the changed values, and this may unnecessarily waste bandwidth and processor cycles. Instead, you can simply return the changed paths, and the Falcor client will know to ask the server, instead of the cache, when/if your application needs a value that is associated with one of these changed paths.&lt;/p&gt;
 
 &lt;h3 id=&quot;the-client&quot;&gt;The client&lt;/h3&gt;
 
