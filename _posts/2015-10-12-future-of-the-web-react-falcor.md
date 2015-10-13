@@ -43,6 +43,8 @@ In short, I really appreciate the relatively narrow focus of React. Dividing up 
 
 Falcor, a _very_ new library created and open-sourced by Netflix, is a complete departure from the traditional REST API. Instead of focusing on specific endpoints that return a rigid and predetermined set of data, there is only _one_ endpoint. This is how Falcor is commonly described, and it is a bit misleading, though technically correct. Instead of focusing on various server endpoints to retrieve and update your model data, you instead "ask" your API server for specific model data. Do you need the first 3 user names in your customer list along with their ages? Simply "ask" your API server, in a single request, for this specific data. What if you want only the first 2 user names and no ages? Again, a single request to the same endopint. The differences in these two GET requests can be seen by examining their query parameters, which contain specifics regarding the model properties of interest. Server-side, a handler for a particular combination or pattern of model properties is codified as part of a "route". When handling the API request, the falcor router (server-side) contacts the proper router function based on the items present in the query string.
 
+It expects you to be able to model your data in as a [JSON graph][falcor-graph]. Your underlying data source does not necessarily have to maintain all data as a JSON graph, and in most cases it probably will not, but your Falcor API endpoint must translate your data into this format when responding to a request from your client. The necessity of this structure will become clearer as you go through this article and read a bit more about Falcor. The importance of organizing your data as a JSON graph will become even more obvious once you begin to explore [reference routes][falcor-ref], which I have left out of this post in order to keep it simple. 
+
 Falcor promotes a more intuitive API that _is_ your model. It also ensures that extra, unnecessary model data is never returned, saving bandwidth. Furthermore, requests from multiple disparate browser-side components are combined into a single request to limit HTTP overhead. Data is cached by Falcor client-side, and subsequent requests for cached data avoid a round-trip to the server. This decoupling of the model from the data source, along with all of the efficiency considerations, is exceptionally appealing. But the underlying concepts can be a bit mind-bending. I was a little confused by Falcor until I watched [this video by Jafar Husain][why-falcor-video], Falcor's lead developer.
 
 
@@ -257,7 +259,7 @@ This is an example of a [Falcor "call"][falcor-call] route. The client will incl
 ]
 ```
 
-So the client doesn't have to ask the server about the index of this new name or the length of the names collection later on - it will be cached by Falcor client-side thanks to the information provided in the response to this "call" request.
+So the client doesn't have to ask the server about the index of this new name or the length of the names collection later on - it will be cached by Falcor client-side thanks to the information provided in the response to this "call" request. For small or simple data sets, it may make sense to return the changed paths _and_ values, but for larger data sets it may be advisable to _only_ return the changed paths. Your client may not care about _all_ of the changed values, and this may unnecessarily waste bandwidth and processor cycles. Instead, you can simply return the changed paths, and the Falcor client will know to ask the server, instead of the cache, when/if your application needs a value that is associated with one of these changed paths. 
 
 
 ### The client
@@ -531,6 +533,7 @@ Feel free to issue pull requests to the underlying [GitHub repository][repo] if 
 [event-mdn]: https://developer.mozilla.org/en-US/docs/Web/API/Event
 [falcor-call]: http://netflix.github.io/falcor/doc/DataSource.html#call
 [falcor-ds]: http://netflix.github.io/falcor/doc/DataSource.html
+[falcor-graph]: http://netflix.github.io/falcor/documentation/jsongraph.html
 [falcor-ref]: http://netflix.github.io/falcor/documentation/jsongraph.html#reference
 [index.html]: https://github.com/Widen/fullstack-react/blob/1.2.1/index.html
 [model.js]: https://github.com/Widen/fullstack-react/blob/1.2.1/model.js
