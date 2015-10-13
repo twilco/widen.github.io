@@ -501,11 +501,9 @@ First, we need to pull in all project dependencies. In the root of our project, 
 
 The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing `$(npm bin)/webpack` from the root of our project. `$(npm bin)` expands to the directory that contains all binaries pulled in by `npm install`. Note that this path expansion only works in linux/unix environments. A cross-platform option involves adding a reference to the webpack binary inside of your [package.json file][package.json]. For example, if you include the following `"scripts"` property, you can run webpack _and_ allow it to re-generate your bundles whenever code changes on _any_ platform by running `npm run webpack`:
 
-```json
+```javascript
 "scripts": {
-
-    "webpack": "webpack -w"
-    
+    "webpack": "webpack -w" 
 }
 ```
 
