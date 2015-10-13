@@ -13,7 +13,7 @@ In this article, I'm going provide a glimpse into the future of web development.
 4. Basic knowledge of JSON.
 5. Basic knowledge of node.js.
 
-If you lack any of these qualities, you _may_ still be able to navigate this article and the related code, but these gaps in your knowledge will likely prevent you from extending my code to support a more realistic or non-trivial scenario. The internet is full of great resources that will provide you will the concepts necessary to master each of these items, and I encourage you to seek them out as needed - they are only a quick Google search away.
+If you lack any of these qualities, you _may_ still be able to navigate this article and the related code, but these gaps in your knowledge will likely prevent you from extending my code to support a more realistic or non-trivial scenario. The internet is full of great resources that will provide you with the concepts necessary to master each of these items, and I encourage you to seek them out as needed - they are only a quick Google search away.
 
 The current stack at [Widen][widen] has traditionally consisted of Java on the server, AngularJS for all of our browser-related code (within the last few years), Jersey for REST API support, and a whole host of other various libraries such as jQuery, underscore, lodash, jQuery UI, and Bootstrap. When designing the underlying sample web application, which I will be discussing shortly, I had four specific goals in mind:
 
