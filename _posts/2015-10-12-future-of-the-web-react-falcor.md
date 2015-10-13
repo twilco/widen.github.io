@@ -503,7 +503,9 @@ The next step is to generate the source bundle referenced by our index.html file
 
 ```json
 "scripts": {
+
     "webpack": "webpack -w"
+    
 }
 ```
 
