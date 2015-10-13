@@ -499,7 +499,13 @@ All of our code is in place, our server is ready, _and_ we have a build tool in 
 
 First, we need to pull in all project dependencies. In the root of our project, we simply run `npm install`, which will parse our [package.json file][package.json] and install all registered dependencies inside of a "node_modules" folder. This will also install a webpack binary, which we will need to build the client-side source bundles. 
 
-The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing `$(npm bin)/webpack` from the root of our project. `$(npm bin)` expands to the directory that contains all binaries pulled in by `npm install`.
+The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing `$(npm bin)/webpack` from the root of our project. `$(npm bin)` expands to the directory that contains all binaries pulled in by `npm install`. Note that this path expansion only works in linux/unix environments. A cross-platform option involves adding a reference to the webpack binary inside of your [package.json file][package.json]. For example, if you include the following `"scripts"` property, you can run webpack _and_ allow it to re-generate your bundles whenever code changes on _any_ platform by running `npm run webpack`:
+
+```json
+"scripts": {
+    "webpack": "webpack -w"
+}
+```
 
 Finally, we need to start our web server, which handles API requests and serves up our index.html, bundle.js, and source map files. To start the Node.js server, execute `node --harmony server`. The `--harmony` switch tells node that we are using syntax included in the newest ECMAScript specifications, known as "harmony". ECMAScript 6 is one such entry in the harmony set of specifications. You may not need this switch if you are using a very recent version of node.js.
 
@@ -526,17 +532,17 @@ Feel free to issue pull requests to the underlying [GitHub repository][repo] if 
 [falcor-call]: http://netflix.github.io/falcor/doc/DataSource.html#call
 [falcor-ds]: http://netflix.github.io/falcor/doc/DataSource.html
 [falcor-ref]: http://netflix.github.io/falcor/documentation/jsongraph.html#reference
-[index.html]: https://github.com/Widen/fullstack-react/blob/1.2.0/index.html
-[model.js]: https://github.com/Widen/fullstack-react/blob/1.2.0/model.js
-[name-adder.jsx]: https://github.com/Widen/fullstack-react/blob/1.2.0/name-adder.jsx
-[name-manager.jsx]: https://github.com/Widen/fullstack-react/blob/1.2.0/name-manager.jsx
-[names-list.jsx]: https://github.com/Widen/fullstack-react/blob/1.2.0/names-list.jsx
-[package.json]: https://github.com/Widen/fullstack-react/blob/1.2.0/package.json
+[index.html]: https://github.com/Widen/fullstack-react/blob/1.2.1/index.html
+[model.js]: https://github.com/Widen/fullstack-react/blob/1.2.1/model.js
+[name-adder.jsx]: https://github.com/Widen/fullstack-react/blob/1.2.1/name-adder.jsx
+[name-manager.jsx]: https://github.com/Widen/fullstack-react/blob/1.2.1/name-manager.jsx
+[names-list.jsx]: https://github.com/Widen/fullstack-react/blob/1.2.1/names-list.jsx
+[package.json]: https://github.com/Widen/fullstack-react/blob/1.2.1/package.json
 [promise-mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
 [react-prop-validation]: https://facebook.github.io/react/docs/reusable-components.html#prop-validation
 [repo]: https://github.com/Widen/fullstack-react
 [request.body]: http://expressjs.com/api.html#req.body
-[server.js]: https://github.com/Widen/fullstack-react/blob/1.2.0/server.js
-[webpack.config.js]: https://github.com/Widen/fullstack-react/blob/1.2.0/webpack.config.js
+[server.js]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js
+[webpack.config.js]: https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js
 [widen]: http://widen.com
 [why-falcor-video]: https://netflix.github.io/falcor/starter/why-falcor.html
