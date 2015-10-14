@@ -5,8 +5,8 @@
     <description>The blog of the Widen Engineering Team.</description>
     <link>http://engineering.widen.com/</link>
     <atom:link href="http://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 13 Oct 2015 14:18:15 -0500</pubDate>
-    <lastBuildDate>Tue, 13 Oct 2015 14:18:15 -0500</lastBuildDate>
+    <pubDate>Wed, 14 Oct 2015 09:59:09 -0500</pubDate>
+    <lastBuildDate>Wed, 14 Oct 2015 09:59:09 -0500</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -48,7 +48,7 @@
 
 &lt;h3 id=&quot;react&quot;&gt;React&lt;/h3&gt;
 
-&lt;p&gt;React differs from Angular and Ember due to its limited scope and footprint. While Angular &amp;amp; Ember are positioned as frameworks, React mostly concerns itself with the application “view”. React contains no dependency injection or support for “services”. There is no “jq-lite” (Angular) nor is their a required jQuery dependency (Ember). Instead of handlebars (Ember) you write your markup alongside your JavaScript using JSX, which compiles down into a series of JavaScript calls that build your document through React’s element API as part of a “virtual DOM” that React maintains. It updates the “real” DOM from this virtual model in the most efficient way possible, avoiding unnecessary reflows/repaints, as well as delegating event handlers for you (among other things). If you embrace JSX (and from my experience, you should) you are adding a compilation phase to your project. For me, this was something I have tried to avoid for a while, but made my peace with this workflow after realizing how elegant and useful React through the lens of JSX really is. At this point, the floodgates opened up, and other useful JavaScript preprocessors, such as webpack and babel, were easy to embrace. More on those later.&lt;/p&gt;
+&lt;p&gt;React differs from Angular and Ember due to its limited scope and footprint. While Angular &amp;amp; Ember are positioned as frameworks, React mostly concerns itself with the application “view”. React contains no dependency injection or support for “services”. There is no “jq-lite” (Angular) nor is there a required jQuery dependency (Ember). Instead of handlebars (Ember) you write your markup alongside your JavaScript using JSX, which compiles down into a series of JavaScript calls that build your document through React’s element API as part of a “virtual DOM” that React maintains. It updates the “real” DOM from this virtual model in the most efficient way possible, avoiding unnecessary reflows/repaints, as well as delegating event handlers for you (among other things). If you embrace JSX (and from my experience, you should) you are adding a compilation phase to your project. For me, this was something I have tried to avoid for a while, but made my peace with this workflow after realizing how elegant and useful React through the lens of JSX really is. At this point, the floodgates opened up, and other useful JavaScript preprocessors, such as webpack and babel, were easy to embrace. More on those later.&lt;/p&gt;
 
 &lt;p&gt;In short, I really appreciate the relatively narrow focus of React. Dividing up a complex application into smaller components is something I grew to love with Angular. I was excited at the possibility of native support in the form of the Web Components spec, but ultimately chose React for its elegance, ease-of-use, small footprint, and relative maturity.&lt;/p&gt;
 
