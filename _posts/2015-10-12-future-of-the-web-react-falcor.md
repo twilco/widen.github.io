@@ -488,7 +488,7 @@ module.exports = {
 }
 ```
 
-If we name the file [webpack.config.js][webpack.config.js], webapck will be able to easily discover and use our configuration. The main entry point of our app, "name-manager.jsx" is used as the value of the `entry` configuration property. Webpack will use this "main" class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the `output.filename` config property. 
+If we name the file [webpack.config.js][webpack.config.js], webpack will be able to easily discover and use our configuration. The main entry point of our app, "name-manager.jsx" is used as the value of the `entry` configuration property. Webpack will use this "main" class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the `output.filename` config property. 
 
 Next, a set of "loaders" are specified. We're using the babel loader, which ensures ECMAScript 6 code is compiled down to ECMAScript 5 syntax, which allows us to write purely ES6 code without having to worry about which portions of the spec our target browsers support. The `test` property on our loader is a regular expression, and it results in webpack passing any .js or .jsx files in our source tree to the babel loader for processing. The babel loader processes our source before webpack combines everything to a single resource.
  
