@@ -5,8 +5,8 @@
     <description>The blog of the Widen Engineering Team.</description>
     <link>http://engineering.widen.com/</link>
     <atom:link href="http://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 14 Oct 2015 09:59:09 -0500</pubDate>
-    <lastBuildDate>Wed, 14 Oct 2015 09:59:09 -0500</lastBuildDate>
+    <pubDate>Wed, 28 Oct 2015 16:24:22 -0500</pubDate>
+    <lastBuildDate>Wed, 28 Oct 2015 16:24:22 -0500</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -488,7 +488,7 @@
 &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
-&lt;p&gt;If we name the file &lt;a href=&quot;https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js&quot;&gt;webpack.config.js&lt;/a&gt;, webapck will be able to easily discover and use our configuration. The main entry point of our app, “name-manager.jsx” is used as the value of the &lt;code class=&quot;highlighter-rouge&quot;&gt;entry&lt;/code&gt; configuration property. Webpack will use this “main” class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the &lt;code class=&quot;highlighter-rouge&quot;&gt;output.filename&lt;/code&gt; config property.&lt;/p&gt;
+&lt;p&gt;If we name the file &lt;a href=&quot;https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js&quot;&gt;webpack.config.js&lt;/a&gt;, webpack will be able to easily discover and use our configuration. The main entry point of our app, “name-manager.jsx” is used as the value of the &lt;code class=&quot;highlighter-rouge&quot;&gt;entry&lt;/code&gt; configuration property. Webpack will use this “main” class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the &lt;code class=&quot;highlighter-rouge&quot;&gt;output.filename&lt;/code&gt; config property.&lt;/p&gt;
 
 &lt;p&gt;Next, a set of “loaders” are specified. We’re using the babel loader, which ensures ECMAScript 6 code is compiled down to ECMAScript 5 syntax, which allows us to write purely ES6 code without having to worry about which portions of the spec our target browsers support. The &lt;code class=&quot;highlighter-rouge&quot;&gt;test&lt;/code&gt; property on our loader is a regular expression, and it results in webpack passing any .js or .jsx files in our source tree to the babel loader for processing. The babel loader processes our source before webpack combines everything to a single resource.&lt;/p&gt;
 
