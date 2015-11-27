@@ -11,17 +11,90 @@ Generally speaking, automated tests ensure that future changes to our code due t
 
 While manual tests are still important, I'm going to discuss automated tests in this article. Furthermore, I'll discuss two distinct types of automated tests - unit tests, and integration tests. Unit tests are low-level and very narrowly scoped. They exercise only specific sections of your code. For example, we'll write a different set of unit tests for each frontend React component, along with a set of tests for our backend Falcor routes. It's critical that we focus on testing the specific roles of each of these modules, and that may mean mocking out a module's internal dependencies so that we can better control the environment. When we "mock" something, we're essentially replacing it with a dummy version that we have full control over. This eliminates uncertainty in our testing environment.
 
-In addition to unit tests, we have integration tests, which may also be known as "Selenium" or "Webdriver" tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we'll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, _all_ of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario. 
+In addition to unit tests, we have integration tests, which may also be known as "Selenium" or "WebDriver" tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we'll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, _all_ of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario.
 
-{% client-side unit tests %}
-  {% Restructure our files - client-side stuff into app dir & config into config dir %}
-    {% Fixing our webpack npm script based on moved files %}
+## Browser-side unit tests
+We'll first focus on writing automated tests for our code that runs in the browser. This accounts for portions of our simple application that our users directly interact with. We'll primarily write tests for our React components, but first it may make sense to refactor our code a bit to make it more conducive to testing.
+
+### Refactoring for ease of testing
+The [most recent version of our names application][repo-v1] contains all of our source files organized into a flat structure. While this is a reasonable hierarchy for such a small number of files, it doesn't scale very well. As we add more files to handle configuration, testing, and to support better modularization of our application, we'll need a better-defined structure for our project. To start, let's move our 3 React components and the Falcor model file into a new directory named "app". Let's also move our webpack configuration file into a root-level "config" directory, and finally our index.html file into a "site" directory. This new "site" directory will contain all publicly accessible resources, so the webpack-generated bundle JavaScript should also live here. After this initial reorganization, our project looks like this:
+
+```
+.
++-- app
+|   +-- model.js
+|   +-- name-adder.jsx
+|   +-- name-manager.jsx
+|   +-- names-list.jsx
++-- config
+|   +-- webpack.config.js
++-- site
+|   +-- index.html
++-- server.js
++-- package.json
+```
+
+In order to support this new structure, a few changes must be made to some of our existing code. First, webpack.config.js has to be updated to be aware of the new location of our source files. This is a simple as change the value of the `entry` property from `./name-manager.jsx` to `./app/name-manager.jsx`. So [our original app/webpack.config.js][webpack.config.js-v1] file now looks like this:
+
+```javascript
+module.exports = {
+    entry: './app/name-manager.jsx',
+    output: {
+        filename: './site/bundle.js'
+    },
+    module: {
+        loaders: [
+            {
+                test: /\.js/,
+                loader: 'babel',
+                exclude: /node_modules/
+            }
+        ]
+    },
+    devtool: 'source-map'
+}
+```
+
+Furthermore, our NodeJS server must be adjusted to serve the HTML and JS bundle files out of the site directory. This requires a simple change to our Express server. This means `app.use(express.static('.'))`, changes to `app.use(express.static('site'))` in our server.js file. So, the last few lines of [our original server.js][server.js-v1] now look like this:
+
+```javascript
+app.use(express.static('site'))
+app.listen(9090, err => {
+    if (err) {
+        console.error(err)
+        return
+    }
+    console.log('navigate to http://localhost:9090')
+});
+```
+
+Before we go any further, we should make sure our changes haven't broken anything, but before we do that, let's make one additional adjustment. Going forward, it may be beneficial for us to use our package.json file as a place to execute any scripts needed to build, test, and run our application. The usefulness of this approach will become clearer as this exercise progresses. We'll start by defining a second target in the package.json `"scripts"` object, one that will startup our server. After this addition, the bottom of [our original package.json file][package.json-v1] looks like this:
+
+```json
+"scripts": {
+  "server": "node --harmony server",
+  "webpack": "webpack --config config/webpack.config.js"
+}
+```
+
+There are two changes to this section of the file. First, a new `"server"` tasks has been added, which starts up our NodeJS server. Second, our `"webpack"` target has been adjusted to include a reference to the new location of our webpack configuration file. Previously, this file was located in the root of our project, and, by convention, webpack looks for a file named "webpack.config.js" in the root of the project. Since we've moved this to the config directory, we must now let webpack know where this configuration file exists.
+
+### Getting familiar with our testing tools
+
   {% Explanation of testing tools %}
   {% Configuring karma %}
+
+
+### Writing our tests
+
   {% Testing name-adder %}
   {% Testing name-list %}
   {% Testing name-manager %}
+
+### Running our tests
+
   {% Easily running our tests w/ npm test %}
+
 
 {% server-side unit tests %}
   {% Restructure our files - server-side stuff into server dir %}
@@ -53,6 +126,10 @@ In addition to unit tests, we have integration tests, which may also be known as
     {% move integration test config to a file in config dir %}
     {% better reporting of failed tests all around %}
 
+[repo-v1]: https://github.com/Widen/fullstack-react/tree/1.2.1
 [repo-v2]: https://github.com/Widen/fullstack-react/tree/2.0.0
+[package.json-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/package.json
 [part1]: {{base}}/blog/future-of-the-web-react-falcor/
+[server.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js
 [testing-slides]: http://slides.com/raynicholus/automated-testing
+[webpack.config.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js
