@@ -81,7 +81,21 @@ There are two changes to this section of the file. First, a new `"server"` tasks
 
 ### Getting familiar with our testing tools
 
-  {% Explanation of testing tools %}
+Our client-side unit tests will be created with the help of a few important and useful tools:
+
+1. [Jasmine][jasmine]
+2. [PhantomJS][phantomjs]
+3. [Rewire][rewire]
+4. [Karma][karma]
+
+Jasmine is a JavaScript library we will use to write our unit tests. It includes a rich [set of assertions][jasmine-matchers] for comparing actual values under test with expected values, a full-featured [mocking engine][jasmine-spies] that will allow us to more easily focus on the component under test, as well as a number of other helpers that we will use to [group our tests][jasmine-describe] and [test asynchronous behaviors][jasmine-async].
+
+PhantomJS is a headless version of [Webkit][webkit], the rendering engine currently used in Apple's Safari browser and formerly used in Google's Chrome browser (before it was forked as [Blink][blink]). Running our unit tests in a headless browser makes them easy and quick to run, not to mention portable. The entire browser is distributed and contained in a JavaScript package downloaded from npm. Using a conventional browser for unit tests in a development environment can be jarring with browser windows opening and closing, especially if tests are automatically re-run as soon as any code changes are saved. While a 2.0 version of PhantomJS is available, we will stick with 1.9, since the 2.0 version has some long-standing issues with no solutions in sight. For example, there are no official, stable Linux binaries at the moment.
+
+Rewire is a Node.js tool primarily used (at least in this project) to mock out sub-modules imported by a module under test. For example, when testing our `<NameManager/>` component, we need to be able to control the behavior of its internal dependencies - `<NameList/>` and `<NameAdder/>`. We can use Rewire to gain access to these dependencies inside of `<NameManager/>` and replace them with dummy modules with inputs and outputs that we can monitor and control in order to more reliably test _this_ component. Rewire allows us to access internal dependencies in this way by using its own module loader to insert hooks into modules that allow them to be unnaturally accessed and controlled in a testing environment. For our browser-based unit tests, we'll need to use a Babel plug-in that wraps the Rewire plugin. It is aptly named [babel-plugin-rewire][rewire-babel]. We must use this Babel plug-in instead of the native Rewire library due to [Babel's unique ECMAScript 6 module transpilation logic][rewire-babel-bug].
+
+Karma is a test runner and reporter, initially developed by Google for use with AngularJS unit tests. Fun fact: it was originally known as [Testacular][testacular]. It's hard to imagine why they changed the name. Before we can begin writing tests, we'll must first configure Karma and tie all of our testing and reporting tools together. 
+
   {% Configuring karma %}
 
 
@@ -126,10 +140,24 @@ There are two changes to this section of the file. First, a new `"server"` tasks
     {% move integration test config to a file in config dir %}
     {% better reporting of failed tests all around %}
 
-[repo-v1]: https://github.com/Widen/fullstack-react/tree/1.2.1
-[repo-v2]: https://github.com/Widen/fullstack-react/tree/2.0.0
+
+[blink]: http://www.chromium.org/blink
+[jasmine]: http://jasmine.github.io/2.3/introduction.html
+[jasmine-async]: http://jasmine.github.io/2.3/introduction.html#section-Asynchronous_Support
+[jasmine-describe]: http://jasmine.github.io/2.3/introduction.html#section-Grouping_Related_Specs_with_<code>describe</code>
+[jasmine-matchers]: http://jasmine.github.io/2.3/introduction.html#section-Matchers
+[jasmine-spies]: http://jasmine.github.io/2.3/introduction.html#section-Spies
+[karma]: http://karma-runner.github.io/0.13/index.html
 [package.json-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/package.json
 [part1]: {{base}}/blog/future-of-the-web-react-falcor/
+[phantomjs]: http://phantomjs.org/
+[repo-v1]: https://github.com/Widen/fullstack-react/tree/1.2.1
+[repo-v2]: https://github.com/Widen/fullstack-react/tree/2.0.0
+[rewire]: https://github.com/jhnns/rewire
+[rewire-babel]: https://github.com/speedskater/babel-plugin-rewire
+[rewire-babel-bug]: https://github.com/jhnns/rewire/issues/55
 [server.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js
+[testacular]: http://googletesting.blogspot.com/2012/11/testacular-spectacular-test-runner-for.html
 [testing-slides]: http://slides.com/raynicholus/automated-testing
+[webkit]: https://webkit.org/
 [webpack.config.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js
