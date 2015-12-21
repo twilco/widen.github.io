@@ -94,9 +94,46 @@ PhantomJS is a headless version of [Webkit][webkit], the rendering engine curren
 
 Rewire is a Node.js tool primarily used (at least in this project) to mock out sub-modules imported by a module under test. For example, when testing our `<NameManager/>` component, we need to be able to control the behavior of its internal dependencies - `<NameList/>` and `<NameAdder/>`. We can use Rewire to gain access to these dependencies inside of `<NameManager/>` and replace them with dummy modules with inputs and outputs that we can monitor and control in order to more reliably test _this_ component. Rewire allows us to access internal dependencies in this way by using its own module loader to insert hooks into modules that allow them to be unnaturally accessed and controlled in a testing environment. For our browser-based unit tests, we'll need to use a Babel plug-in that wraps the Rewire plugin. It is aptly named [babel-plugin-rewire][rewire-babel]. We must use this Babel plug-in instead of the native Rewire library due to [Babel's unique ECMAScript 6 module transpilation logic][rewire-babel-bug].
 
-Karma is a test runner and reporter, initially developed by Google for use with AngularJS unit tests. Fun fact: it was originally known as [Testacular][testacular]. It's hard to imagine why they changed the name. Before we can begin writing tests, we'll must first configure Karma and tie all of our testing and reporting tools together. 
+Karma is a test runner and reporter, initially developed by Google for use with AngularJS unit tests. Fun fact: it was originally known as [Testacular][testacular]. It's hard to imagine why they changed the name, but I digress. Before we can begin writing tests, we must first configure Karma and tie all of our testing and reporting tools together. Remember that karma is our client-side test _runner_. In other words, it will use use Jasmine to execute the tests we are going to write, and it will provision a PhantomJS instance as an environment in which the tests will run. It will report the results using a karma plugin: karma-spec-reporter. A plug-in will allow Karma to use Webpack to generate a temporary source bundle that includes all of the code we intend to test. Our existing webpack.config.js file will be used here to determine how this bundle is generated. But we will contribute an addition Babel plug-in to our Webpack configuration just for these tests - babel-plugin-rewire - which will hook into the bundle generation process and add hooks into our code that we will need to mock out dependencies internal to each of the React components we intend to test. Finally, we'll ask Karma to include an ECMAScript 5 "shim", which is needed to ensure our modern code runs properly in PhantomJS 1.9, which is essentially a relatively old version of Safari.
 
-  {% Configuring karma %}
+Our Karma configuration will be named karma.conf.js, and it will be appropriately located inside of our new "config" directory. The completed file will look like this:
+
+```javascript
+var webpackConfig = require('./webpack.config')
+webpackConfig.module.loaders[0].query = {plugins: ['babel-plugin-rewire']}
+
+module.exports = function (config) {
+    config.set({
+        basePath: '../',
+        browsers: ['PhantomJS'],
+        files: [
+            'node_modules/es5-shim/es5-shim.js', // only used by PhantomJS 1.x
+            'app/test/tests.bundle.js'
+        ],
+        frameworks: ['jasmine'],
+        plugins: [
+            require('karma-webpack'),
+            'karma-spec-reporter',
+            'karma-jasmine',
+            'karma-phantomjs-launcher'
+        ],
+        preprocessors: {
+            'app/test/tests.bundle.js': 'webpack'
+        },
+        reporters: ['spec'],
+        singleRun: true,
+        webpack: webpackConfig,
+        webpackMiddleware: {noInfo: true}
+    });
+};
+```
+
+Before we start configuring Karma, you'll notice that we are referencing our existing Webpack configuration file and adding a plug-in - babel-plugin-rewire. As mentioned previously, this will allow us to more easily mock internal component dependencies. Moving on, our first configuration point is the `basePath`. The location here establishes a relative path for all other paths specified in our configuration file. Since our configuration file is located inside of the "config" subdirectory, our base path is set to the root of the project. Next, we must declare any browsers to run our tests against. We're just using PhantomJS at the moment. Note that a Karma plug-in for PhantomJS is specified in the `plugins` section near the middle of the file as well. This plug-in will be used by Karma to start and control PhantomJS.
+
+The `files` configuration point is an array containing a path to the ECMAScript 5 shim used to fill-in missing ES5 support for PhantomJS, followed by a file that will be later coded to include all of our test files. Followed by `files` is `frameworks`. This array will only contain one value - "jasmine" - which is our unit test framework. Later, we'll write all of our unit tests using Jasmine. Notice that there is a corresponding plug-in - karma-jasmine - in the following `plugins` section. This plug-in provides Karma programmatic access to the Jasmine binaries.
+
+Skipping down just a tad to the `preprocessors` section, we are instructing Karma to run our unit test files through Webpack. The last two items in our config file - `webpack` and `webpackMiddleware` - are used to point Karma at our Webpack configuration file (which we pulled in at the top of this file) and ensure info messages are printed to the console, respectively. There is a Webpack plug-in for Karma as well referenced as the first item in our `plugins` array.
+Karma will only run our tests once and then exit, thanks to the `singleRun` option set to a value of `true`. And finally, our test results will be printed in a useful format to the console using a reporter plug-in - karma-spec-reporter. The alias for this reporter - "spec" - is include in the `reporters` array, and the plug-in is mentioned in our `plugins` array as well. Karma is ready to go, and next we will begin writing client-side unit tests.
 
 
 ### Writing our tests
