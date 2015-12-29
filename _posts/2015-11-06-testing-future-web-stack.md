@@ -13,7 +13,7 @@ While manual tests are still important, I'm going to discuss automated tests in 
 
 In addition to unit tests, we have integration tests, which may also be known as "Selenium" or "WebDriver" tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we'll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, _all_ of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario.
 
-## Browser-side unit tests
+## Part 1: Browser-side unit tests
 We'll first focus on writing automated tests for our code that runs in the browser. This accounts for portions of our simple application that our users directly interact with. We'll primarily write tests for our React components, but first it may make sense to refactor our code a bit to make it more conducive to testing.
 
 ### Refactoring for ease of testing
@@ -138,41 +138,113 @@ Karma will only run our tests once and then exit, thanks to the `singleRun` opti
 
 ### Writing our tests
 
-  {% Testing name-adder %}
-  {% Testing name-list %}
-  {% Testing name-manager %}
+I've explained why it is important to write automated unit tests, covered the tools we will be using to write and run these tests, _and_ I've showed you how to configure karma to actually run the tests. Just one problem - we don't have any tests to run. Let's take care of that now by writing comprehensive unit tests that cover each of [our three React components from the previous article][part1-components]: `<NameAdder />`, `<NamesList />`, and our "glue" component - `<NameManager />`.
+
+Each component's tests will be located in a dedicated file inside of a new subdirectory under our app directory. After writing all of our tests, our file tree will look something like this:
+
+```
+.
++-- app
+|   +-- model.js
+|   +-- name-adder.jsx
+|   +-- name-manager.jsx
+|   +-- names-list.jsx
+|   +-- test
+|      +-- name-adder.spec.jsx
+|      +-- name-manager.spec.jsx
+|      +-- names-list.spec.jsx
+|      +-- tests.bundle.js
++-- config
+|   +-- karma.conf.js
+|   +-- webpack.config.js
++-- site
+|   +-- index.html
++-- server.js
++-- package.json
+```
+
+Notice a fourth file in the new tests directory - tests.bundle.js. This was first mentioned in the previous section, as it is referenced as the entry point in our Karma configuration file. Essentially, this file identifies all test files to execute. In fact, it looks for any files ending in .spec.js or .spec.jsx in the current directory and makes them available for execution by, in this case, Karma, and it looks like this:
+
+```javascript
+var context = require.context('.', true, /.+\.spec\.js(x?)?$/)
+context.keys().forEach(context)
+module.exports = context
+```
+
+#### Testing NameAdder
+
+
+#### Testing NamesList
+
+
+#### Testing NameManager
+
 
 ### Running our tests
 
   {% Easily running our tests w/ npm test %}
 
 
-{% server-side unit tests %}
-  {% Restructure our files - server-side stuff into server dir %}
+## Part 2: Server-side unit tests
+
+
+### Neatness counts - file reorganization
+{% Restructure our files - server-side stuff into server dir %}
     {% Adjusting our server startup script based on new location of server. Move to npm script for consistency %}
-  {% Explanation of testing tools %}
-  {% Configuring Jasmine %}
-  {% Refactoring our server to make it more testable %}
-  {% Testing all of our Falcor routes %}
-  {% Updating the npm test script to run server tests too %}
 
-{% integration tests %}
-  {% Explanation of testing tools %}
-  {% Test adding a name %}
-  {% Run locally against FF %}
-  {% Updating our npm scripts to simplify setup of test, startup of selenium server, running of tests}
 
-{% CI w/ Travis + Sauce Labs %}
-  {% What is Travis? %}
-  {% What is SauceLabs? %}
+### Refactoring our code to make it more testable
+
+
+### Understanding our server-side testing tools
+
+
+### Configuring Jasmine to run our tests
+
+
+### Unit testing our Falcor routes
+
+
+### Running our tests
+{% Updating the npm test script to run server tests too %}
+
+
+## Part 3: Integration testing
+
+
+### Tools to help us write and run our tests
+
+
+### Writing a simple but useful test
+{% Test adding a name %}
+
+
+### Running our test locally
+{% Run locally against FF %}
+{% Updating our npm scripts to simplify setup of test, startup of selenium server, running of tests}
+
+### Part 3.5: Testing against many browsers using Travis CI and BrowserStack
+{% why is this good? %}
+
+
+#### What is Travis CI? What is BrowserStack?
+
+
+#### Setting up Travis
   {% Setting up an account %}
   {% Making Travis aware of your project %}
-  {% Setting up SauceLabs account %}
+
+#### Setting up BrowserStack
+  {% Setting up account %}
   {% Configuring your base build %}
-  {% Updating integration tests & config to run against various browsers using SauceLabs %}
+
+
+#### Running your integration tests using Travis and BrowserStack
+  {% Updating integration tests & config to run against various browsers using BrowserStack %}
   {% Updating npm test script to run all tests %}
 
-{% Going further %}
+
+### Going further
     {% handle empty list of names in code and back it with a unit test for names-list %}
     {% move integration test config to a file in config dir %}
     {% better reporting of failed tests all around %}
@@ -187,6 +259,7 @@ Karma will only run our tests once and then exit, thanks to the `singleRun` opti
 [karma]: http://karma-runner.github.io/0.13/index.html
 [package.json-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/package.json
 [part1]: {{base}}/blog/future-of-the-web-react-falcor/
+[part1-components]: {{base}}/blog/future-of-the-web-react-falcor#dividing-ui-roles-into-components-with-react
 [phantomjs]: http://phantomjs.org/
 [repo-v1]: https://github.com/Widen/fullstack-react/tree/1.2.1
 [repo-v2]: https://github.com/Widen/fullstack-react/tree/2.0.0
