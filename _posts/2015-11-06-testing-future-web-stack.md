@@ -173,6 +173,48 @@ module.exports = context
 
 #### Testing NameAdder
 
+In [the previous article][part1], we created a React component with a very specific job - allow a new name to be added to our list of names. A simple unit test would ensure that this component is at least able to perform this task. In short, we are going to write a relatively simple test that attempts to enter a new name into the `<input type="text">` rendered by this component, click the add button, and then ensure our component calls our Falcor model with the correct data. I'll start by posting the entire test specification. Don't worry, I'll cover this first example in quite a bit of detail, which will be helpful to you when viewing tests for our other React components.
+
+So, this is app/test/name-adder.spec.jsx:
+
+```javascript
+var React = require('react'),
+    ReactDom = require('react-dom'),
+    NameAdder = require('../name-adder.jsx'),
+    Falcor = require('falcor'),
+    TestUtils = require('react/lib/ReactTestUtils')
+
+describe('NameAdder', () => {
+    it('saves new messages', () => {
+        var model = jasmine.createSpyObj('model', ['call']),
+            onNameAdded = () => {},
+            nameAdder = TestUtils.renderIntoDocument(<NameAdder onAdded={onNameAdded}/>),
+            form = TestUtils.findRenderedDOMComponentWithTag(nameAdder, 'form'),
+            input = nameAdder.refs.input
+
+        NameAdder.__Rewire__('model', model)
+        model.call.and.returnValue({then: (success) => success()})
+
+        input.value = 'new name'
+        TestUtils.Simulate.submit(form)
+
+        expect(model.call).toHaveBeenCalledWith(['names', 'add'], ['new name'], ['name'])
+    })
+})
+```
+
+First, you'll notice that I've imported several dependencies that will be needed to complete this test. `React`, `ReactDom`, `NameAdder`, and `Falcor` are probably not surprising, but `TestUtils` is a new one. React provides a set of utilities that help writing unit tests against React component. We'll use various methods in `TestUtils` to easily add our component under test to the DOM, locate children of this component, and simulate DOM events that trigger our component to take specific actions.
+
+Our test is wrapped in an `it` block, which itself is wrapped in a `describe` block. These are Jasmine conventions. The `describe` block is meant to contain a set of tests, and each `it` block contains a single test. Each of them should read like a sentence or phrase. Here, we will `describe` a `NameAdder` component. What does it do? `it` saves new messages. We will test this assertion inside of the `it` block.
+
+Inside of our `it` block, we're first using Jasmine to created a mocked version of our Falcor model, which we will "inject" into our `NameAdder` component shortly. By mocking the model, we can easily control and examine inputs and outputs to verify the behavior of the component under test. Next, we're defining an empty function, which will serve as the value of the `onAdded` property passed to our `NameAdder` component, which is created and added to our document after that. We don't much care about the `onAdded` property for the purposes of this test - but it must be supplied as it is current a required property. The last two variable declarations at the top of the `it` block locate the `<form>` and `<input>` elements inside of our rendered `NameAdder` component. We'll need access to these soon when we test our component.
+
+Remember when I said we would need to inject the mocked Falcor model into our `NameAdder` component instance? That happens immediately after the block of variable declarations. This is where babel-plugin-rewire enters into our testing stack. This babel plug-in added a bunch of methods to the compiled JavaScript code that makes it easy to access internal dependencies. This is especially useful for replacing real dependencies with mocked ones. The `__Rewire__` function, added to our `NameAdder` component during babel compilation, allows us to replace our Falcor model simply by specifying the name of the internal variable that is assigned the import - `model` - followed by the new value - our Jasmine-created mock object. immediately after injecting our mocked model into `NameAdder` we're defining a behavior, again using Jasmine. When the `call` method is invoked by `NameAdder` on this mock object, invoke the promissory success function, indicating that the model update was a success. Remember that the `call` function on our Falcor model is used internally by `NameAdder` to send a newly added name to the model.
+
+The `<input>` we referenced in the variable block is used next. We're essentially "typing" in a new name by setting the `value` property of this element. Text inputs, among several other input types, will reflect entered data on the `value` property on the JavaScript object that represents the element tag in our markup. We can read _or_ write to this property. Internally, `NameAdder` reads this property when handing a form submission, and sends the value of this `value` property to the Falcor model. And so, now that we've entered a new name, we need to submit the form. `TestUtils` provides a method that will "simulate" a form submit. Without this shortcut, triggering a DOM event can be a bit tricky in some instances. Just think of this as an easy way to invoke the internal `onSubmit` function set on the `<form>` component inside of `NameAdder`. This function starts the chain of actions that ends in a new name being sent to our server.
+
+Finally, we have to actually _test_ something, don't we? Perhaps the most prudent course at this juncture is to hook into our mocked Falcor model, ensure proper route has been `call`ed with the text of our new name. The `expect` function - a utility provided by Jasmine - gives us an easy and intuitive way to describe the expected value of a mocked object.
+
 
 #### Testing NamesList
 
@@ -223,28 +265,31 @@ module.exports = context
 {% Run locally against FF %}
 {% Updating our npm scripts to simplify setup of test, startup of selenium server, running of tests}
 
-### Part 3.5: Testing against many browsers using Travis CI and BrowserStack
+
+## Part 4: Full Test Automation With Travis CI and BrowserStack
 {% why is this good? %}
 
 
-#### What is Travis CI? What is BrowserStack?
+### What is Travis CI? What is BrowserStack?
 
 
-#### Setting up Travis
+### Setting up Travis
   {% Setting up an account %}
   {% Making Travis aware of your project %}
 
-#### Setting up BrowserStack
+### Setting up BrowserStack
   {% Setting up account %}
   {% Configuring your base build %}
 
 
-#### Running your integration tests using Travis and BrowserStack
+### Running our unit tests using Travis
+
+### Running our integration tests using Travis and BrowserStack
   {% Updating integration tests & config to run against various browsers using BrowserStack %}
   {% Updating npm test script to run all tests %}
 
 
-### Going further
+## Going further
     {% handle empty list of names in code and back it with a unit test for names-list %}
     {% move integration test config to a file in config dir %}
     {% better reporting of failed tests all around %}
