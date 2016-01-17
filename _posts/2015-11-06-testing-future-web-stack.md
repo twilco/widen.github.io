@@ -218,8 +218,52 @@ Finally, we have to actually _test_ something, don't we? Perhaps the most pruden
 
 #### Testing NamesList
 
+In case the previous article is a bit fuzzy at this point, remember that we created a `<NamesList>` React component with one specific goal - list all names and auto-update when a new name is added. Now it's time to write tests for this component. Before we write any code, let's figure out exactly _what_ we need to test. The simplest test perhaps mocks out our data store and ensures the `<NamesList>` component renders all of the names in our mocked store. The critical piece of this test involves inserting a mocked version of our server's data store. Luckily this is very easy to accomplish with babel-plugin-rewire and Falcor. Let's take a look at the code for this test first, housed in app/test/names-list.spec.jsx:
+
+```javascript
+var React = require('react'),
+    TestUtils = require('react/lib/ReactTestUtils'),
+    NamesList = require('../names-list.jsx'),
+    Falcor = require('falcor')
+
+describe('names-list tests', () => {
+    afterEach(() => NamesList.__ResetDependency__('model'))
+
+    it('renders with some initial data', (done) => {
+        NamesList.__Rewire__('model', new Falcor.Model({
+            cache: {
+                names: {
+                    0: {name: 'joe'},
+                    1: {name: 'jane'},
+                    length: 2
+                }
+            }
+        }))
+
+        var namesList = TestUtils.renderIntoDocument(<NamesList/>)
+
+        namesList.componentDidUpdate = () => {
+            var nameEls = TestUtils.scryRenderedDOMComponentsWithTag(namesList, 'li')
+
+            expect(nameEls.length).toBe(2)
+            expect(nameEls[0].textContent).toBe('joe')
+            expect(nameEls[1].textContent).toBe('jane')
+
+            done()
+        }
+    })
+})
+```
+
+Nothing new in the variable declaration section at the top of the file, other than the import of Falcor. We'll need to make brief use of Falcor's client-side API as we work with our mocked model. At the top of the `describe` block, there's an `afterEach` function, which may be new to some who are not already familiar with Jasmine. The body of this function will run after each test has completed. Since we only have one test (so far), this will run after the single `it` block has completed. While not entirely necessary in our case it is good practice to reset any internal dependencies that have been tampered with at the end of each test. As you will see soon in our test, we are replacing the imported Falcor model with a mocked version, and the logic in our `afterEach` block acts as an "undo" for this action, so as not to pollute other tests.
+
+We've only written one test for `<NamesList>`, which is a sufficient start. As the title of the `it` block states, we're going to ensure that the initial render of this component renders all available names according to the model/store. In the first line of our `it` block, babel-plugin-rewire is being used to replace the imported Falcor model with a mocked version. Our mocked model includes two names: "joe" and "jane". It is perfectly valid to initialize a Falcor model in this way, and this allows us to assert full control over the component's access to data, which makes writing unit tests much easier.
+
+After rendering the component into a detached DOM node with the help of React's `TestUtils`, are waiting until the first time our component's state changes. The initial render will _not_ include the values from our mocked model, since accessing the model data is an asynchronous operation. Remember: after the model values are retrieved by `<NamesList>`, the component's internal state will be updated with the new names. And if there _are_ new names, the `componentDidUpdate` method will be called by React. `componentDidUpdate` is a [React component lifecycle method][react-lifecycle] that is called after each state change (but not on the initial component render). Our test hooks into this lifecycle method and checks to ensure that the component's DOM contains the names represented by our mocked model using Jasmine's built-in assertion library. Inside of this method, first are handle on the list item elements containing the names is created, and then each list item is checked to ensure it matches the expected name from the model. The method name used to lookup these elements inside of the component, [`scryRenderedDOMComponentsWithTag`][scryRenderedDOMComponentsWithTag], looks a little strange, and it is (to me at least). For an explanation of the `scry` prefix, have a look at [this twitter conversation][whyscry-twitter].
+
 
 #### Testing NameManager
+
 
 
 ### Running our tests
@@ -306,13 +350,16 @@ Finally, we have to actually _test_ something, don't we? Perhaps the most pruden
 [part1]: {{base}}/blog/future-of-the-web-react-falcor/
 [part1-components]: {{base}}/blog/future-of-the-web-react-falcor#dividing-ui-roles-into-components-with-react
 [phantomjs]: http://phantomjs.org/
+[react-lifecycle]: https://facebook.github.io/react/docs/component-specs.html
 [repo-v1]: https://github.com/Widen/fullstack-react/tree/1.2.1
 [repo-v2]: https://github.com/Widen/fullstack-react/tree/2.0.0
 [rewire]: https://github.com/jhnns/rewire
 [rewire-babel]: https://github.com/speedskater/babel-plugin-rewire
 [rewire-babel-bug]: https://github.com/jhnns/rewire/issues/55
+[scryRenderedDOMComponentsWithTag]: https://facebook.github.io/react/docs/test-utils.html#scryrendereddomcomponentswithtag
 [server.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js
 [testacular]: http://googletesting.blogspot.com/2012/11/testacular-spectacular-test-runner-for.html
 [testing-slides]: http://slides.com/raynicholus/automated-testing
 [webkit]: https://webkit.org/
 [webpack.config.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js
+[whyscry-twitter]: https://twitter.com/angustweets/status/590659867926462465
