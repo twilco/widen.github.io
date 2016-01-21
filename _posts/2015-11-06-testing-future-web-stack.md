@@ -271,7 +271,7 @@ var React = require('react'),
     TestUtils = require('react/lib/ReactTestUtils'),
     NameManager = require('../name-manager.jsx')
 
-describe('name-manager tests', () => {
+describe('NameManager', () => {
     it('updates NamesList when new name is added', (done) => {
         class NameAdder extends React.Component {
             triggerOnAdded() {
