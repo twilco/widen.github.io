@@ -264,6 +264,40 @@ After rendering the component into a detached DOM node with the help of React's 
 
 #### Testing NameManager
 
+The `<NameManager />` glues the `<NamesList />` and `<NameAdder />` component together. When testing it, we need to be sure that it does its job as a workflow conductor. That is, when a name is added, the `<NameManager />` must notify the `<NamesList />`, so the list can update with the new names according to the server. We don't want to test the implementation of `<NamesList />` or `<NameAdder />`, so we will have to mock both of these out. In fact, as you can see below, most of the code in this test is dedicated to mocking components. Our test, as expected, lives in app/test/name-manager.spec.jsx
+
+```javascript
+var React = require('react'),
+    TestUtils = require('react/lib/ReactTestUtils'),
+    NameManager = require('../name-manager.jsx')
+
+describe('name-manager tests', () => {
+    it('updates NamesList when new name is added', (done) => {
+        class NameAdder extends React.Component {
+            triggerOnAdded() {
+                this.props.onAdded()
+            }
+            render() {return <div/>}
+        }
+        NameManager.__Rewire__('NameAdder', NameAdder)
+
+        NameManager.__Rewire__('NamesList', class extends React.Component {
+            update() {
+                done()
+            }
+            render() {return <div/>}
+        })
+
+        var nameManager = TestUtils.renderIntoDocument(<NameManager/>)
+        TestUtils.findRenderedComponentWithType(nameManager, NameAdder).triggerOnAdded()
+    })
+})
+```
+
+In this test, the instance of NameAdder imported internally by NameManager is replaced with a simple class that invokes the `onAdded()` callback passed into the component by NamesManager when the `triggerOnAdded()` class method is called. And NamesList is replaced with a trivial class that completes the test when the `update()` method is called. The workflow is: a name is added using NameAdder, resulting in a call to the `onAdded()` function passed to NameAdder. That function results in an update of NamesList via invocation of the `update()` method. After rendering `<NameManager />` we simply call `triggerOnAdded` on the child `<NameAdder />` component. If everything is working correctly, the last call will be on the `<NamesList />` component's `update()` method, which will complete and pass the test. One new thing about this test is our use of the `findRenderedComponentWithType` method on `TestUtils`. This allows us to located a specific type of composite component inside another composite component. In this case, we are looking for the `<NameAdder />` component.
+
+
+And that's it, now we have tests for _all_ of our React components!
 
 
 ### Running our tests
