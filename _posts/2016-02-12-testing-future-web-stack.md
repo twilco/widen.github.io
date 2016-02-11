@@ -76,7 +76,7 @@ app.listen(9090, err => {
 });
 ```
 
-Before we go any further, we should make sure our changes haven't broken anything, but before we do that, let's make one additional adjustment. Going forward, it may be beneficial for us to use our package.json file as a place to execute any scripts needed to build, test, and run our application. The usefulness of this approach will become clearer as this exercise progresses. We'll start by defining a second target in the package.json `"scripts"` object, one that will startup our server. After this addition, the bottom of [our original package.json file][package.json-v1] looks like this:
+Before we go any further, we should make sure our changes haven't broken anything, but before we do that, let's make one additional adjustment. Going forward, it may be beneficial for us to use our package.json file as a place to execute any scripts needed to build, test, and run our application. The usefulness of this approach will become clearer as this exercise progresses. We'll start by defining a second target in the package.json `"scripts"` object, one that will startup our server. After this addition, the bottom of [our original package.json file][package.json-v1] now looks like this:
 
 ```json
 "scripts": {
@@ -308,7 +308,7 @@ And that's it, now we have tests for _all_ of our React components!
 ### Running our tests
 Now that we have all of our React components covered with unit tests, it would be nice to be able to actually _run_ them to verify that everything is working as expected. To make this easy, let's add a `test` entry to the `scripts` property in our package.json file. This will allow us to execute our full suite of tests simply by running `npm test`. This new script looks like this:
 
-```javascript
+```json
 "scripts": {
   ...
   "test": "karma start config/karma.conf.js",
@@ -336,15 +336,115 @@ On to the server!
 
 
 ## Part 2: Server-side unit tests
+On the server, most of our code is focused primarily at handling Falcor requests. In order to service these, we have defined three primary routes:
+
+1. A "get" route that returns the number of names.
+2. Another "get" route that returns one or more names.
+3. A "call" route that adds a new name.
+
+In this section, you'll see unit tests that verify the expected behavior of each Falcor route. In order to more easily verify the logic in these routes, we'll rely on the Rewire library to mock out our "names" data store in order to provide canned values for our tests.
 
 
+### Neatness counts - file reorganization & refactoring
+In order to make our source easier to browse _and_ test, some changes are necessary. First, we'll split the original server.js file/module into three modules: one to hold our names data, another for housing our Falcor routes, and then a third that directly handles requests from our frontend and deals with all of the other generic server tasks.
 
-### Neatness counts - file reorganization
-{% Restructure our files - server-side stuff into server dir %}
-    {% Adjusting our server startup script based on new location of server. Move to npm script for consistency %}
+We'll start by moving the [`data` variable in the original server.js file][data-server-v1] into a new names.js file, which will look like this:
 
+```javascript
+module.exports = [
+    {name: 'a'},
+    {name: 'b'},
+    {name: 'c'}
+]
+```
 
-### Refactoring our code to make it more testable
+Separating this into its own module makes it trivial for us to substitute this data store for a mocked version in our server unit tests.
+
+Next, we'll move our [Falcor routes from server.js][routes-server-v1], along with most Falcor-related dependencies, into a router.js file:
+
+```javascript
+var Router = require('falcor-router'),
+    names = require('./names'),
+    NamesRouter = Router.createClass([
+        {
+            route: 'names[{integers:nameIndexes}]["name"]',
+            get: (pathSet) => {
+                var results = [];
+                pathSet.nameIndexes.forEach(nameIndex => {
+                    if (names.length > nameIndex) {
+                        results.push({
+                            path: ['names', nameIndex, 'name'],
+                            value: names[nameIndex].name
+                        })
+                    }
+                })
+                return results
+            }
+        },
+        ...
+    ])
+
+module.exports = NamesRouter
+```
+
+This separation allows us to focus specifically on testing Falcor routes without having to deal with any of the generic server logic that is unimportant to our unit tests.
+
+All of these changes to promote testable code leaves our original server.js file much smaller and only focused on traditional server tasks, such as routing HTTP requests, serving up static resources (such as our WebPack-generated JavaScript bundles), and starting up the server. Here it is, for reference:
+
+```javascript
+var FalcorServer = require('falcor-express'),
+    bodyParser = require('body-parser'),
+    express = require('express'),
+    app = express(),
+    NamesRouter = require('./router')
+
+app.use(bodyParser.urlencoded({extended: false}));
+app.use('/model.json', FalcorServer.dataSourceRoute(() => new NamesRouter()))
+app.use(express.static('site'))
+app.listen(9090, err => {
+    if (err) {
+        console.error(err)
+        return
+    }
+    console.log('navigate to http://localhost:9090')
+});
+```
+
+So now it's easier to test our code since each file/module is focused on a specific task, but we have 2 extra files cluttering up the root of our project. Let's move those into a new subdirectory, appropriately named "server". With this change, our project's structure seems a bit more sane and predictable. Here's the tree at this point:
+
+```
+.
++-- app
+|   +-- model.js
+|   +-- name-adder.jsx
+|   +-- name-manager.jsx
+|   +-- names-list.jsx
+|   +-- test
+|      +-- name-adder.spec.jsx
+|      +-- name-manager.spec.jsx
+|      +-- names-list.spec.jsx
+|      +-- tests.bundle.js
++-- config
+|   +-- karma.conf.js
+|   +-- webpack.config.js
++-- server
+|   +-- names.js
+|   +-- router.js
+|   +-- server.js
++-- site
+|   +-- index.html
++-- package.json
+```
+
+Don't forget to change the `start` script in package.json! It should reflect the new path of the server entry point:
+
+```json
+"scripts": {
+  ...
+  "start": "node server/server",
+  ...
+}
+```
 
 
 ### Understanding our server-side testing tools
@@ -405,6 +505,7 @@ On to the server!
 
 
 [blink]: http://www.chromium.org/blink
+[data-server-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js#L6
 [falcor-code-updates]: https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-5545284dc279e8d0cac06a735ecc9f64R1
 [falcor-model-deref]: http://netflix.github.io/falcor/doc/Model.html#deref
 [falcor-path-change]: https://github.com/Netflix/falcor/issues/708
@@ -426,6 +527,7 @@ On to the server!
 [rewire]: https://github.com/jhnns/rewire
 [rewire-babel]: https://github.com/speedskater/babel-plugin-rewire
 [rewire-babel-bug]: https://github.com/jhnns/rewire/issues/55
+[routes-server-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js#L13
 [scryRenderedDOMComponentsWithTag]: https://facebook.github.io/react/docs/test-utils.html#scryrendereddomcomponentswithtag
 [server.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js
 [testacular]: http://googletesting.blogspot.com/2012/11/testacular-spectacular-test-runner-for.html
