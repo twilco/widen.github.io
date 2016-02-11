@@ -13,6 +13,14 @@ While manual tests are still important, I'm going to discuss automated tests in 
 
 In addition to unit tests, we have integration tests, which may also be known as "Selenium" or "WebDriver" tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we'll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, _all_ of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario.
 
+## Part 0: Bringing our code and project up-to-date
+Since the last article 4 months ago, most of our project's dependencies have changed in some way, some of them drastically. The most visible changes were to Falcor and Babel.
+
+Version 0.1.16 of Falcor brings [a breaking change][falcor-path-change] that affected our response parsing code. In short, an unexpected item is visible among expected properties of "get" resonses: `$__path`. This new property is useful for creating new models based on sections of an existing JSON graph. This is accomplished using [the new `Model.deref` method][falcor-model-deref]. However, we don't have much use for this in our simple app. Since we only want to see the requested values in our "get" responses, we must [make use of a new `Falcor.keys` method][falcor-code-updates], which iterates over all of the keys in the response, ignoring the `$__path` property. In this way, it functions exactly like [`Object.keys`][object-keys-mdn], except for the added convenience of skipping this unwanted property.
+
+Babel 6.x brings a number of substantial changes that have a cascading effect on some of our _other_ dependencies. Essentially, Babel was carved up into many different smaller and more focused libraries in 6.0. This required us to explicitly [pull in separate libraries for ES6, React, and command-line support][package.json-babel-updates] with Babel. The "main" Babel library - babel-core - doesn't perform ES6, ES7, or React compilation tasks anymore. Our [WebPack configuration for the Babel loader also changed][webpack-babel-updates] slightly as a result.
+
+
 ## Part 1: Browser-side unit tests
 We'll first focus on writing automated tests for our code that runs in the browser. This accounts for portions of our simple application that our users directly interact with. We'll primarily write tests for our React components, but first it may make sense to refactor our code a bit to make it more conducive to testing.
 
@@ -72,12 +80,12 @@ Before we go any further, we should make sure our changes haven't broken anythin
 
 ```json
 "scripts": {
-  "server": "node --harmony server",
+  "start": "node server",
   "webpack": "webpack --config config/webpack.config.js"
 }
 ```
 
-There are two changes to this section of the file. First, a new `"server"` tasks has been added, which starts up our NodeJS server. Second, our `"webpack"` target has been adjusted to include a reference to the new location of our webpack configuration file. Previously, this file was located in the root of our project, and, by convention, webpack looks for a file named "webpack.config.js" in the root of the project. Since we've moved this to the config directory, we must now let webpack know where this configuration file exists.
+There are two changes to this section of the file. First, a new `"start"` tasks has been added, which starts up our NodeJS server. You can simple run `npm start` to execute this step. Second, our `"webpack"` target has been adjusted to include a reference to the new location of our webpack configuration file. Previously, this file was located in the root of our project, and, by convention, webpack looks for a file named "webpack.config.js" in the root of the project. Since we've moved this to the config directory, we must now let webpack know where this configuration file exists.
 
 ### Getting familiar with our testing tools
 
@@ -90,11 +98,11 @@ Our client-side unit tests will be created with the help of a few important and 
 
 Jasmine is a JavaScript library we will use to write our unit tests. It includes a rich [set of assertions][jasmine-matchers] for comparing actual values under test with expected values, a full-featured [mocking engine][jasmine-spies] that will allow us to more easily focus on the component under test, as well as a number of other helpers that we will use to [group our tests][jasmine-describe] and [test asynchronous behaviors][jasmine-async].
 
-PhantomJS is a headless version of [Webkit][webkit], the rendering engine currently used in Apple's Safari browser and formerly used in Google's Chrome browser (before it was forked as [Blink][blink]). Running our unit tests in a headless browser makes them easy and quick to run, not to mention portable. The entire browser is distributed and contained in a JavaScript package downloaded from npm. Using a conventional browser for unit tests in a development environment can be jarring with browser windows opening and closing, especially if tests are automatically re-run as soon as any code changes are saved. While a 2.0 version of PhantomJS is available, we will stick with 1.9, since the 2.0 version has some long-standing issues with no solutions in sight. For example, there are no official, stable Linux binaries at the moment.
+PhantomJS is a headless version of [Webkit][webkit], the rendering engine currently used in Apple's Safari browser and formerly used in Google's Chrome browser (before it was forked as [Blink][blink]). Running our unit tests in a headless browser makes them easy and quick to run, not to mention portable. The entire browser is distributed and contained in a JavaScript package downloaded from npm. Using a conventional browser for unit tests in a development environment can be jarring with browser windows opening and closing, especially if tests are automatically re-run as soon as any code changes are saved.
 
 Rewire is a Node.js tool primarily used (at least in this project) to mock out sub-modules imported by a module under test. For example, when testing our `<NameManager/>` component, we need to be able to control the behavior of its internal dependencies - `<NameList/>` and `<NameAdder/>`. We can use Rewire to gain access to these dependencies inside of `<NameManager/>` and replace them with dummy modules with inputs and outputs that we can monitor and control in order to more reliably test _this_ component. Rewire allows us to access internal dependencies in this way by using its own module loader to insert hooks into modules that allow them to be unnaturally accessed and controlled in a testing environment. For our browser-based unit tests, we'll need to use a Babel plug-in that wraps the Rewire plugin. It is aptly named [babel-plugin-rewire][rewire-babel]. We must use this Babel plug-in instead of the native Rewire library due to [Babel's unique ECMAScript 6 module transpilation logic][rewire-babel-bug].
 
-Karma is a test runner and reporter, initially developed by Google for use with AngularJS unit tests. Fun fact: it was originally known as [Testacular][testacular]. It's hard to imagine why they changed the name, but I digress. Before we can begin writing tests, we must first configure Karma and tie all of our testing and reporting tools together. Remember that karma is our client-side test _runner_. In other words, it will use use Jasmine to execute the tests we are going to write, and it will provision a PhantomJS instance as an environment in which the tests will run. It will report the results using a karma plugin: karma-spec-reporter. A plug-in will allow Karma to use Webpack to generate a temporary source bundle that includes all of the code we intend to test. Our existing webpack.config.js file will be used here to determine how this bundle is generated. But we will contribute an addition Babel plug-in to our Webpack configuration just for these tests - babel-plugin-rewire - which will hook into the bundle generation process and add hooks into our code that we will need to mock out dependencies internal to each of the React components we intend to test. Finally, we'll ask Karma to include an ECMAScript 5 "shim", which is needed to ensure our modern code runs properly in PhantomJS 1.9, which is essentially a relatively old version of Safari.
+Karma is a test runner and reporter, initially developed by Google for use with AngularJS unit tests. Fun fact: it was originally known as [Testacular][testacular]. It's hard to imagine why they changed the name, but I digress. Before we can begin writing tests, we must first configure Karma and tie all of our testing and reporting tools together. Remember that karma is our client-side test _runner_. In other words, it will use use Jasmine to execute the tests we are going to write, and it will provision a PhantomJS instance as an environment in which the tests will run. It will report the results using a karma plugin: karma-spec-reporter. A plug-in will allow Karma to use Webpack to generate a temporary source bundle that includes all of the code we intend to test. Our existing webpack.config.js file will be used here to determine how this bundle is generated. But we will contribute an addition Babel plug-in to our Webpack configuration just for these tests - babel-plugin-rewire - which will hook into the bundle generation process and add hooks into our code that we will need to mock out dependencies internal to each of the React components we intend to test.
 
 Our Karma configuration will be named karma.conf.js, and it will be appropriately located inside of our new "config" directory. The completed file will look like this:
 
@@ -106,10 +114,7 @@ module.exports = function (config) {
     config.set({
         basePath: '../',
         browsers: ['PhantomJS'],
-        files: [
-            'node_modules/es5-shim/es5-shim.js', // only used by PhantomJS 1.x
-            'app/test/tests.bundle.js'
-        ],
+        files: ['app/test/tests.bundle.js'],
         frameworks: ['jasmine'],
         plugins: [
             require('karma-webpack'),
@@ -374,12 +379,17 @@ And that's it, now we have tests for _all_ of our React components!
 
 
 [blink]: http://www.chromium.org/blink
+[falcor-code-updates]: https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-5545284dc279e8d0cac06a735ecc9f64R1
+[falcor-model-deref]: http://netflix.github.io/falcor/doc/Model.html#deref
+[falcor-path-change]: https://github.com/Netflix/falcor/issues/708
 [jasmine]: http://jasmine.github.io/2.3/introduction.html
 [jasmine-async]: http://jasmine.github.io/2.3/introduction.html#section-Asynchronous_Support
 [jasmine-describe]: http://jasmine.github.io/2.3/introduction.html#section-Grouping_Related_Specs_with_<code>describe</code>
 [jasmine-matchers]: http://jasmine.github.io/2.3/introduction.html#section-Matchers
 [jasmine-spies]: http://jasmine.github.io/2.3/introduction.html#section-Spies
 [karma]: http://karma-runner.github.io/0.13/index.html
+[object-keys-mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+[package.json-babel-updates]: https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-b9cfc7f2cdf78a7f4b91a753d10865a2R19
 [package.json-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/package.json
 [part1]: {{base}}/blog/future-of-the-web-react-falcor/
 [part1-components]: {{base}}/blog/future-of-the-web-react-falcor#dividing-ui-roles-into-components-with-react
@@ -395,5 +405,6 @@ And that's it, now we have tests for _all_ of our React components!
 [testacular]: http://googletesting.blogspot.com/2012/11/testacular-spectacular-test-runner-for.html
 [testing-slides]: http://slides.com/raynicholus/automated-testing
 [webkit]: https://webkit.org/
+[webpack-babel-updates]: https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-a58d55bdb5770c78ad512f8e91f8d051R6
 [webpack.config.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js
 [whyscry-twitter]: https://twitter.com/angustweets/status/590659867926462465
