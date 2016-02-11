@@ -306,11 +306,37 @@ And that's it, now we have tests for _all_ of our React components!
 
 
 ### Running our tests
+Now that we have all of our React components covered with unit tests, it would be nice to be able to actually _run_ them to verify that everything is working as expected. To make this easy, let's add a `test` entry to the `scripts` property in our package.json file. This will allow us to execute our full suite of tests simply by running `npm test`. This new script looks like this:
 
-  {% Easily running our tests w/ npm test %}
+```javascript
+"scripts": {
+  ...
+  "test": "karma start config/karma.conf.js",
+  ...
+}
+```
+
+This will use the `karma` binary installed in node_modules/karma to run our Jasmine tests. It's pretty simple to do this via the command-line, and everything works as expected simply by issuing the `start` command and pointing Karma at the configuration file we created earlier. When you run `npm test`, all test should pass, and you'll see this in your terminal:
+
+```
+NameAdder
+  ✓ saves new messages
+
+NameManager
+  ✓ updates NamesList when new name is added
+
+NamesList
+  ✓ renders with some initial data
+
+PhantomJS 2.1.1 (Mac OS X 0.0.0): Executed 3 of 3 SUCCESS (0.007 secs / 0.021 secs)
+TOTAL: 3 SUCCESS
+```
+
+On to the server!
 
 
 ## Part 2: Server-side unit tests
+
 
 
 ### Neatness counts - file reorganization
