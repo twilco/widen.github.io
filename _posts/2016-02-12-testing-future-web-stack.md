@@ -602,46 +602,61 @@ And that's it! Now we have all frontend and backend code covered by unit tests, 
 
 ## Part 3: Integration testing
 
+Unit tests have been throughly covered by now, so let's move on to "integration" testing. These tests will examine how our application functions when a realistic user-generated operation is performed. In contrast to unit tests, integration tests exercise the _entire_ application, so we will need to have a running server in order to run these tests. We'll need to write code that will open up a browser, load our application, and then perform one or more common tasks.
+
 
 ### Tools to help us write and run our tests
 
+Just like out client-side and sever-side unit tests, we'll again use Jasmine to write our integration tests. Furthermore, Jasmine will _run_ these tests as well, just as it runs our server tests. But integration tests are a bit more complex than unit tests, so we need some more help writing and running them. We'll enlist [WebdriverIO][webdriverio] to make this as easy as possible. WebdriverIO provides an easy to use JavaScript API on top of Selenium Webdriver's wire protocol, which allows us to control and query any browser programmatically. But [wire protocol is low-level and not particularly pleasant to work with][webdriver-w3c]. WebdriverIO "fixes" this for us, and allows us to complete our mission to write and test a web application using nothing but JavaScript.
+
 
 ### Writing a simple but useful test
-{% Test adding a name %}
+To illustrate the role and structure of a typical Webdriver-dependant integration test using WebdriverIO, let's create a single simple but incredibly useful test that will ensure a user is able to successfully add a new name.
+
+Before we get into actually writing any code, let's outline exactly how this test should be structured. Let's also assume that our server is already running:
+
+1. Navigate to our app in a browser.
+2. Determine how many names exist in the list initially (by counting list item elements).
+3. "Type" a value into the text input at the bottom of the page.
+4. Click the "add name" button.
+5. Ensure the number of names in our list has increased by  exactly 1 and it contains the value we entered into the text input.
+6. End test/close browser.
+
+That's it - six simple steps. And WebdriverIO provides an elegant API that will allow us to follow this formula _and_ write code that is mostly self-documenting.
 
 
 ### Running our test locally
-{% Run locally against FF %}
-{% Updating our npm scripts to simplify setup of test, startup of selenium server, running of tests}
+- Run locally against FF
+- Updating our npm scripts to simplify setup of test, startup of selenium server, running of tests
 
 
 ## Part 4: Full Test Automation With Travis CI and BrowserStack
-{% why is this good? %}
+- why is this good?
 
 
 ### What is Travis CI? What is BrowserStack?
 
 
 ### Setting up Travis
-  {% Setting up an account %}
-  {% Making Travis aware of your project %}
+- Setting up an account
+- Making Travis aware of your project
 
 ### Setting up BrowserStack
-  {% Setting up account %}
-  {% Configuring your base build %}
+- Setting up account
+- Configuring your base build
 
 
 ### Running our unit tests using Travis
 
 ### Running our integration tests using Travis and BrowserStack
-  {% Updating integration tests & config to run against various browsers using BrowserStack %}
-  {% Updating npm test script to run all tests %}
+- Updating integration tests & config to run against various browsers using BrowserStack
+- Updating npm test script to run all tests
 
 
 ## Going further
-    {% handle empty list of names in code and back it with a unit test for names-list %}
-    {% move integration test config to a file in config dir %}
-    {% better reporting of failed tests all around %}
+- handle empty list of names in code and back it with a unit test for names-list
+- move integration test config to a file in config dir
+- better reporting of failed tests all around
 
 
 [blink]: http://www.chromium.org/blink
@@ -676,6 +691,8 @@ And that's it! Now we have all frontend and backend code covered by unit tests, 
 [server.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js
 [testacular]: http://googletesting.blogspot.com/2012/11/testacular-spectacular-test-runner-for.html
 [testing-slides]: http://slides.com/raynicholus/automated-testing
+[webdriver-w3c]: https://www.w3.org/TR/webdriver/
+[webdriverio]: http://webdriver.io/
 [webkit]: https://webkit.org/
 [webpack-babel-updates]: https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-a58d55bdb5770c78ad512f8e91f8d051R6
 [webpack.config.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js
