@@ -11,7 +11,7 @@ Generally speaking, automated tests ensure that future changes to our code due t
 
 While manual tests are still important, I'm going to discuss automated tests in this article. Furthermore, I'll discuss two distinct types of automated tests - unit tests, and integration tests. Unit tests are low-level and very narrowly scoped. They exercise only specific sections of your code. For example, we'll write a different set of unit tests for each frontend React component, along with a set of tests for our backend Falcor routes. It's critical that we focus on testing the specific roles of each of these modules, and that may mean mocking out a module's internal dependencies so that we can better control the environment. When we "mock" something, we're essentially replacing it with a dummy version that we have full control over. This eliminates uncertainty in our testing environment.
 
-In addition to unit tests, we have integration tests, which may also be known as "Selenium" or "WebDriver" tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we'll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, _all_ of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario. While there are other definitions of "integration" testing as meaning of this term seems to be somewhat subjective, we're going to work with the definition outlined here throughout this article.
+In addition to unit tests, we have integration tests, which may also be known as "Selenium" or "" tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we'll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, _all_ of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario. While there are other definitions of "integration" testing as meaning of this term seems to be somewhat subjective, we're going to work with the definition outlined here throughout this article.
 
 ## Part 0: Bringing our code and project up-to-date
 Since the last article 4 months ago, most of our project's dependencies have changed in some way, some of them drastically. The most visible changes were to Falcor and Babel.
@@ -622,12 +622,67 @@ Before we get into actually writing any code, let's outline exactly how this tes
 5. Ensure the number of names in our list has increased by  exactly 1 and it contains the value we entered into the text input.
 6. End test/close browser.
 
-That's it - six simple steps. And WebdriverIO provides an elegant API that will allow us to follow this formula _and_ write code that is mostly self-documenting.
+That's it - six simple steps. And WebdriverIO provides an elegant API that will allow us to follow this formula _and_ write code that is mostly self-documenting. This test will live among the other server-side tests - in server/test - and will be named "integration.spec.js". This will allow it to be automatically executed by Jasmine along with the server unit tests. Let's have a look at the code:
+
+```javascript
+var webdriverio = require('webdriverio')
+
+describe('name adder integration tests', () => {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+
+    beforeEach(() => {
+        this.browser = webdriverio.remote().init()
+    })
+
+    it ('adds a name', done => {
+        var date = Date.now(),
+            nameCount
+
+        this.browser.url('http://localhost:9090')
+            .waitForExist('li', 30000)
+            .elements('li').then(elements => nameCount = elements.value.length)
+            .setValue('input', date)
+            .getValue('input').then(value => expect(parseInt(value)).toBe(date))
+            .click('button')
+            .waitForExist(`li=${date}`, 5000)
+            .elements('li').then(elements => expect(elements.value.length).toBe(nameCount+1))
+            .end()
+            .call(done)
+    })
+})
+```
+
+The format of this specification is familiar, since we're again using Jasmine. Notice the "webdriverio" import at the top of the file, and initialization code inside of `beforeEach`. This produces a `browser` object which exposes a set of methods to control the browser. We've also set a longer-than-normal timeout for our tests. This isn't really important now, but it may be later when we attempt to run these tests against virtualized browsers in the cloud in the next section.
+
+The test outlined earlier is represented by a series of chained method calls inside of the "adds a name" test. Starting with `this.browser.url(...)`, here is a line-by-line breakdown of our integration test:
+
+1. Open Firefox (by default) and navigate to the index page of our app.
+2. Wait for a `<li>` to exist on the page (this will represent the first initial name in our list). If this is not visible within 30 seconds, the test will fail. Again, for testing against a local browser, this long of a timeout is probably unnecessary, but this may be important in the next section.
+3. Find all `<li>` elements, count them, and set this number to be the value of the `nameCount` variable. This is the number of names on page load.
+4. Set the value of the `<input type="text">` at the bottom of the page to the current time in milliseconds.
+5. Make sure this text input reflects the value we just entered.
+6. Click the "add name" button next to the input.
+7. Wait up to 5 seconds for a `<li>` element to appear on the page with text that equals the value we just submitted. This is the first check to ensure our newly added name exists on the page after a submit.
+8. Count the number of `<li>` elements on the page again. Remember that each name is housed in a separate `<li>`, so there should be one more than our last check.
+9. Close the browser.
+10. Signal to Jasmine that the test is complete.
 
 
 ### Running our test locally
-- Run locally against FF
-- Updating our npm scripts to simplify setup of test, startup of selenium server, running of tests
+By default, without providing _any_ configuration options to WebdriverIO, our test will run against Firefox. So, before running this locally, be sure you have Firefox installed. We'll also need to run a Selenium server locally. WebdriverIO actually drives the browser _through_ this Selenium server. Downloading, installing, and running this server is _much_ easier than it sounds. In order to run the server, you'll need a Java Runtime Environment (JRE) installed on your machine as well. Most machines already have this installed, so you probably don't have to worry about this.
+
+In order to make it as easy as possible to setup/startup our Selenium server and run our integration tests, we'll need to add two more `"scripts"` to our package.json file:
+
+```json
+"scripts": {
+  "setup-webdriver": "(mkdir server/test/bin; cd server/test/bin; curl -O http://selenium-release.storage.googleapis.com/2.51/selenium-server-standalone-2.51.0.jar server/test)",
+  "start-webdriver": "java -jar server/test/bin/selenium-server-standalone-2.51.0.jar",
+}
+```
+
+The above represents only the _new_ entries in package.json. The first new script - `"setup-webdriver"` - creates and enters a "bin" directory inside of server/test/, and then downloads the Selenium server binary (which is a Java jar) into that directory. This first new script only needs to be run _once_. The second new script - `"start-webdriver"` - will, as you might expect, start this newly installed Selenium server using the JRE I mentioned earlier.
+
+So, now we have a running Selenium server. How can we actually execute this new integration test? Simple! Just run `npm test`. Since our specification file ends with ".spec.js" all we have to do is ensure it is placed inside the server/test directory, and the Jasmine configuration we create in the previous section will ensure it is run as part of our server-side tests. Go ahead and run the test. You'll notice that Firefox opens automatically and the steps outlined above are executed before your eyes (and very quickly). Once the browser closes, results are printed to the console. If all goes well, our three green server-side test dots in the terminal will be joined by a fourth dot representing the successful run of our integration test.
 
 
 ## Part 4: Full Test Automation With Travis CI and BrowserStack
