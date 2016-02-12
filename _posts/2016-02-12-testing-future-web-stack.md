@@ -1,11 +1,11 @@
 ---
-title:  The Future of Web Development Part 2 - Comprehensive Automated Testing
+title:  The Future of Web Development Part 2 - Full-Stack Automated JavaScript Testing
 author: Ray Nicholus
 categories: react falcor webpack web server JSON HTTP node.js JavaScript ES6 jasmine selenium webdriver testing
-excerpt: "In my last article, I showed you how to develop a full-stack JavaScript web application using some pretty interesting and futuristic libraries and web specifications. In this follow-up, I'm going to demonstrate how you can write JavaScript-based unit and integration/Selenium tests for that same app using nothing but JavaScript."
+excerpt: "In my last article, I showed you how to develop a full-stack JavaScript web application using some pretty interesting and futuristic libraries and web specifications. In this follow-up, I'm going to demonstrate how you can write server-side and client-side unit and integration/Selenium tests for that app entirely in JavaScript."
 ---
 
-In [my last article][part1], I showed you how to developer a full-stack JavaScript web application using ECMAScript 6, Falcor, React, Babel, Webpack, and NodeJS. Developing a project using this futuristic stack is undoubtedly fun, but this is only a piece of the puzzle. Any code you write that is meant to be used by others should be tested. Manually testing your code is certainly one approach, though you will find this route cumbersome. In order to make more efficient use of your time and provide executable documentation for future maintainers, it is important to develop a suite of automated tests. In this follow-up article, I'll show you how to write automated tests for _all_ of the code we wrote in the first article. We will automate testing of the frontend and server-side code, _plus_ I'll show you how to write automated integration (a.k.a. Selenium) tests that exercise the entire application. Keeping with the spirit of the first article, all tests will be written using JavaScript and made available in [an updated version of the same GitHub repository][repo-v2]. After completing this article and following the coding examples, you'll see how easy and satisfying it is to write automated tests for _your_ web applications.
+In [my last article][part1], I showed you how to developer a full-stack JavaScript web application using ECMAScript 6, Falcor, React, Babel, Webpack, and NodeJS. Developing a project using this futuristic stack is undoubtedly fun, but this is only a piece of the puzzle. Any code you write that is meant to be used by others should be tested. Manually testing your code is certainly one approach, though you will find this route cumbersome. In order to make more efficient use of your time and provide executable documentation for future maintainers, it is important to develop a suite of automated tests. In this follow-up article, I'll show you how to write automated tests for _all_ of the code we wrote in the first article. We will automate testing of the frontend and server-side code, _plus_ I'll show you how to write automated integration (a.k.a. Selenium) tests that exercise the entire application. **Keeping with the spirit of the first article, all tests will be written using JavaScript and made available in [an updated version of the same GitHub repository][repo-v2]**. After completing this article and following the coding examples, you'll see how easy and satisfying it is to write automated tests for _your_ web applications.
 
 Generally speaking, automated tests ensure that future changes to our code due to maintenance or evolution do not cause our application to regress. In other words, we want to be sure that our users are _always_ able to add new names. It's also important that the list of names presented to the user is accurate and up-to-date. There are probably some edge cases that should be tested as well. What happens if our server goes down? How does the UI respond? It's also prudent to ensure that our application works in all supported browsers. If you have spent any amount of time developing for the web, you already know that this is a real concern due to potential browser-specific issues and varying web API and JavaScript implementations. And what if an unexpected condition is encountered server-side? How will our Falcor routes deal with this? While our app is indeed trivial, there is quite a bit that can go wrong, and that means we have a lot of tests to write!
 
@@ -78,7 +78,7 @@ app.listen(9090, err => {
 
 Before we go any further, we should make sure our changes haven't broken anything, but before we do that, let's make one additional adjustment. Going forward, it may be beneficial for us to use our package.json file as a place to execute any scripts needed to build, test, and run our application. The usefulness of this approach will become clearer as this exercise progresses. We'll start by defining a second target in the package.json `"scripts"` object, one that will startup our server. After this addition, the bottom of [our original package.json file][package.json-v1] now looks like this:
 
-```json
+```javascript
 "scripts": {
   "start": "node server",
   "webpack": "webpack --config config/webpack.config.js"
@@ -308,7 +308,7 @@ And that's it, now we have tests for _all_ of our React components!
 ### Running our tests
 Now that we have all of our React components covered with unit tests, it would be nice to be able to actually _run_ them to verify that everything is working as expected. To make this easy, let's add a `test` entry to the `scripts` property in our package.json file. This will allow us to execute our full suite of tests simply by running `npm test`. This new script looks like this:
 
-```json
+```javascript
 "scripts": {
   "test": "karma start config/karma.conf.js",
 }
@@ -436,7 +436,7 @@ So now it's easier to test our code since each file/module is focused on a speci
 
 Don't forget to change the `start` script in package.json! It should reflect the new path of the server entry point:
 
-```json
+```javascript
 "scripts": {
   "start": "node server/server",
 }
@@ -450,7 +450,7 @@ One of the goals of this full-stack JavaScript approach is to blend the frontend
 ### Configuring Jasmine to run our tests
 The Jasmine test runner, which will be used to execute our Jasmine server-side unit tests, needs a bit of configuration in order to do its job. We'll store this configuration, which is quite minimal, in a JSON file inside of our configuration directory, alongside the existing Karma and WebPack configuration files. This Jasmine config revolves around two properties, `"spec_dir"` and `"spec_files"`:
 
-```json
+```javascript
 {
   "spec_dir": "server/test",
   "spec_files": ["**/*[sS]pec.js"]
@@ -563,7 +563,7 @@ Verifying the response to the "call" involves ensuring the changes to our store 
 ### Running our tests
 We are now accustomed to using npm to perform various operations on our application, such as running unit tests. Carrying forward this pattern, let's provide a way to run our server-side tests via npm. In fact, let's modify our package.json scripts so that we can execute both our frontend _and_ backend tests with a single command. The relevant portions of our package.json now look like this:
 
-```json
+```javascript
 "scripts": {
   "test-client": "karma start config/karma.conf.js",
   "test-server": "jasmine JASMINE_CONFIG_PATH=config/jasmine.json",
@@ -673,7 +673,7 @@ By default, without providing _any_ configuration options to WebdriverIO, our te
 
 In order to make it as easy as possible to setup/startup our Selenium server and run our integration tests, we'll need to add two more `"scripts"` to our package.json file:
 
-```json
+```javascript
 "scripts": {
   "setup-webdriver": "(mkdir server/test/bin; cd server/test/bin; curl -O http://selenium-release.storage.googleapis.com/2.51/selenium-server-standalone-2.51.0.jar server/test)",
   "start-webdriver": "java -jar server/test/bin/selenium-server-standalone-2.51.0.jar",
@@ -686,27 +686,143 @@ So, now we have a running Selenium server. How can we actually execute this new 
 
 
 ## Part 4: Full Test Automation With Travis CI and BrowserStack
-- why is this good?
+Running the unit and integration tests locally is important and convenient, but we need to be able to verify our code on a location other than our own development machine. It can be surprising just how many new issues surface when you leave the comfort of your own "perfect" environment. Relying on a trusted 3rd party entity to run tests is also a critical part of the continuous integration process. If you have a known third-party service verify your build, like Travis CI, _and_ you are using GitHub to manage your project, you can create "safe" branches using [GitHub's branch protection feature][github-branch-protection]. When enabled, this will prevent any code from a branch with failing tests (or with untested code) from being merged into the protected branch.
+
+In this section, I'll show you how to configure a cloud-based continuous integration service to run your build and all of your tests on each push to GitHub. Furthermore, I'll show how you can also run your integration tests against _any_ browser on _any_ device/OS using a _second_ cloud service. Both of these useful services will work together to provide you with an elegant and efficient continuos integration environment.
 
 
-### What is Travis CI? What is BrowserStack?
+### Getting familiar with our CI tools
+[Travis CI][travis] is a popular continuous integration service that allows you to perform various project related tasks (such as running your build and tests) on a virtualized Ubuntu machine (or OSX for Objective-C projects). Travis is free for public/OSS projects. For private projects, Travis provides access to additional features, such as resource caching and private builds, for a fee. Since the repository that holds our code is public and open source, we'll make use of Travis' free tier to run our unit and integration tests on every push to GitHub. Travis integrates nicely into GitHub, and even works with the branch protection feature I mentioned earlier.
+
+While Travis can run our unit tests in both PhantomJS and a "headless" Firefox, it cannot run our integration tests. These require a non-headless browser, and potentially access to something other than Linux. Ideally, Travis would still control the build and tests, but delegate to another service to run integration tests on a specific browser/OS combination, reporting back the results along with all unit tests. By integrating BrowserStack into our CI environment, this is entirely achievable. [BrowserStack][browserstack] is a "cloud" service that provides programmatic (and manual) access to any browser on any conceivable operating system. It does this via an API (for programmatic access) and a web interface (for manual access). The most common use for BrowserStack is to facilitate automated cross-browser execution of integration tests. Like Travis, BrowserStack also provides free access to their virtualized machines for open source projects, with various plans offered to private/commercial projects.
 
 
-### Setting up Travis
-- Setting up an account
-- Making Travis aware of your project
+### Running our unit tests on every push with Travis CI
+The steps required to get our unit tests running on Travis with every push to GitHub are as follows:
 
-### Setting up BrowserStack
-- Setting up account
-- Configuring your base build
+1. Setup Travis account.
+2. Make Travis aware of our project.
+3. Create a configuration file detailing our build requirements.
+4. Commit and push the build file up to GitHub.
+5. Profit.
+
+#### Setting up a Travis CI account
+Signing up is as easy as clicking the "Sign Up" button on https://travis-ci.org. As I mentioned earlier, Travis integrates almost seamlessly with GitHub, so much so that you can sign into to Travis using your GitHub account.
+
+#### Connecting the GitHub repository to Travis
+Once logged in, visit your profile page. There, you'll see a list of all public repositories in your account. To connect the Widen/fullstack-react repository to Travis (which holds the code for our names app), I visited _my_ account page in Travis, found the GitHub repo in the list of my projects, and clicked on the slider to "activate" the project. It should look something like this:
+
+<img src="{{base}}/images/travis-activate-repo.png" width="400" />
+
+#### Creating a config file to control the project build & triggering a build
+All of the configuration for our Travis build must be located in a file named `.travis.yml` in the root of our project. [YAML][yaml-spec] is a type of "data serialization format", much like JSON and XML. It is unusually human-readable, as you can see by looking at the Travis config file for Widen/fullstack-react:
+
+```yaml
+language: node_js
+node_js:
+- '5.0'
+```
+
+As you can see above, the configuration is _very_ minimal. All we really need to do is tell Travis that this is a JavaScript project (via the `language` property) and specify the version of Node.JS to install on the environment. Travis CI allows for a number of language-specific conventions to reduce configuration boilerplate. For example, by default, Travis will run `npm install` and `npm test` on any Node.JS projects. Since we have already defined a `"test"` script in our package.json file, we only need to tell Travis that this is indeed a Node.JS project, and it takes care of pulling down dependencies and running our tests automagically.
+
+So, to start your first build on Travis, simply commit the above `.travis.yml` file and push it up to GitHub. Take a look at [a Travis build log][travis-temp-log] for Widen/fullstack-react hat matches this very configuration. Note that I had to temporarily change the name of the integration.spec.js file to integration.spec.bak.js. This ensures it is _not_ seen by Jasmine and not executed. We're not quite ready to run integration tests _yet_.
 
 
-### Running our unit tests using Travis
+### Adding integration tests to the mix with BrowserStack
+Now that we have Travis running our frontend and backend unit tests, it's time to add integration tests to the mix. For this, as described earlier, we need to enlist the help of BrowserStack. The steps required to enable Travis to run our integration test with BrowserStack, alongside our unit tests "locally" using PhantomJS, are as follows:
 
-### Running our integration tests using Travis and BrowserStack
-- Updating integration tests & config to run against various browsers using BrowserStack
-- Updating npm test script to run all tests
+1. Setup a BrowserStack account
+2. Update our Travis config file with BrowserStack-related logic and authentication data
+3. Provide some configuration data for our integration test that will allow it to execute the test in browsers of our choosing.
+4. Push our changes up to GitHub and watch the build log on Travis.
 
+#### Setting up a BrowserStack account
+You can start using BrowserStack for free, regardless of the status of your project. For open-source projects, contact BrowserStack for free permanent access to one of the paid plans. This is exactly how I procured a free account for Widen/fullstack-react. After you create an account via their web interface, navigate to your account settings and make a note of your username and access key. You will need both of these when establishing configuration next.
+
+#### Configuring Travis and BrowserStack to run our integration test
+There are 5 steps required to create the necessary configuration and start running the integration test on Travis:
+
+1. Update the Travis config to start our app server
+2. Download and run the BrowserStack tunnel. This will the machine running on BrowserStack to see our running app instance on Travis.
+3. Specify a list of operating systems and browsers to test against.
+4. Include encrypted authentication information for our test & tunnel.
+5. Update our integration test to run against the browsers we chose in step 4.
+
+Let's look at the updated Travis config file first:
+
+```yaml
+language: node_js
+node_js:
+- '5.0'
+before_script:
+- npm start &
+- wget http://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip
+- unzip BrowserStackLocal-linux-x64.zip
+- ./BrowserStackLocal $BROWSERSTACK_KEY &
+- sleep 10
+env:
+  global:
+  - secure: IKsVq7xmRs/1pJZ/pB3tbOITtbtcBFlBh3IIuhGkh72y0v8PTFfP/r/zlT/Gq5seAIaXN+YnbDPA61qroxGAGJdrsAB0xVae+AWRmBbHV64mq4g3kkj4RJPjv/2rAsTHEBpXPpmHdpjEDFIEqwTKWehZpJZAjLFoRS7LV5ucRc2LBNpfP3J83AJWn3KpBVnw5SBcwUbY8O8vKcaaYyfeorjMXqZ84Rw9jlDyhR8HJmRrvA/FVadg2lpzabFmQ5gBkLFzxEKghvIRkAJDQ1LMjYBmA6aogiJZoH90InRb6ub4KUrrmnYdbn0ug8YxDYXDa34fsBBnipUAYwSnwGujJmHHQ3rbcS12/S+cs75uFowBLP2ej6toznyUIwhfMX9rBFY6salo3jW3Qj7Qyy+68C3aqPLkJLCEgFHN2dGLR4BEoguycxSDoeIc5vj6j3c8uH/pP1Vp1jIRuaDglfyraIiwcZL5l4zznlnaqCOvTG6hJKZHgz1MCxaaCQjCdsKtMjFnmz8aocxmJbW+0BazAhEbbPvUsagKrq0K91bmXKWaplvuo1jhqWOIlkW3L6eNX5880or+BergkjXufnZFLm6soaBdP1/aRN1fBgDPRuPcEh+gHbiSa3A1Y3Fsrx+eAz8mnkyqoXlAvQTPq8XBkIoUyoYWtzWpDp3CAVPGJmg=
+  - secure: RyXfo5jJrjlcedkk2k5ceT7KeuqdXaqRzREHMFI/FIJy/dkIpFQ2mD/HVF/SO7V/8hcsfA4TBIPb7Qlitl+5NZEgo3TlNpoxML9+jMrzBEnSafiqu1lJrg4z3+D4TtfjTi2ccI9wqhUeYiuPWmdFBgsqgRvFxMgbDLC0KJipsk12PYKCMzV+2+INBxx6SulBlPWS8RMMQeD0kY9JBMyxabZ5E3LtA9ALDedSW/C4qj6H4bchTSU1Vh7UcMOrCypfKGNv4halfoSfgIzZuSpWsnKGMz0RXiPwfUI9UHymA9vwToIzBgk+ZFlRqzIF69ex6llKTMgJARyat5xGmbLFN12u8YhAMde8SxSArNL4s5x1WUFK04OzagYEzPVRniJYK3pEVI0SGQPwWo6l85JUGT0iT4abn4MQRNwVhtHhqv55tMoJ7DlRujoKCa7bqQh/Okqw294Y/mFWMz6pENlT1p4JU5wERdL3Dtf2kHIpBMqRiEP/stHvkKcsRpUugW+4EbZDGyhVEOUnPUM4ZK/SvEqvg3foOSQdnBzrrc46KhBQ2Rh3l0Qyc/sOLXk/LrGmfKINU2wbNZqcpMRY5bjoEpAxRoEWO+mn+Cpfl8JRIfwN6VN88lHVGOvNlOjcdmo0wNhifDFSpTItIvpDZNW93zaIfZacBt0X2R7oqbiApXE=
+  matrix:
+  - BROWSER: Firefox
+    PLATFORM: Win8
+    VERSION: 41
+  - BROWSER: Chrome
+    PLATFORM: Win8
+    VERSION: 46
+  - BROWSER: Safari
+    PLATFORM: Mac
+    VERSION: 9
+```
+
+We've add a number of new items to the configuration. The `before_script` block will be executed after `npm install` but before `npm test`. Here, is a line-by-line breakdown of that configurarion block:
+
+1. Start our application server in a separate process (to prevent it from blocking the rest of the build).
+2. Download the BrowserStack tunnel binary.
+3. Unzip the tunnel binary.
+4. Start the tunnel in a separate process (to prevent it from blocking the rest of the build)
+5. Wait 10 seconds for the tunnel to start.
+
+Notice that we are passing an environment variable - `BROWSERSTACK_KEY` - to the tunnel on startup. This is our secret API key, but where is this variable coming from? If you look further down at the `env` section of the configuration, you'll see a couple `secure` items. These contain our username (`BROWSERSTACK_USERNAME`) and BrowserStack API (`BROWSERSTACK_KEY`) key. They have been encrypted and added to our config file. Travis' documentation site contains [a section that explains how to create and store these encrypted variables][travis-secure-variables].
+
+The final portion of the `env` configuration block contains a series of `matrix` entries. As you can see, these correspond to browser/OS environments that we'd like to test. For each matrix entry, Travis runs a separate virtualized machine, and makes each matrix property (`BROWSER`, `PLATFORM`, and `VERSION`) available to as environment variables.
+
+Our last step, before we are able to run our integration tests alongside the unit tests in Travis, is to make a few changes to server/test/integration.spec.js. All we really need to do is pass some configuration to WebdriverIO that allows it to connect to BrowserStack instead of a locally running Selenium server. This configuration will also pass browser and OS information to BrowserStack so it can provision the appropriate environment. That specific information is already defined in our Travis config file. We only need to change the first portion of our integration test module, which now looks like this:
+
+```javascript
+var webdriverio = require('webdriverio'),
+    options = {}
+
+if (process.env.CI) {
+    options = {
+        desiredCapabilities: {
+            browserName: process.env.BROWSER,
+            version: process.env.VERSION,
+            platform: process.env.PLATFORM,
+            "browserstack.local": true
+        },
+        host: 'hub.browserstack.com',
+        port: 80,
+        user: process.env.BROWSERSTACK_USERNAME,
+        key: process.env.BROWSERSTACK_KEY
+    }
+}
+
+describe('name adder integration tests', () => {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+
+    beforeEach(() => {
+        this.browser = webdriverio.remote(options).init()
+    })
+
+    /* existing test here... */
+})
+```
+
+As you can see, the configuration we've added grabs the browser, OS, version and BrowserStack-related auth info provided as environment variables in our Travis config. This data is then passed to WebdriverIO as a JavaScript object. I've added a check to _only_ provide this new configuration data if the code is running on Travis. We can easily detect this by looking for a `CI` environment variable, which Travis sets for us. If our test is _not_ running on Travis, it will attempt to connect to a locally-running Selenium server, as before.
+
+Simply commit these changes, push them up to GitHub, and you will see unit and integration tests run on Travis. Take a look at [a recent build on Travis of Widen/fullstack-react][travis-passing-build] that illustrates the finished product.
 
 ## Going further
 - handle empty list of names in code and back it with a unit test for names-list
@@ -715,11 +831,13 @@ So, now we have a running Selenium server. How can we actually execute this new 
 
 
 [blink]: http://www.chromium.org/blink
+[browserstack]: https://www.browserstack.com/
 [data-server-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js#L6
 [donedone-jar]: http://images.wisegeek.com/hand-putting-money-in-coin.jpg
 [falcor-code-updates]: https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-5545284dc279e8d0cac06a735ecc9f64R1
 [falcor-model-deref]: http://netflix.github.io/falcor/doc/Model.html#deref
 [falcor-path-change]: https://github.com/Netflix/falcor/issues/708
+[github-branch-protection]: https://help.github.com/articles/about-protected-branches/
 [jasmine]: http://jasmine.github.io/2.3/introduction.html
 [jasmine-async]: http://jasmine.github.io/2.3/introduction.html#section-Asynchronous_Support
 [jasmine-describe]: http://jasmine.github.io/2.3/introduction.html#section-Grouping_Related_Specs_with_<code>describe</code>
@@ -746,9 +864,14 @@ So, now we have a running Selenium server. How can we actually execute this new 
 [server.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js
 [testacular]: http://googletesting.blogspot.com/2012/11/testacular-spectacular-test-runner-for.html
 [testing-slides]: http://slides.com/raynicholus/automated-testing
+[travis]: https://travis-ci.org/
+[travis-passing-build]: https://travis-ci.org/Widen/fullstack-react/builds/108453063
+[travis-secure-variables]: https://docs.travis-ci.com/user/environment-variables/#Encrypting-Variables-Using-a-Public-Key
+[travis-temp-log]: https://travis-ci.org/Widen/fullstack-react/builds/108709902
 [webdriver-w3c]: https://www.w3.org/TR/webdriver/
 [webdriverio]: http://webdriver.io/
 [webkit]: https://webkit.org/
 [webpack-babel-updates]: https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-a58d55bdb5770c78ad512f8e91f8d051R6
 [webpack.config.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js
 [whyscry-twitter]: https://twitter.com/angustweets/status/590659867926462465
+[yaml-spec]: http://yaml.org/spec/
