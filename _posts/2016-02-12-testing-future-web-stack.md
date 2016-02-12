@@ -825,9 +825,15 @@ As you can see, the configuration we've added grabs the browser, OS, version and
 Simply commit these changes, push them up to GitHub, and you will see unit and integration tests run on Travis. Take a look at [a recent build on Travis of Widen/fullstack-react][travis-passing-build] that illustrates the finished product.
 
 ## Going further
-- handle empty list of names in code and back it with a unit test for names-list
-- move integration test config to a file in config dir
-- better reporting of failed tests all around
+While [Widen/fullstack-react][repo-v2] was designed to be simple to allow us to focus on the concepts needed to create and test a futuristic full-stack JavaScript web application, there are certainly areas where we can make improvements. Some of those improvements may include:
+
+* Handle an empty list of names in the code and back it with a unit test for `<NamesList>`.
+* Move the integration test configuration to a file in config directory.
+* Improve console reporting for server-side tests.
+* Make use of ES6 modules instead of using CommonJS throughout the project.
+* Compile the server code using Babel & Webpack. This will allow us to use more ES6/7 features on the server as well, and give us to ability to set aliases, use plug-ins, and all of the other conveniences we are already used to client-side.
+
+Let me know in the comments section below, or open up a pull request or issue in [the project's issue tracker][issues] if you have any other ideas.
 
 
 [blink]: http://www.chromium.org/blink
@@ -838,6 +844,7 @@ Simply commit these changes, push them up to GitHub, and you will see unit and i
 [falcor-model-deref]: http://netflix.github.io/falcor/doc/Model.html#deref
 [falcor-path-change]: https://github.com/Netflix/falcor/issues/708
 [github-branch-protection]: https://help.github.com/articles/about-protected-branches/
+[issues]: https://github.com/Widen/fullstack-react/issues
 [jasmine]: http://jasmine.github.io/2.3/introduction.html
 [jasmine-async]: http://jasmine.github.io/2.3/introduction.html#section-Asynchronous_Support
 [jasmine-describe]: http://jasmine.github.io/2.3/introduction.html#section-Grouping_Related_Specs_with_<code>describe</code>
