@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>The Future of Web Development Part 2 - Full-Stack Automated JavaScript Testing | Widen Engineering</title>
+  <meta name="description" content="In my last article, I showed you how to develop a full-stack JavaScript web application using some pretty interesting and futuristic libraries and web specif...">
+
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/favicon/apple-icon-57x57-443078e666f8564fe94d070b2e527a4e.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/assets/favicon/apple-icon-60x60-8a893e3ab71590ed3057de7e6cd3ae98.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/favicon/apple-icon-72x72-f8c2f3ae23146687e05cc43b079e20f7.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/favicon/apple-icon-76x76-c8d92c837a6f23b049e992c8d1ac4300.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/favicon/apple-icon-114x114-e2a336df00d1c5b863ba753bbc65685b.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/assets/favicon/apple-icon-120x120-9dd8c2247c71ee7257d91cefcd651488.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/assets/favicon/apple-icon-144x144-977c40f1283a726696a38f03ca13d462.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/assets/favicon/apple-icon-152x152-a2b19091ea27d58f71346b1230fb6695.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-icon-180x180-c5f20e7c26f328953ad1bc7456a6b132.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="/assets/favicon/android-icon-192x192-c18592872a77026c84201ce58a5c2b56.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32-ba8c5bfb24d4e1d4c9249c63a689dbc0.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon/favicon-96x96-e3521be3d5d9e10952a430e073a28fd3.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16-c488d0fbd40d0408f7ccb9b2fe8c787d.png">
+
+<link rel="manifest" href="/assets/favicon/manifest-1ec559e0a7d1bdd5863ea8923dc00726.json">
+
+<meta name="msapplication-TileColor" content="#B72822">
+<meta name="msapplication-TileImage" content="/assets/favicon/ms-icon-144x144-977c40f1283a726696a38f03ca13d462.png">
+<meta name="theme-color" content="#B72822">
+
+  <link rel="stylesheet" href="/assets/app-87142aaebc5b8564f9220127fd8b5a59.css">
+  <link rel="canonical" href="http://engineering.widen.com/blog/testing-future-web-stack/">
+  <link rel="alternate" type="application/rss+xml" title="Widen Engineering" href="http://engineering.widen.com/feed.xml" />
+</head>
+
+
+  <body>
+
+    <div class="full-width">
+      <header class="site-header" role="banner">
+    <div class="wrapper">
+        <div class="logo">
+            <a href="/">
+                <img width="400" alt="Widen-Engineering-White-Logo" src="http://embed.widencdn.net/img/widen/c17yrvuaac/400px@2x/Widen Engineering White Logo.png?u=mcuc7i">
+            </a>
+        </div>
+        <br class="clear"/>
+  </div>
+
+</header>
+
+    </div>
+
+    <div class="wrapper">
+
+      <main class="content" role="main">
+
+        <div class="post">
+    <header>
+        <h1><a title="The Future of Web Development Part 2 - Full-Stack Automated JavaScript Testing" href="/blog/testing-future-web-stack/">The Future of Web Development Part 2 - Full-Stack Automated JavaScript Testing</a></h1>
+        <time datetime="2016-02-12T00:00:00-06:00">Feb 12, 2016</time> • Ray Nicholus
+    </header>
+
+    <article role="article">
+
+      <p>In <a href="/blog/future-of-the-web-react-falcor/">my last article</a>, I showed you how to develop a full-stack JavaScript web application using ECMAScript 6, Falcor, React, Babel, Webpack, and Node.JS. Developing a project using this futuristic stack is undoubtedly fun, but this is only a piece of the puzzle. Any code you write that is meant to be used by others should be tested. Manually testing your code is certainly one approach, though you will find this route cumbersome. In order to make more efficient use of your time and provide executable documentation for future maintainers, it is important to develop a suite of automated tests. In this follow-up article, I’ll show you how to write automated tests for <em>all</em> of the code we wrote in the first article. We will automate testing of the frontend and server-side code, <em>plus</em> I’ll show you how to write automated integration (a.k.a. Selenium) tests that exercise the entire application. <strong>Keeping with the spirit of the first article, all tests will be written using JavaScript and made available in <a href="https://github.com/Widen/fullstack-react/tree/2.0.0">an updated version of the same GitHub repository</a></strong>. After completing this article and following the coding examples, you’ll see how easy and satisfying it is to write automated tests for <em>your</em> web applications.</p>
+
+<p>Automated tests ensure that future changes to our code due to maintenance or evolution do not cause our application to regress. In the context of this simple application, we want to be sure that users are <em>always</em> able to add new names. It’s also important that the list of names presented to the user be accurate and up-to-date. There are probably some edge cases that should be tested as well. What happens if our server goes down? How does the UI respond? It’s also prudent to ensure that our application works in all supported browsers. If you have spent any amount of time developing for the web, you already know that this is a real concern due to potential browser-specific issues and varying web API and JavaScript implementations. And what if an unexpected condition is encountered server-side? How will our Falcor routes deal with this? While our app is indeed trivial, there is quite a bit that can go wrong, and that means we have a lot of tests to write!</p>
+
+<p>While manual tests are still important, I’m going to discuss automated testing in this article. Furthermore, I’ll discuss two distinct types of automated tests - unit tests and integration tests. Unit tests are low-level and very narrowly scoped. They exercise only specific sections of the code. For example, we’ll write a different set of unit tests for each frontend React component, along with a set of tests for our backend Falcor routes. It’s critical that we focus on testing the specific roles of each of these modules, and that may mean mocking out a module’s internal dependencies so that we can better control the environment. When we “mock” something, we’re essentially replacing it with a dummy version that we have full control over. This eliminates uncertainty in our testing environment.</p>
+
+<p>In addition to unit tests, we have integration tests, which may also be known as “workflow” or “Selenium” tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we’ll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, <em>all</em> of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario. While there are other definitions of “integration” testing, as the meaning of this term seems to be somewhat subjective, we’re going to work with the definition outlined here throughout this article.</p>
+
+<h2 id="part-0-bringing-our-code-and-project-up-to-date">Part 0: Bringing our code and project up-to-date</h2>
+<p>Since the last article (exactly 4 months ago), most of our project’s dependencies have changed in some way, some of them drastically. The most visible changes were to Falcor and Babel.</p>
+
+<p>Version 0.1.16 of Falcor brings <a href="https://github.com/Netflix/falcor/issues/708">a breaking change</a> that affected our response parsing code. In short, an unexpected item is visible among expected properties of “get” responses: <code class="highlighter-rouge">$__path</code>. This new property is useful for creating new models based on sections of an existing JSON graph, which is accomplished using <a href="http://netflix.github.io/falcor/doc/Model.html#deref">the new <code class="highlighter-rouge">Model.deref</code> method</a>. However, we don’t have much use for this in our simple app. Since we only want to see the requested values in our “get” responses, we must <a href="https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-5545284dc279e8d0cac06a735ecc9f64R1">make use of a new <code class="highlighter-rouge">Falcor.keys</code> method</a>, which iterates over all of the keys in the response, ignoring the <code class="highlighter-rouge">$__path</code> property. In this way, it functions exactly like <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys"><code class="highlighter-rouge">Object.keys</code></a>, except for the added convenience of skipping this unwanted property.</p>
+
+<p>Babel 6.x brings a number of substantial changes that have a cascading effect on some of our <em>other</em> dependencies. Essentially, Babel was carved up into many different smaller and more focused libraries in 6.0. This required us to explicitly <a href="https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-b9cfc7f2cdf78a7f4b91a753d10865a2R19">pull in separate libraries for ES6, React, and command-line support</a> with Babel. The “main” Babel library - babel-core - doesn’t perform ES6, ES7, or React compilation tasks anymore. Our <a href="https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-a58d55bdb5770c78ad512f8e91f8d051R6">WebPack configuration for the Babel loader also changed</a> slightly as a result.</p>
+
+<h2 id="part-1-browser-side-unit-tests">Part 1: Browser-side unit tests</h2>
+<p>We’ll first focus on writing automated tests for our code that runs in the browser. This accounts for portions of our simple application that our users directly interact with. We’ll primarily write tests for our React components, but first it may make sense to refactor our code a bit to make it more conducive to testing.</p>
+
+<h3 id="refactoring-for-ease-of-testing">Refactoring for ease of testing</h3>
+<p>The <a href="https://github.com/Widen/fullstack-react/tree/1.2.1">most recent version of our names application</a> contains all of our source files organized into a flat structure. While this is a reasonable hierarchy for such a small number of files, it doesn’t scale very well. As we add more files to handle configuration, testing, and to support better modularization of our application, we’ll need a better-defined structure for our project. To start, let’s move our 3 React components and the Falcor model file into a new directory named “app”. Let’s also move our webpack configuration file into a root-level “config” directory, and finally our index.html file into a “site” directory. This new “site” directory will contain all publicly accessible resources, so the Webpack-generated JavaScript bundle should <em>also</em> live here. After this initial reorganization, our project looks like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>.
++-- app
+|   +-- model.js
+|   +-- name-adder.jsx
+|   +-- name-manager.jsx
+|   +-- names-list.jsx
++-- config
+|   +-- webpack.config.js
++-- site
+|   +-- index.html
++-- server.js
++-- package.json
+</code></pre>
+</div>
+
+<p>In order to support this new structure, a few changes must be made to some of our existing code. First, webpack.config.js has to be updated to be aware of the new location of our source files. This is a simple as changing the value of the <code class="highlighter-rouge">entry</code> property from “./name-manager.jsx” to “./app/name-manager.jsx”. So <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js">our original app/webpack.config.js</a> file now looks like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">entry</span><span class="p">:</span> <span class="s1">'./app/name-manager.jsx'</span><span class="p">,</span>
+    <span class="na">output</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">filename</span><span class="p">:</span> <span class="s1">'./site/bundle.js'</span>
+    <span class="p">},</span>
+    <span class="na">module</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">loaders</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="na">test</span><span class="p">:</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">js/</span><span class="p">,</span>
+                <span class="na">loader</span><span class="p">:</span> <span class="s1">'babel'</span><span class="p">,</span>
+                <span class="na">exclude</span><span class="p">:</span> <span class="sr">/node_modules/</span><span class="p">,</span>
+                <span class="na">query</span><span class="p">:</span> <span class="p">{</span>
+                  <span class="na">presets</span><span class="p">:</span> <span class="p">[</span><span class="s1">'es2015'</span><span class="p">,</span> <span class="s1">'react'</span><span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="na">devtool</span><span class="p">:</span> <span class="s1">'source-map'</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>Furthermore, our Node.JS server must be adjusted to serve the HTML and JS bundle files out of the site directory. This requires a simple change to our Express server. This means <code class="highlighter-rouge">app.use(express.static('.'))</code> changes to <code class="highlighter-rouge">app.use(express.static('site'))</code> in our server.js file. So, the last few lines of <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/server.js">our original server.js</a> now look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="s1">'site'</span><span class="p">))</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">9090</span><span class="p">,</span> <span class="nx">err</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'navigate to http://localhost:9090'</span><span class="p">)</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p>Before we go any further, we should make sure our changes haven’t broken anything, but before we do that, let’s make one additional adjustment. Going forward, it may be beneficial for us to use our package.json file as a place to execute any scripts needed to build, test, and run our application. The usefulness of this approach will become clearer as this exercise progresses. We’ll start by defining a second target in the package.json <code class="highlighter-rouge">"scripts"</code> object, one that will startup our server. After this addition, the bottom of <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/package.json">our original package.json file</a> now looks like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s2">"scripts"</span><span class="err">:</span> <span class="p">{</span>
+  <span class="s2">"start"</span><span class="err">:</span> <span class="s2">"node server"</span><span class="p">,</span>
+  <span class="s2">"webpack"</span><span class="err">:</span> <span class="s2">"webpack --config config/webpack.config.js"</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>There are two changes to this section of the file. First, a new <code class="highlighter-rouge">"start"</code> tasks has been added, which starts up our Node.JS server. You can simply run <code class="highlighter-rouge">npm start</code> to execute this step. Second, our <code class="highlighter-rouge">"webpack"</code> target has been adjusted to include a reference to the new location of our Webpack configuration file. Previously, this file was located in the root of our project, and, by convention, Webpack looks for a file named “webpack.config.js” in the root of the project. Since we’ve moved this to the config directory, we must now let webpack know where this configuration file exists.</p>
+
+<h3 id="getting-familiar-with-our-testing-tools">Getting familiar with our testing tools</h3>
+
+<p>Our client-side unit tests will be created with the help of a few important and useful tools:</p>
+
+<ol>
+  <li><a href="http://jasmine.github.io/2.3/introduction.html">Jasmine</a></li>
+  <li><a href="http://phantomjs.org/">PhantomJS</a></li>
+  <li><a href="https://github.com/jhnns/rewire">Rewire</a></li>
+  <li><a href="http://karma-runner.github.io/0.13/index.html">Karma</a></li>
+</ol>
+
+<p>Jasmine is a JavaScript library we will use to <em>compose</em> our unit tests. It includes a rich <a href="http://jasmine.github.io/2.3/introduction.html#section-Matchers">set of assertions</a> for comparing actual values under test with expected values, a full-featured <a href="http://jasmine.github.io/2.3/introduction.html#section-Spies">mocking engine</a> that will allow us to more easily focus on the component under test, as well as a number of other helpers that we will use to <a href="http://jasmine.github.io/2.3/introduction.html#section-Grouping_Related_Specs_with_&lt;code&gt;describe&lt;/code&gt;">group our tests</a> and <a href="http://jasmine.github.io/2.3/introduction.html#section-Asynchronous_Support">test asynchronous behaviors</a>.</p>
+
+<p>PhantomJS is a headless version of <a href="https://webkit.org/">WebKit</a>, the rendering engine currently used in Apple’s Safari browser and formerly used in Google’s Chrome browser (before it was forked as <a href="http://www.chromium.org/blink">Blink</a>). Running our unit tests in a headless browser makes them easy and quick to run, not to mention portable. The entire browser is distributed and contained in a JavaScript package downloaded from npm. Using a conventional browser for unit tests in a development environment can be jarring with browser windows opening and closing, especially if tests are automatically re-run as soon as any code changes are saved.</p>
+
+<p>Rewire is a Node.js tool primarily used (at least in this project) to mock out sub-modules imported by a module under test. For example, when testing our <code class="highlighter-rouge">&lt;NameManager/&gt;</code> component, we need to be able to control the behavior of its internal dependencies - <code class="highlighter-rouge">&lt;NameList/&gt;</code> and <code class="highlighter-rouge">&lt;NameAdder/&gt;</code>. We can use Rewire to gain access to these dependencies inside of <code class="highlighter-rouge">&lt;NameManager/&gt;</code> and replace them with dummy modules with inputs and outputs that we can monitor and control in order to more reliably test <em>this</em> component. Rewire allows us to access internal dependencies in this way by using its own module loader to insert hooks into modules that allow them to be unnaturally accessed and controlled in a testing environment. For our browser-based unit tests, we’ll need to use a Babel plug-in that wraps the Rewire plugin. It is aptly named <a href="https://github.com/speedskater/babel-plugin-rewire">babel-plugin-rewire</a>. We must use this Babel plug-in instead of the native Rewire library due to <a href="https://github.com/jhnns/rewire/issues/55">Babel’s unique ECMAScript 6 module transpilation logic</a>.</p>
+
+<p>Karma is a test runner and reporter, initially developed by Google for use with AngularJS unit tests. Fun fact: it was originally known as <a href="http://googletesting.blogspot.com/2012/11/testacular-spectacular-test-runner-for.html">Testacular</a>. It’s hard to imagine why they changed the name, but I digress. Before we can begin writing tests, we must first configure Karma and tie all of our testing and reporting tools together. Remember that Karma is our client-side test <em>runner</em>. In other words, it will use use Jasmine to execute the tests we are going to write, and it will provision a PhantomJS instance as an environment in which the tests will run. It will report the results using a Karma plugin: karma-spec-reporter. Another plug-in will need to be introduced to allow Karma to use Webpack to generate a temporary source bundle that includes all of the code we intend to test. Our existing webpack.config.js file will be used here to determine how this bundle is generated. But we will need to contribute an addition Babel plug-in to our Webpack configuration just for these tests - babel-plugin-rewire - which will hook into the bundle generation process and add hooks into our code that we will need to mock out dependencies internal to each of the React components we intend to test.</p>
+
+<p>Our Karma configuration will be named karma.conf.js, and it will be appropriately located inside of our new “config” directory. The completed file will look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">webpackConfig</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./webpack.config'</span><span class="p">)</span>
+<span class="nx">webpackConfig</span><span class="p">.</span><span class="nx">module</span><span class="p">.</span><span class="nx">loaders</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">query</span> <span class="o">=</span> <span class="p">{</span><span class="na">plugins</span><span class="p">:</span> <span class="p">[</span><span class="s1">'babel-plugin-rewire'</span><span class="p">]}</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">config</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">config</span><span class="p">.</span><span class="nx">set</span><span class="p">({</span>
+        <span class="na">basePath</span><span class="p">:</span> <span class="s1">'../'</span><span class="p">,</span>
+        <span class="na">browsers</span><span class="p">:</span> <span class="p">[</span><span class="s1">'PhantomJS'</span><span class="p">],</span>
+        <span class="na">files</span><span class="p">:</span> <span class="p">[</span><span class="s1">'app/test/tests.bundle.js'</span><span class="p">],</span>
+        <span class="na">frameworks</span><span class="p">:</span> <span class="p">[</span><span class="s1">'jasmine'</span><span class="p">],</span>
+        <span class="na">plugins</span><span class="p">:</span> <span class="p">[</span>
+            <span class="nx">require</span><span class="p">(</span><span class="s1">'karma-webpack'</span><span class="p">),</span>
+            <span class="s1">'karma-spec-reporter'</span><span class="p">,</span>
+            <span class="s1">'karma-jasmine'</span><span class="p">,</span>
+            <span class="s1">'karma-phantomjs-launcher'</span>
+        <span class="p">],</span>
+        <span class="na">preprocessors</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">'app/test/tests.bundle.js'</span><span class="p">:</span> <span class="s1">'webpack'</span>
+        <span class="p">},</span>
+        <span class="na">reporters</span><span class="p">:</span> <span class="p">[</span><span class="s1">'spec'</span><span class="p">],</span>
+        <span class="na">singleRun</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+        <span class="na">webpack</span><span class="p">:</span> <span class="nx">webpackConfig</span><span class="p">,</span>
+        <span class="na">webpackMiddleware</span><span class="p">:</span> <span class="p">{</span><span class="na">noInfo</span><span class="p">:</span> <span class="kc">true</span><span class="p">}</span>
+    <span class="p">});</span>
+<span class="p">};</span>
+</code></pre>
+</div>
+
+<p>Before we start configuring Karma, you’ll notice that we are referencing our existing Webpack configuration file and adding a plug-in: babel-plugin-rewire. As mentioned previously, this will allow us to more easily mock internal component dependencies. Moving on, our first configuration point is the <code class="highlighter-rouge">basePath</code>. The location here establishes a relative path for all other paths specified in our configuration file. Since our configuration file is located inside of the “config” subdirectory, our base path is set to the root of the project. Next, we must declare any browsers to run our tests against. We’re just using PhantomJS at the moment. Note that a Karma plug-in for PhantomJS is specified in the <code class="highlighter-rouge">plugins</code> section near the middle of the file as well. This plug-in will be used by Karma to start and control PhantomJS.</p>
+
+<p>The <code class="highlighter-rouge">files</code> configuration point is an array containing the path to a file that will be later coded to include all of our test files. Followed by <code class="highlighter-rouge">files</code> is <code class="highlighter-rouge">frameworks</code>. This array will only contain one value - “jasmine” - which is our unit test framework. Later, we’ll write all of our unit tests using Jasmine. Notice that there is a corresponding plug-in - karma-jasmine - in the following <code class="highlighter-rouge">plugins</code> section. This plug-in provides Karma programmatic access to the Jasmine binaries.</p>
+
+<p>Skipping down just a tad to the <code class="highlighter-rouge">preprocessors</code> section, we are instructing Karma to run our unit test files through Webpack. The last two items in our config file - <code class="highlighter-rouge">webpack</code> and <code class="highlighter-rouge">webpackMiddleware</code> - are used to point Karma at our Webpack configuration file (which we pulled in at the top of this file) and ensure info messages are printed to the console, respectively. There is a Webpack plug-in for Karma as well referenced as the first item in our <code class="highlighter-rouge">plugins</code> array.<br />
+Karma will only run our tests once and then exit, thanks to the <code class="highlighter-rouge">singleRun</code> option set to a value of <code class="highlighter-rouge">true</code>. And finally, our test results will be printed in a useful format to the console using a reporter plug-in: karma-spec-reporter. The alias for this reporter - “spec” - is included in the <code class="highlighter-rouge">reporters</code> array, and the plug-in is mentioned in our <code class="highlighter-rouge">plugins</code> array as well. Karma is ready to go, and next we will begin writing client-side unit tests.</p>
+
+<h3 id="writing-our-tests">Writing our tests</h3>
+
+<p>I’ve already explained why it’s important to write automated unit tests, covered the tools we will be using to write and run these tests, <em>and</em> I’ve showed you how to configure Karma to actually run the tests. Just one problem - we don’t have any actual tests to run. Let’s take care of that now by writing comprehensive unit tests that cover each of <a href="/blog/future-of-the-web-react-falcor#dividing-ui-roles-into-components-with-react">our three React components from the previous article</a>: <code class="highlighter-rouge">&lt;NameAdder /&gt;</code>, <code class="highlighter-rouge">&lt;NamesList /&gt;</code>, and our “glue” component - <code class="highlighter-rouge">&lt;NameManager /&gt;</code>.</p>
+
+<p>Each component’s tests will be located in a dedicated file inside of a new subdirectory under our app directory. After writing all of our tests, our file tree will look something like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>.
++-- app
+|   +-- model.js
+|   +-- name-adder.jsx
+|   +-- name-manager.jsx
+|   +-- names-list.jsx
+|   +-- test
+|      +-- name-adder.spec.jsx
+|      +-- name-manager.spec.jsx
+|      +-- names-list.spec.jsx
+|      +-- tests.bundle.js
++-- config
+|   +-- karma.conf.js
+|   +-- webpack.config.js
++-- site
+|   +-- index.html
++-- server.js
++-- package.json
+</code></pre>
+</div>
+
+<p>Notice a fourth file in the new tests directory - tests.bundle.js. This was first mentioned in the previous section, as it is referenced as the entry point in our Karma configuration file. Essentially, this file identifies all test files to execute. In fact, it looks for any files ending in .spec.js or .spec.jsx in the current directory and makes them available for execution by, in this case, Karma, and it looks like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">context</span> <span class="o">=</span> <span class="nx">require</span><span class="p">.</span><span class="nx">context</span><span class="p">(</span><span class="s1">'.'</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="sr">/.+</span><span class="se">\.</span><span class="sr">spec</span><span class="se">\.</span><span class="sr">js</span><span class="se">(</span><span class="sr">x</span><span class="se">?)?</span><span class="sr">$/</span><span class="p">)</span>
+<span class="nx">context</span><span class="p">.</span><span class="nx">keys</span><span class="p">().</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">context</span><span class="p">)</span>
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">context</span>
+</code></pre>
+</div>
+
+<h4 id="testing-nameadder">Testing NameAdder</h4>
+
+<p>In <a href="/blog/future-of-the-web-react-falcor/">the previous article</a>, we created a React component with a very specific job - allow a new name to be added to our list of names. A simple unit test would ensure that this component is at least able to perform this task. In short, we are going to write a relatively simple test that attempts to enter a new name into the <code class="highlighter-rouge">&lt;input type="text"&gt;</code> rendered by this component, click the add button, and then ensure our component calls our Falcor model with the correct data. I’ll start by posting the entire test specification. Don’t worry, I’ll cover this first example in quite a bit of detail, which will be helpful to you when viewing tests for our other React components.</p>
+
+<p>So, this is app/test/name-adder.spec.jsx:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">),</span>
+    <span class="nx">ReactDom</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react-dom'</span><span class="p">),</span>
+    <span class="nx">NameAdder</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'../name-adder.jsx'</span><span class="p">),</span>
+    <span class="nx">Falcor</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor'</span><span class="p">),</span>
+    <span class="nx">TestUtils</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react/lib/ReactTestUtils'</span><span class="p">)</span>
+
+<span class="nx">describe</span><span class="p">(</span><span class="s1">'NameAdder'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">it</span><span class="p">(</span><span class="s1">'saves new messages'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">model</span> <span class="o">=</span> <span class="nx">jasmine</span><span class="p">.</span><span class="nx">createSpyObj</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'call'</span><span class="p">]),</span>
+            <span class="nx">onNameAdded</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{},</span>
+            <span class="nx">nameAdder</span> <span class="o">=</span> <span class="nx">TestUtils</span><span class="p">.</span><span class="nx">renderIntoDocument</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">NameAdder</span> <span class="nx">onAdded</span><span class="o">=</span><span class="p">{</span><span class="nx">onNameAdded</span><span class="p">}</span><span class="sr">/&gt;</span><span class="se">)</span><span class="err">,
+</span>            <span class="nx">form</span> <span class="o">=</span> <span class="nx">TestUtils</span><span class="p">.</span><span class="nx">findRenderedDOMComponentWithTag</span><span class="p">(</span><span class="nx">nameAdder</span><span class="p">,</span> <span class="s1">'form'</span><span class="p">),</span>
+            <span class="nx">input</span> <span class="o">=</span> <span class="nx">nameAdder</span><span class="p">.</span><span class="nx">refs</span><span class="p">.</span><span class="nx">input</span>
+
+        <span class="nx">NameAdder</span><span class="p">.</span><span class="nx">__Rewire__</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="nx">model</span><span class="p">)</span>
+        <span class="nx">model</span><span class="p">.</span><span class="nx">call</span><span class="p">.</span><span class="nx">and</span><span class="p">.</span><span class="nx">returnValue</span><span class="p">({</span><span class="na">then</span><span class="p">:</span> <span class="p">(</span><span class="nx">success</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">success</span><span class="p">()})</span>
+
+        <span class="nx">input</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="s1">'new name'</span>
+        <span class="nx">TestUtils</span><span class="p">.</span><span class="nx">Simulate</span><span class="p">.</span><span class="nx">submit</span><span class="p">(</span><span class="nx">form</span><span class="p">)</span>
+
+        <span class="nx">expect</span><span class="p">(</span><span class="nx">model</span><span class="p">.</span><span class="nx">call</span><span class="p">).</span><span class="nx">toHaveBeenCalledWith</span><span class="p">([</span><span class="s1">'names'</span><span class="p">,</span> <span class="s1">'add'</span><span class="p">],</span> <span class="p">[</span><span class="s1">'new name'</span><span class="p">],</span> <span class="p">[</span><span class="s1">'name'</span><span class="p">])</span>
+    <span class="p">})</span>
+<span class="p">})</span>
+</code></pre>
+</div>
+
+<p>First, you’ll notice that I’ve imported several dependencies that will be needed to complete this test. <code class="highlighter-rouge">React</code>, <code class="highlighter-rouge">ReactDom</code>, <code class="highlighter-rouge">NameAdder</code>, and <code class="highlighter-rouge">Falcor</code> are probably not surprising, but <code class="highlighter-rouge">TestUtils</code> is a new one. React provides a set of utilities that help you write unit tests against a React component. We’ll use various methods in <code class="highlighter-rouge">TestUtils</code> to easily add our component under test to the DOM, locate children of this component, and simulate DOM events that trigger our component to take specific actions.</p>
+
+<p>Our test is wrapped in an <code class="highlighter-rouge">it</code> block, which itself is wrapped in a <code class="highlighter-rouge">describe</code> block. These are Jasmine conventions. The <code class="highlighter-rouge">describe</code> block is meant to contain a set of tests, and each <code class="highlighter-rouge">it</code> block contains a single test. Each of them should read like a sentence or phrase. Here, we will <code class="highlighter-rouge">describe</code> a <code class="highlighter-rouge">NameAdder</code> component. What does it do? <code class="highlighter-rouge">it</code> saves new messages. We will test this assertion inside of the <code class="highlighter-rouge">it</code> block.</p>
+
+<p>Inside of our <code class="highlighter-rouge">it</code> block, we’re first using Jasmine to create a mocked version of our Falcor model, which we will “inject” into our <code class="highlighter-rouge">NameAdder</code> component shortly. By mocking the model, we can easily control and examine inputs and outputs to verify the behavior of the component under test. Next, we’re defining an empty function, which will serve as the value of the <code class="highlighter-rouge">onAdded</code> property passed to our <code class="highlighter-rouge">NameAdder</code> component, which is created and added to our document after that. We don’t much care about the <code class="highlighter-rouge">onAdded</code> property for the purposes of this test - but it must be supplied as it is currently a required property. The last two variable declarations at the top of the <code class="highlighter-rouge">it</code> block locate the <code class="highlighter-rouge">&lt;form&gt;</code> and <code class="highlighter-rouge">&lt;input&gt;</code> elements inside of our rendered <code class="highlighter-rouge">NameAdder</code> component. We’ll need access to these soon when we test our component.</p>
+
+<p>Remember when I said we would need to inject a mocked Falcor model into our <code class="highlighter-rouge">NameAdder</code> component instance? That happens immediately after the block of variable declarations. This is where babel-plugin-rewire enters into our testing stack. This Babel plug-in added a bunch of methods to the compiled JavaScript code that makes it easy to access internal dependencies. This is especially useful for replacing real dependencies with mocked ones. The <code class="highlighter-rouge">__Rewire__</code> function, added to our <code class="highlighter-rouge">NameAdder</code> component during Babel compilation, allows us to replace our Falcor model simply by specifying the name of the internal variable that is assigned the import - <code class="highlighter-rouge">model</code> - followed by the new value - our Jasmine-created mock object. Immediately after injecting our mocked model into <code class="highlighter-rouge">NameAdder</code> we’ve defined a behavior, again using Jasmine. When the <code class="highlighter-rouge">call</code> method is invoked by <code class="highlighter-rouge">NameAdder</code> on this mock object, it invokes the promissory success function, indicating that the model update was a success. Remember that the <code class="highlighter-rouge">call</code> function on our Falcor model is used internally by <code class="highlighter-rouge">NameAdder</code> to send a newly added name to the model, which in turn sends the new data to our server to be handled by a matching Falcor route.</p>
+
+<p>The <code class="highlighter-rouge">&lt;input&gt;</code> we referenced in the variable block is used next. We’re essentially “typing” in a new name by setting the <code class="highlighter-rouge">value</code> property of this element. Text inputs, among several other input types, will reflect entered data in the <code class="highlighter-rouge">value</code> property on the JavaScript object that represents the element tag in our markup. We can read <em>or</em> write to this property. Internally, <code class="highlighter-rouge">NameAdder</code> reads this property when handing a form submission, and sends the value of this <code class="highlighter-rouge">value</code> property to the Falcor model. And so, now that we’ve entered a new name, we need to submit the form. <code class="highlighter-rouge">TestUtils</code> provides a method that will “simulate” a form submit. Without this shortcut, triggering a DOM event can be a bit tricky in some instances. Just think of this as an easy way to invoke the internal <code class="highlighter-rouge">onSubmit</code> function set on the <code class="highlighter-rouge">&lt;form&gt;</code> component inside of <code class="highlighter-rouge">NameAdder</code>. This function starts the chain of actions that ends in a new name being sent to our server.</p>
+
+<p>Finally, we have to actually <em>test</em> something, don’t we? Perhaps the most prudent course at this juncture is to hook into our mocked Falcor model and ensure the proper route has been <code class="highlighter-rouge">call</code>ed with the text of our new name. The <code class="highlighter-rouge">expect</code> function - a utility provided by Jasmine - gives us an easy and intuitive way to describe the expected value of a mocked object.</p>
+
+<h4 id="testing-nameslist">Testing NamesList</h4>
+
+<p>In case the previous article is a bit fuzzy at this point, remember that we created a <code class="highlighter-rouge">&lt;NamesList&gt;</code> React component with one specific goal - list all names and auto-update when a new name is added. Now it’s time to write tests for this component. Before we write any code, let’s figure out exactly <em>what</em> we need to test. The simplest test perhaps mocks out our data store and ensures the <code class="highlighter-rouge">&lt;NamesList&gt;</code> component renders all of the names in our mocked store. The critical piece of this test involves inserting a mocked version of our server’s data store. Luckily this is very easy to accomplish with babel-plugin-rewire and Falcor. Let’s take a look at the code for this test first, housed in app/test/names-list.spec.jsx:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">),</span>
+    <span class="nx">TestUtils</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react/lib/ReactTestUtils'</span><span class="p">),</span>
+    <span class="nx">NamesList</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'../names-list.jsx'</span><span class="p">),</span>
+    <span class="nx">Falcor</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor'</span><span class="p">)</span>
+
+<span class="nx">describe</span><span class="p">(</span><span class="s1">'names-list tests'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">afterEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="nx">NamesList</span><span class="p">.</span><span class="nx">__ResetDependency__</span><span class="p">(</span><span class="s1">'model'</span><span class="p">))</span>
+
+    <span class="nx">it</span><span class="p">(</span><span class="s1">'renders with some initial data'</span><span class="p">,</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">NamesList</span><span class="p">.</span><span class="nx">__Rewire__</span><span class="p">(</span><span class="s1">'model'</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Falcor</span><span class="p">.</span><span class="nx">Model</span><span class="p">({</span>
+            <span class="na">cache</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">names</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="mi">0</span><span class="p">:</span> <span class="p">{</span><span class="nl">name</span><span class="p">:</span> <span class="s1">'joe'</span><span class="p">},</span>
+                    <span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="nl">name</span><span class="p">:</span> <span class="s1">'jane'</span><span class="p">},</span>
+                    <span class="na">length</span><span class="p">:</span> <span class="mi">2</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}))</span>
+
+        <span class="kd">var</span> <span class="nx">namesList</span> <span class="o">=</span> <span class="nx">TestUtils</span><span class="p">.</span><span class="nx">renderIntoDocument</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">NamesList</span><span class="o">/&gt;</span><span class="p">)</span>
+
+        <span class="nx">namesList</span><span class="p">.</span><span class="nx">componentDidUpdate</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">nameEls</span> <span class="o">=</span> <span class="nx">TestUtils</span><span class="p">.</span><span class="nx">scryRenderedDOMComponentsWithTag</span><span class="p">(</span><span class="nx">namesList</span><span class="p">,</span> <span class="s1">'li'</span><span class="p">)</span>
+
+            <span class="nx">expect</span><span class="p">(</span><span class="nx">nameEls</span><span class="p">.</span><span class="nx">length</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="nx">expect</span><span class="p">(</span><span class="nx">nameEls</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">textContent</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">'joe'</span><span class="p">)</span>
+            <span class="nx">expect</span><span class="p">(</span><span class="nx">nameEls</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">textContent</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">'jane'</span><span class="p">)</span>
+
+            <span class="nx">done</span><span class="p">()</span>
+        <span class="p">}</span>
+    <span class="p">})</span>
+<span class="p">})</span>
+</code></pre>
+</div>
+
+<p>Nothing new in the variable declaration section at the top of the file, other than the import of Falcor. We’ll need to make brief use of Falcor’s client-side API as we work with our mocked model. At the top of the <code class="highlighter-rouge">describe</code> block, there’s an <code class="highlighter-rouge">afterEach</code> function, which may be new to some who are not already familiar with Jasmine. The body of this function will run after each test has completed. Since we only have one test (so far), this will run after the single <code class="highlighter-rouge">it</code> block has completed. While not entirely necessary in our case, it is good practice to reset any internal dependencies that have been tampered with at the end of each test. As you will see soon in our test, we are replacing the imported Falcor model with a mocked version, and the logic in our <code class="highlighter-rouge">afterEach</code> block acts as an “undo” for this action, so as not to pollute other tests.</p>
+
+<p>We’ve only written one test for <code class="highlighter-rouge">&lt;NamesList&gt;</code>, which is a sufficient start. As the title of the <code class="highlighter-rouge">it</code> block states, we’re going to ensure that the initial render of this component renders all available names according to the model/store. In the first line of our <code class="highlighter-rouge">it</code> block, babel-plugin-rewire is being used to replace the imported Falcor model with a mocked version. Our mocked model includes two names: “joe” and “jane”. It is perfectly valid to initialize a Falcor model in this way, and this allows us to assert full control over the component’s access to data, which makes writing unit tests much easier.</p>
+
+<p>After rendering the component into a detached DOM node with the help of React’s <code class="highlighter-rouge">TestUtils</code>, we must wait until the first time our component’s state changes. The initial render will <em>not</em> include the values from our mocked model, since accessing the model data is an asynchronous operation. Remember: after the model values are retrieved by <code class="highlighter-rouge">&lt;NamesList&gt;</code>, the component’s internal state will be updated with the new names. And if there <em>are</em> new names, the <code class="highlighter-rouge">componentDidUpdate</code> method will be called by React. <code class="highlighter-rouge">componentDidUpdate</code> is a <a href="https://facebook.github.io/react/docs/component-specs.html">React component lifecycle method</a> that is called after each state change (but not on the initial component render). Our test hooks into this lifecycle method and checks to ensure that the component’s DOM contains the names represented by our mocked model using Jasmine’s built-in assertion library. Inside of this method, <em>first</em> a handle on the list item elements containing the names is created, and then each list item is checked to ensure it matches the expected name from the model. The method name used to lookup these elements inside of the component, <a href="https://facebook.github.io/react/docs/test-utils.html#scryrendereddomcomponentswithtag"><code class="highlighter-rouge">scryRenderedDOMComponentsWithTag</code></a>, looks a little strange (to me at least). For an explanation of the <code class="highlighter-rouge">scry</code> prefix, have a look at <a href="https://twitter.com/angustweets/status/590659867926462465">this twitter conversation</a>.</p>
+
+<h4 id="testing-namemanager">Testing NameManager</h4>
+
+<p>The <code class="highlighter-rouge">&lt;NameManager /&gt;</code> glues the <code class="highlighter-rouge">&lt;NamesList /&gt;</code> and <code class="highlighter-rouge">&lt;NameAdder /&gt;</code> components together. When testing it, we need to be sure that it does its job as a workflow conductor. That is, when a name is added, the <code class="highlighter-rouge">&lt;NameManager /&gt;</code> must notify the <code class="highlighter-rouge">&lt;NamesList /&gt;</code>, so the list can update with the new names according to the server. We don’t want to test the implementation of <code class="highlighter-rouge">&lt;NamesList /&gt;</code> or <code class="highlighter-rouge">&lt;NameAdder /&gt;</code>, so we will have to mock both of these out. In fact, as you can see below, most of the code in this test is dedicated to mocking components. Our test, as expected, lives in app/test/name-manager.spec.jsx</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">),</span>
+    <span class="nx">TestUtils</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react/lib/ReactTestUtils'</span><span class="p">),</span>
+    <span class="nx">NameManager</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'../name-manager.jsx'</span><span class="p">)</span>
+
+<span class="nx">describe</span><span class="p">(</span><span class="s1">'NameManager'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">it</span><span class="p">(</span><span class="s1">'updates NamesList when new name is added'</span><span class="p">,</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kr">class</span> <span class="nx">NameAdder</span> <span class="kr">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+            <span class="nx">triggerOnAdded</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">onAdded</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="nx">render</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="o">&lt;</span><span class="nx">div</span><span class="o">/&gt;</span><span class="p">}</span>
+        <span class="p">}</span>
+        <span class="nx">NameManager</span><span class="p">.</span><span class="nx">__Rewire__</span><span class="p">(</span><span class="s1">'NameAdder'</span><span class="p">,</span> <span class="nx">NameAdder</span><span class="p">)</span>
+
+        <span class="nx">NameManager</span><span class="p">.</span><span class="nx">__Rewire__</span><span class="p">(</span><span class="s1">'NamesList'</span><span class="p">,</span> <span class="kr">class</span> <span class="kr">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+            <span class="nx">update</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">done</span><span class="p">()</span>
+            <span class="p">}</span>
+            <span class="nx">render</span><span class="p">()</span> <span class="p">{</span><span class="k">return</span> <span class="o">&lt;</span><span class="nx">div</span><span class="o">/&gt;</span><span class="p">}</span>
+        <span class="p">})</span>
+
+        <span class="kd">var</span> <span class="nx">nameManager</span> <span class="o">=</span> <span class="nx">TestUtils</span><span class="p">.</span><span class="nx">renderIntoDocument</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">NameManager</span><span class="o">/&gt;</span><span class="p">)</span>
+        <span class="nx">TestUtils</span><span class="p">.</span><span class="nx">findRenderedComponentWithType</span><span class="p">(</span><span class="nx">nameManager</span><span class="p">,</span> <span class="nx">NameAdder</span><span class="p">).</span><span class="nx">triggerOnAdded</span><span class="p">()</span>
+    <span class="p">})</span>
+<span class="p">})</span>
+</code></pre>
+</div>
+
+<p>In this test, the instance of NameAdder imported internally by NameManager is replaced with a simple class that invokes the <code class="highlighter-rouge">onAdded()</code> callback passed into the component by NamesManager when the <code class="highlighter-rouge">triggerOnAdded()</code> class method is called. And NamesList is replaced with a trivial class that completes the test when the <code class="highlighter-rouge">update()</code> method is called. First, a name is added using NameAdder, resulting in a call to the <code class="highlighter-rouge">onAdded()</code> function passed to NameAdder. That function results in an update of NamesList via invocation of the <code class="highlighter-rouge">update()</code> method. After rendering <code class="highlighter-rouge">&lt;NameManager /&gt;</code> we simply call <code class="highlighter-rouge">triggerOnAdded</code> on the child <code class="highlighter-rouge">&lt;NameAdder /&gt;</code> component. If everything is working correctly, the last call will be on the <code class="highlighter-rouge">&lt;NamesList /&gt;</code> component’s <code class="highlighter-rouge">update()</code> method, which will complete and pass the test. One new thing about this test is our use of the <code class="highlighter-rouge">findRenderedComponentWithType</code> method on <code class="highlighter-rouge">TestUtils</code>. This allows us to located a specific type of composite component inside another composite component. In this case, we are looking for the <code class="highlighter-rouge">&lt;NameAdder /&gt;</code> component. There are no <code class="highlighter-rouge">expect</code> blocks here and no assertions, but the test will timeout and fail if the <code class="highlighter-rouge">update()</code> method is not called on NamesList.</p>
+
+<p>And that’s it, now we have tests for <em>all</em> of our React components!</p>
+
+<h3 id="running-our-tests">Running our tests</h3>
+<p>Now that we have all of our React components covered with unit tests, it would be nice to be able to actually <em>run</em> them to verify that everything is working as expected. To make this easy, let’s add a <code class="highlighter-rouge">"test"</code> entry to the <code class="highlighter-rouge">"scripts"</code> property in our package.json file. This will allow us to execute our full suite of tests simply by running <code class="highlighter-rouge">npm test</code>. The relevant portion of package.json now looks like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s2">"scripts"</span><span class="err">:</span> <span class="p">{</span>
+  <span class="s2">"test"</span><span class="err">:</span> <span class="s2">"karma start config/karma.conf.js"</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>This will use the <code class="highlighter-rouge">karma</code> binary installed in node_modules/karma to run our Jasmine tests. It’s pretty simple to do this via the command-line, and everything works as expected simply by issuing the <code class="highlighter-rouge">start</code> command and pointing Karma at the configuration file we created earlier. When you run <code class="highlighter-rouge">npm test</code>, all test should pass, and you’ll see this in your terminal:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>NameAdder
+  ✓ saves new messages
+
+NameManager
+  ✓ updates NamesList when new name is added
+
+NamesList
+  ✓ renders with some initial data
+
+PhantomJS 2.1.1 (Mac OS X 0.0.0): Executed 3 of 3 SUCCESS (0.007 secs / 0.021 secs)
+TOTAL: 3 SUCCESS
+</code></pre>
+</div>
+
+<p>On to the server!</p>
+
+<h2 id="part-2-server-side-unit-tests">Part 2: Server-side unit tests</h2>
+<p>On the server, most of our code is focused primarily on handling Falcor requests. In order to service these, we have defined three notable routes:</p>
+
+<ol>
+  <li>A “get” route that returns the number of names.</li>
+  <li>Another “get” route that returns one or more names.</li>
+  <li>A “call” route that adds a new name.</li>
+</ol>
+
+<p>In this section, you’ll see unit tests that verify the expected behavior of each Falcor route. In order to more easily verify the logic in these routes, we’ll rely on the Rewire library to mock out our “names” data store in order to provide canned values for our tests.</p>
+
+<h3 id="neatness-counts---file-reorganization--refactoring">Neatness counts - file reorganization &amp; refactoring</h3>
+<p>In order to make our source easier to browse <em>and</em> test, some changes are necessary. First, we’ll split the original server.js file/module into three modules: one to hold our names data, another for housing our Falcor routes, and then a third that directly handles requests from our frontend and deals with all of the other generic server tasks.</p>
+
+<p>We’ll start by moving the <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/server.js#L6"><code class="highlighter-rouge">data</code> variable in the original server.js file</a> into a new names.js file, which will look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'a'</span><span class="p">},</span>
+    <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'b'</span><span class="p">},</span>
+    <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'c'</span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre>
+</div>
+
+<p>Separating this into its own module makes it trivial for us to substitute this data store for a mocked version in our server unit tests.</p>
+
+<p>Next, we’ll move our <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/server.js#L13">Falcor routes from server.js</a>, along with most Falcor-related dependencies, into a router.js file:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">Router</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor-router'</span><span class="p">),</span>
+    <span class="nx">names</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./names'</span><span class="p">),</span>
+    <span class="nx">NamesRouter</span> <span class="o">=</span> <span class="nx">Router</span><span class="p">.</span><span class="nx">createClass</span><span class="p">([</span>
+        <span class="p">{</span>
+            <span class="na">route</span><span class="p">:</span> <span class="s1">'names[{integers:nameIndexes}]["name"]'</span><span class="p">,</span>
+            <span class="na">get</span><span class="p">:</span> <span class="p">(</span><span class="nx">pathSet</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">results</span> <span class="o">=</span> <span class="p">[];</span>
+                <span class="nx">pathSet</span><span class="p">.</span><span class="nx">nameIndexes</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">nameIndex</span> <span class="o">=&gt;</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">names</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="nx">nameIndex</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+                            <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="nx">nameIndex</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">],</span>
+                            <span class="na">value</span><span class="p">:</span> <span class="nx">names</span><span class="p">[</span><span class="nx">nameIndex</span><span class="p">].</span><span class="nx">name</span>
+                        <span class="p">})</span>
+                    <span class="p">}</span>
+                <span class="p">})</span>
+                <span class="k">return</span> <span class="nx">results</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">...</span>
+    <span class="p">])</span>
+
+<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">NamesRouter</span>
+</code></pre>
+</div>
+
+<p>This separation allows us to focus specifically on testing Falcor routes without having to deal with any of the generic server logic that is unimportant to our unit tests.</p>
+
+<p>All of these changes to promote testable code leaves our original server.js file much smaller and only focused on traditional server tasks, such as routing HTTP requests, serving up static resources (such as our Webpack-generated JavaScript bundles), and starting up the server. Here it is, for reference:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">FalcorServer</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor-express'</span><span class="p">),</span>
+    <span class="nx">bodyParser</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'body-parser'</span><span class="p">),</span>
+    <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'express'</span><span class="p">),</span>
+    <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">(),</span>
+    <span class="nx">NamesRouter</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./router'</span><span class="p">)</span>
+
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">bodyParser</span><span class="p">.</span><span class="nx">urlencoded</span><span class="p">({</span><span class="na">extended</span><span class="p">:</span> <span class="kc">false</span><span class="p">}));</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">'/model.json'</span><span class="p">,</span> <span class="nx">FalcorServer</span><span class="p">.</span><span class="nx">dataSourceRoute</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">new</span> <span class="nx">NamesRouter</span><span class="p">()))</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="s1">'site'</span><span class="p">))</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">9090</span><span class="p">,</span> <span class="nx">err</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="p">}</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'navigate to http://localhost:9090'</span><span class="p">)</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+
+<p>So now it’s easier to test our code since each file/module is focused on a specific task, but we have 2 extra files cluttering up the root of our project. Let’s move those into a new subdirectory, appropriately named “server”. Let’s also rename server.js to index.js. This is a good way to indicate that this is the main entry point for our server, and also allows us to start the server without explicitly specifying the file name. With this change, our project’s structure seems a bit more sane and predictable. Here’s the tree at this point:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>.
++-- app
+|   +-- model.js
+|   +-- name-adder.jsx
+|   +-- name-manager.jsx
+|   +-- names-list.jsx
+|   +-- test
+|      +-- name-adder.spec.jsx
+|      +-- name-manager.spec.jsx
+|      +-- names-list.spec.jsx
+|      +-- tests.bundle.js
++-- config
+|   +-- karma.conf.js
+|   +-- webpack.config.js
++-- server
+|   +-- names.js
+|   +-- router.js
+|   +-- index.js
++-- site
+|   +-- index.html
++-- package.json
+</code></pre>
+</div>
+
+<h3 id="understanding-our-server-side-testing-tools">Understanding our server-side testing tools</h3>
+<p>One of the goals of this full-stack JavaScript approach is to blend the frontend and backend together as much as possible. By utilizing the same language across the entire app, we get the benefit of also using the same tools for testing. This is particularly noticeable when we look at the unit testing structure for our server. Our toolset is a subset of the same tools used to write and run unit tests for our frontend. On the backend, we’ll write our tests using the familiar Jasmine library. Mocking out internal dependencies, such as our data store, will again be accomplished using Rewire. While we used Karma to run our frontend Jasmine tests, we can simply use Jasmine’s Node.JS binary to run our server unit tests.</p>
+
+<h3 id="configuring-jasmine-to-run-our-tests">Configuring Jasmine to run our tests</h3>
+<p>The Jasmine test runner, which will be used to execute our Jasmine server-side unit tests, needs a bit of configuration in order to do its job. We’ll store this configuration, which is quite minimal, in a JSON file inside of our configuration directory, alongside the existing Karma and Webpack configuration files. This Jasmine config revolves around two properties, <code class="highlighter-rouge">"spec_dir"</code> and <code class="highlighter-rouge">"spec_files"</code>:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span>
+  <span class="s2">"spec_dir"</span><span class="err">:</span> <span class="s2">"server/test"</span><span class="p">,</span>
+  <span class="s2">"spec_files"</span><span class="err">:</span> <span class="p">[</span><span class="s2">"**/*[sS]pec.js"</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>“spec” is short for specification. Each set of similar tests are grouped into specifications, and this configuration file tells Jasmine a bit about the specification we’re about to write. <code class="highlighter-rouge">"spec_dir"</code> is the directory that holds all of our server-side specifications. Those will eventually live in the “test” subdirectory, inside of the “server” directory. This structure mirrors the setup of our client-side “app” directory. <code class="highlighter-rouge">"spec_files"</code> is an array that helps Jasmine find the actual specifications to run inside of our <code class="highlighter-rouge">"spec_dir"</code>. Our configuration contains one entry - a regular expression that will match any file inside this directory (or any of its children) that ends with “.spec.js”. So all of our specification files must adhere to this format, and if we do, Jasmine will magically run all defined tests and report the results.</p>
+
+<h3 id="unit-testing-our-falcor-routes">Unit testing our Falcor routes</h3>
+
+<p>All of our server-side unit tests, which will exercise the three primary Falcor routes defined in server/router.js, will live inside of server/test/router.spec.js. Again, these will be Jasmine tests.</p>
+
+<p>Before I discuss the setup for these unit tests, lets take a look at the relevant code first:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">describe</span><span class="p">(</span><span class="s1">'falcor router tests'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">rewire</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'rewire'</span><span class="p">),</span>
+        <span class="nx">Router</span> <span class="o">=</span> <span class="nx">rewire</span><span class="p">(</span><span class="s1">'../router'</span><span class="p">),</span>
+        <span class="nx">namesRouter</span>
+
+    <span class="nx">beforeEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">Router</span><span class="p">.</span><span class="nx">__set__</span><span class="p">(</span><span class="s1">'names'</span><span class="p">,</span> <span class="p">[</span>
+            <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'uno'</span><span class="p">},</span>
+            <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'dos'</span><span class="p">},</span>
+            <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'tres'</span><span class="p">}</span>
+        <span class="p">])</span>
+        <span class="nx">namesRouter</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Router</span><span class="p">()</span>
+    <span class="p">})</span>
+<span class="p">})</span>
+</code></pre>
+</div>
+
+<p>The above code doesn’t actually <em>test</em> anything, but it is crucial for the tests we are <em>about</em> to write. Each of these three unit tests will require us to work with some predictable set of data. In order to ensure this, we’ll need to mock out our data store and explicitly specify the data we want to test against. Using Rewire, we can reach inside of the router.js module and replace the imported <code class="highlighter-rouge">names</code> data store instance with our own set of data. This modified instance of the Falcor router is then made available to all of our upcoming unit tests.</p>
+
+<p>Our first unit test will examine the route that returns the number of names in the list. Remember our mocked data store contains exactly 3 names, so this is the result we are looking for in our test:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">it</span><span class="p">(</span><span class="s1">'gets the number of names'</span><span class="p">,</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">namesRouter</span><span class="p">.</span><span class="nx">get</span><span class="p">([[</span><span class="s1">'names'</span><span class="p">,</span> <span class="s1">'length'</span><span class="p">]]).</span>
+    <span class="nx">subscribeOnNext</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">({</span>
+            <span class="na">jsonGraph</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">names</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="na">length</span><span class="p">:</span> <span class="mi">3</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+        <span class="nx">done</span><span class="p">()</span>
+    <span class="p">})</span>
+<span class="p">})</span>
+</code></pre>
+</div>
+
+<p>Quite simply, we’re calling the <code class="highlighter-rouge">names.lenth</code> route on our Falcor router, and this returns <a href="https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md">an RxJS <code class="highlighter-rouge">Observable</code></a>. The <a href="https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/subscribeonnext.md"><code class="highlighter-rouge">subscribeOnNext</code> method</a> will execute our passed callback with the “response” generated by our code for this route. We’re expecting the result to be described in terms of a <a href="http://netflix.github.io/falcor/documentation/jsongraph.html">JSON Graph</a> that contains a <code class="highlighter-rouge">names.length</code> property with the number of names in the server-maintained list. This test (and all other server-side tests we will write) is asynchronous. To prevent Jasmine from completing the test before we’ve verified the condition in our callback, we ask Jasmine to pass a <code class="highlighter-rouge">done</code> function into our test which we invoke once our test is <a href="http://images.wisegeek.com/hand-putting-money-in-coin.jpg"><em>done</em> done</a>.</p>
+
+<p>Our next test verifies that our names route returns the requested names in the list. We’ll ask for the first two names in our mock data store, “uno” and “dos”, and then verify that our route actually returns these items:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">it</span><span class="p">(</span><span class="s1">'gets a list of names by index range'</span><span class="p">,</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">namesRouter</span><span class="p">.</span><span class="nx">get</span><span class="p">([[</span><span class="s1">'names'</span><span class="p">,</span> <span class="p">{</span><span class="s1">'from'</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'to'</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="s1">'name'</span><span class="p">]]).</span>
+    <span class="nx">subscribeOnNext</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">({</span>
+            <span class="na">jsonGraph</span><span class="p">:</span> <span class="p">{</span>
+                <span class="na">names</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="mi">0</span><span class="p">:</span> <span class="p">{</span><span class="nl">name</span><span class="p">:</span> <span class="s1">'uno'</span><span class="p">},</span>
+                    <span class="mi">1</span><span class="p">:</span> <span class="p">{</span><span class="nl">name</span><span class="p">:</span> <span class="s1">'dos'</span><span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+        <span class="nx">done</span><span class="p">()</span>
+    <span class="p">})</span>
+<span class="p">})</span>
+</code></pre>
+</div>
+
+<p>This is very similar to the <code class="highlighter-rouge">names.length</code> route test, with the exception of the additional parameter specifying the range of names.</p>
+
+<p>This last test will add a new name - “cuatro” - using the <code class="highlighter-rouge">names.add</code> “call” route. It will verify the response to this “call”, and then examine the names data store directly to verify that this new name is available at index 3 in our names list:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">it</span><span class="p">(</span><span class="s1">'adds a new name'</span><span class="p">,</span> <span class="p">(</span><span class="nx">done</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">namesStore</span> <span class="o">=</span> <span class="nx">Router</span><span class="p">.</span><span class="nx">__get__</span><span class="p">(</span><span class="s1">'names'</span><span class="p">)</span>
+
+  <span class="nx">namesRouter</span><span class="p">.</span><span class="nx">call</span><span class="p">([</span><span class="s1">'names'</span><span class="p">,</span> <span class="s1">'add'</span><span class="p">],</span> <span class="p">[</span><span class="s1">'cuatro'</span><span class="p">],</span> <span class="p">[</span><span class="s1">'name'</span><span class="p">]).</span>
+  <span class="nx">subscribeOnNext</span><span class="p">((</span><span class="nx">response</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="nx">expect</span><span class="p">(</span><span class="nx">response</span><span class="p">).</span><span class="nx">toEqual</span><span class="p">({</span>
+          <span class="na">jsonGraph</span><span class="p">:</span> <span class="p">{</span>
+              <span class="na">names</span><span class="p">:</span> <span class="p">{</span>
+                  <span class="mi">3</span><span class="p">:</span> <span class="p">{</span><span class="nl">name</span><span class="p">:</span> <span class="s1">'cuatro'</span><span class="p">},</span>
+                  <span class="na">length</span><span class="p">:</span> <span class="mi">4</span>
+              <span class="p">}</span>
+          <span class="p">},</span>
+          <span class="na">paths</span><span class="p">:</span> <span class="p">[[</span><span class="s1">'names'</span><span class="p">,</span> <span class="s1">'length'</span><span class="p">],</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">]]</span>
+      <span class="p">})</span>
+
+      <span class="nx">expect</span><span class="p">(</span><span class="nx">namesStore</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="nx">name</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">'cuatro'</span><span class="p">)</span>
+      <span class="nx">done</span><span class="p">()</span>
+<span class="p">})</span>
+</code></pre>
+</div>
+
+<p>Verifying the response to the “call” involves ensuring the changes to our store are reported. We’re also examining the <code class="highlighter-rouge">path</code> property in the response, which describes what specific elements of the JSON graph have changed as a result of this “call”. The last part of this third test is more of a sanity check. By checking the underlying data store (which we can easily access using Rewire) we’re making absolutely sure that this new name has indeed been added.</p>
+
+<h3 id="running-our-tests-1">Running our tests</h3>
+<p>We are now accustomed to using npm to perform various operations on our application, such as running unit tests. Carrying forward this pattern, let’s provide a way to run our server-side tests via npm. In fact, let’s modify our package.json scripts so that we can execute both our frontend <em>and</em> backend tests with a single command. The relevant portions of our package.json now look like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s2">"scripts"</span><span class="err">:</span> <span class="p">{</span>
+  <span class="s2">"test-client"</span><span class="err">:</span> <span class="s2">"karma start config/karma.conf.js"</span><span class="p">,</span>
+  <span class="s2">"test-server"</span><span class="err">:</span> <span class="s2">"jasmine JASMINE_CONFIG_PATH=config/jasmine.json"</span><span class="p">,</span>
+  <span class="s2">"test"</span><span class="err">:</span> <span class="s2">"npm run test-client; npm run test-server"</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>You can see two <em>new</em> <code class="highlighter-rouge">"scripts"</code> entries above: <code class="highlighter-rouge">"test-client"</code> and <code class="highlighter-rouge">"test-server"</code>. The old <code class="highlighter-rouge">"test"</code> entry was moved over to a more specific <code class="highlighter-rouge">"test-client"</code> entry, and a new <code class="highlighter-rouge">"test-server"</code> entry was created to handle execution of the server tests that we just wrote. The <code class="highlighter-rouge">"test"</code> entry has been modified to run both the <code class="highlighter-rouge">"test-client"</code> and <code class="highlighter-rouge">"test-server"</code> scripts. Now, when we run <code class="highlighter-rouge">npm test</code>, our terminal contains output that shows three successful frontend unit tests <em>and</em> three successful backend tests:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>NameAdder
+  ✓ saves new messages
+
+NameManager
+  ✓ updates NamesList when new name is added
+
+NamesList
+  ✓ renders with some initial data
+
+PhantomJS 2.1.1 (Mac OS X 0.0.0): Executed 3 of 3 SUCCESS (0.006 secs / 0.023 secs)
+
+TOTAL: 3 SUCCESS
+
+
+&gt; fullstack-react@2.0.0 test-server /Users/rnicholus/code/fullstack-react
+&gt; jasmine JASMINE_CONFIG_PATH=config/jasmine.json
+
+Started
+...
+</code></pre>
+</div>
+
+<p>The three dots at the end of the test (which are green in a terminal) represent the success of our three new unit tests. There are ways to provide more verbose reports for our server-side tests, but this is sufficient for now. Note that failures <em>will</em> include relevant information in the console regarding the failure.</p>
+
+<p>And that’s it! Now we have all frontend and backend code covered by unit tests, along with a simple way to run these tests.</p>
+
+<h2 id="part-3-integration-testing">Part 3: Integration testing</h2>
+
+<p>Unit tests have been throughly covered by now, so let’s move on to “integration” testing. These tests will examine how our application functions when a realistic user-generated operation is performed. In contrast to unit tests, integration tests exercise the <em>entire</em> application, so we will need to have a running server in order to execute these tests. We’ll also need to write code that will open up a browser, load our application, and then perform one or more common tasks.</p>
+
+<h3 id="tools-to-help-us-write-and-run-our-tests">Tools to help us write and run our tests</h3>
+
+<p>Just like out client-side and sever-side unit tests, we’ll again use Jasmine to write our integration tests. Furthermore, Jasmine will <em>run</em> these tests as well, just as it runs our server tests. But integration tests are a bit more complex than unit tests, so we need some more help writing and running them. We’ll enlist <a href="http://webdriver.io/">WebdriverIO</a> to make this as easy as possible. WebdriverIO provides an easy to use JavaScript API on top of Selenium Webdriver’s wire protocol, which allows us to control and query any browser programmatically. But <a href="https://www.w3.org/TR/webdriver/">wire protocol is low-level and not particularly pleasant to work with</a>. WebdriverIO “fixes” this for us, and allows us to complete our mission to write and test a web application using nothing but JavaScript.</p>
+
+<h3 id="writing-a-simple-but-useful-test">Writing a simple but useful test</h3>
+<p>To illustrate the role and structure of a typical Webdriver-dependant integration test using WebdriverIO, let’s create a single simple but incredibly useful test that will ensure a user is able to successfully add a new name.</p>
+
+<p>Before we get into actually writing any code, let’s outline exactly how this test should be structured. Let’s also assume that our server is already running:</p>
+
+<ol>
+  <li>Navigate to our app in a browser.</li>
+  <li>Determine how many names exist in the list initially (by counting list item elements).</li>
+  <li>“Type” a value into the text input at the bottom of the page.</li>
+  <li>Click the “add name” button.</li>
+  <li>Ensure the number of names in our list has increased by  exactly 1 and it contains the value we entered into the text input.</li>
+  <li>End test/close browser.</li>
+</ol>
+
+<p>That’s it - six simple steps. And WebdriverIO provides an elegant API that will allow us to follow this formula <em>and</em> write code that is mostly self-documenting. This test will live among the other server-side tests - in server/test - and will be named “integration.spec.js”. This will allow it to be automatically executed by Jasmine along with the server unit tests. Let’s have a look at the code:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">webdriverio</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'webdriverio'</span><span class="p">)</span>
+
+<span class="nx">describe</span><span class="p">(</span><span class="s1">'name adder integration tests'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">jasmine</span><span class="p">.</span><span class="nx">DEFAULT_TIMEOUT_INTERVAL</span> <span class="o">=</span> <span class="mi">30000</span>
+
+    <span class="nx">beforeEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">browser</span> <span class="o">=</span> <span class="nx">webdriverio</span><span class="p">.</span><span class="nx">remote</span><span class="p">().</span><span class="nx">init</span><span class="p">()</span>
+    <span class="p">})</span>
+
+    <span class="nx">it</span> <span class="p">(</span><span class="s1">'adds a name'</span><span class="p">,</span> <span class="nx">done</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">date</span> <span class="o">=</span> <span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">(),</span>
+            <span class="nx">nameCount</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">browser</span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="s1">'http://localhost:9090'</span><span class="p">)</span>
+            <span class="p">.</span><span class="nx">waitForExist</span><span class="p">(</span><span class="s1">'li'</span><span class="p">,</span> <span class="mi">30000</span><span class="p">)</span>
+            <span class="p">.</span><span class="nx">elements</span><span class="p">(</span><span class="s1">'li'</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">elements</span> <span class="o">=&gt;</span> <span class="nx">nameCount</span> <span class="o">=</span> <span class="nx">elements</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
+            <span class="p">.</span><span class="nx">setValue</span><span class="p">(</span><span class="s1">'input'</span><span class="p">,</span> <span class="nx">date</span><span class="p">)</span>
+            <span class="p">.</span><span class="nx">getValue</span><span class="p">(</span><span class="s1">'input'</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">value</span> <span class="o">=&gt;</span> <span class="nx">expect</span><span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">value</span><span class="p">)).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">date</span><span class="p">))</span>
+            <span class="p">.</span><span class="nx">click</span><span class="p">(</span><span class="s1">'button'</span><span class="p">)</span>
+            <span class="p">.</span><span class="nx">waitForExist</span><span class="p">(</span><span class="err">`</span><span class="nx">li</span><span class="o">=</span><span class="nx">$</span><span class="p">{</span><span class="nx">date</span><span class="p">}</span><span class="err">`</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+            <span class="p">.</span><span class="nx">elements</span><span class="p">(</span><span class="s1">'li'</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">elements</span> <span class="o">=&gt;</span> <span class="nx">expect</span><span class="p">(</span><span class="nx">elements</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">length</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">nameCount</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+            <span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">done</span><span class="p">)</span>
+    <span class="p">})</span>
+<span class="p">})</span>
+</code></pre>
+</div>
+
+<p>The format of this specification is familiar, since we’re again using Jasmine. Notice the “webdriverio” import at the top of the file, and initialization code inside of <code class="highlighter-rouge">beforeEach</code>. This produces a <code class="highlighter-rouge">browser</code> object, created by WebdriverIO, which exposes <a href="http://webdriver.io/api.html">a set of methods to control the browser</a>. We’ve also set a longer-than-normal timeout for our tests. This isn’t really important now, but it may be later when we attempt to run these tests against virtualized browsers in the cloud in the next section.</p>
+
+<p>The test outlined earlier is represented in our code by a series of chained method calls inside of the “adds a name” test. Starting with <code class="highlighter-rouge">this.browser.url(...)</code>, here is a line-by-line breakdown of our integration test:</p>
+
+<ol>
+  <li>Open Firefox (by default) and navigate to the index page of our app.</li>
+  <li>Wait for a <code class="highlighter-rouge">&lt;li&gt;</code> to exist on the page (this will represent the first name in our list). If this is not visible within 30 seconds, the test will fail. Again, for testing against a local browser, this long of a timeout is probably unnecessary, but this may be important in the next section.</li>
+  <li>Find all <code class="highlighter-rouge">&lt;li&gt;</code> elements, count them, and set this number to be the value of the <code class="highlighter-rouge">nameCount</code> variable. This is the number of names on page load.</li>
+  <li>Set the value of the <code class="highlighter-rouge">&lt;input type="text"&gt;</code> at the bottom of the page to the current time in milliseconds.</li>
+  <li>Make sure this text input reflects the value we just entered.</li>
+  <li>Click the “add name” button next to the input.</li>
+  <li>Wait up to 5 seconds for a <code class="highlighter-rouge">&lt;li&gt;</code> element to appear on the page with text that equals the value we just submitted. This is the first check to ensure our newly added name exists on the page after a submit.</li>
+  <li>Count the number of <code class="highlighter-rouge">&lt;li&gt;</code> elements on the page again. Remember that each name is housed in a separate <code class="highlighter-rouge">&lt;li&gt;</code>, so there should be one more than our last check.</li>
+  <li>Close the browser.</li>
+  <li>Signal to Jasmine that the test is complete.</li>
+</ol>
+
+<h3 id="running-our-test-locally">Running our test locally</h3>
+<p>By default, without providing <em>any</em> configuration options to WebdriverIO, our test will run against Firefox. So, before running this locally, be sure you have Firefox installed. We’ll also need to run a Selenium server locally. WebdriverIO actually drives the browser <em>through</em> this Selenium server. Downloading, installing, and running this server is <em>much</em> easier than it sounds. In order to run the server, you’ll need a Java Runtime Environment (JRE) installed on your machine as well. Most machines already have this installed, so you probably don’t have to worry about this.</p>
+
+<p>In order to make it as easy as possible to setup/startup our Selenium server and run our integration tests, we’ll need to add two more <code class="highlighter-rouge">"scripts"</code> to our package.json file:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s2">"scripts"</span><span class="err">:</span> <span class="p">{</span>
+  <span class="s2">"setup-webdriver"</span><span class="err">:</span> <span class="s2">"(mkdir server/test/bin; cd server/test/bin; curl -O http://selenium-release.storage.googleapis.com/2.51/selenium-server-standalone-2.51.0.jar server/test)"</span><span class="p">,</span>
+  <span class="s2">"start-webdriver"</span><span class="err">:</span> <span class="s2">"java -jar server/test/bin/selenium-server-standalone-2.51.0.jar"</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>The above represents only the <em>new</em> entries in package.json. The first new script - <code class="highlighter-rouge">"setup-webdriver"</code> - creates and enters a “bin” directory inside of server/test/, and then downloads the Selenium server binary (which is a Java jar) into that directory. This first new script only needs to be run <em>once</em>. The second new script - <code class="highlighter-rouge">"start-webdriver"</code> - will, as you might expect, start this newly installed Selenium server using the JRE I mentioned earlier.</p>
+
+<p>So, now we have a running Selenium server. How can we actually execute this new integration test? Simple! Just run <code class="highlighter-rouge">npm test</code>. Since our specification file ends with “.spec.js” all we have to do is ensure it is placed inside the server/test directory, and the Jasmine configuration we created in the previous section will ensure it is run as part of our server-side tests. Go ahead and run the test. You’ll notice that Firefox opens automatically and the steps outlined above are executed before your eyes (and very quickly). Once the browser closes, results are printed to the console. If all goes well, our three green server-side test dots in the terminal will be joined by a fourth dot representing the successful run of our integration test.</p>
+
+<h2 id="part-4-full-test-automation-with-travis-ci-and-browserstack">Part 4: Full Test Automation With Travis CI and BrowserStack</h2>
+<p>Running the unit and integration tests locally is important and convenient, but we need to be able to verify our code on a location other than our own development machine. It can be surprising just how many new issues surface when you leave the comfort of your own “perfect” environment. Relying on a trusted 3rd party entity to run tests is also a critical part of the continuous integration process. If you have a known third-party service verify your build, like Travis CI, <em>and</em> you are using GitHub to manage your project, you can create “safe” branches using <a href="https://help.github.com/articles/about-protected-branches/">GitHub’s branch protection feature</a>. When enabled, this will prevent any code from a branch with failing tests (or with untested code) from being merged into the protected branch.</p>
+
+<p>In this section, I’ll show you how to configure a cloud-based continuous integration service to run your build and all of your tests on each push to GitHub. Furthermore, I’ll show how you can also run your integration tests against <em>any</em> browser on <em>any</em> device/OS using a <em>second</em> cloud service. Both of these useful services will work together to provide you with an elegant and efficient continuous integration environment.</p>
+
+<h3 id="getting-familiar-with-our-ci-tools">Getting familiar with our CI tools</h3>
+<p><a href="https://travis-ci.org/">Travis CI</a> is a popular continuous integration service that allows you to perform various project related tasks (such as running your build and tests) on a virtualized Ubuntu machine (or OSX for Objective-C projects). Travis is free for public/OSS projects. For private projects, Travis provides access to additional features, such as resource caching and private builds, for a fee. Since the repository that holds our code is public and open source, we’ll make use of Travis’ free tier to run our unit and integration tests on every push to GitHub. Travis integrates nicely into GitHub, and even works with the branch protection feature I mentioned earlier.</p>
+
+<p>While Travis can run our unit tests in both PhantomJS and a “headless” Firefox, it cannot run our integration tests. These require a non-headless browser, and potentially access to something other than Linux. Ideally, Travis would still control the build and tests, but delegate to another service to run integration tests on a specific browser/OS combination, reporting back the results along with all unit tests. By integrating BrowserStack into our CI environment, this is entirely achievable. <a href="https://www.browserstack.com/">BrowserStack</a> is a “cloud” service that provides programmatic (and manual) access to any browser on any conceivable operating system. It does this via an API (for programmatic access) and a web interface (for manual access). The most common use for BrowserStack is to facilitate automated cross-browser execution of integration tests. Like Travis, BrowserStack also provides free access to their virtualized machines for open source projects, with various plans offered to private/commercial projects.</p>
+
+<h3 id="running-our-unit-tests-on-every-push-with-travis-ci">Running our unit tests on every push with Travis CI</h3>
+<p>The steps required to get our unit tests running on Travis with every push to GitHub are as follows:</p>
+
+<ol>
+  <li>Setup Travis account.</li>
+  <li>Make Travis aware of our project.</li>
+  <li>Create a configuration file detailing our build requirements.</li>
+  <li>Commit and push the build file up to GitHub.</li>
+  <li>Profit.</li>
+</ol>
+
+<h4 id="setting-up-a-travis-ci-account">Setting up a Travis CI account</h4>
+<p>Signing up is as easy as clicking the “Sign Up” button on https://travis-ci.org. As I mentioned earlier, Travis integrates almost seamlessly with GitHub, so much so that you can sign into to Travis using your GitHub account.</p>
+
+<h4 id="connecting-the-github-repository-to-travis">Connecting the GitHub repository to Travis</h4>
+<p>Once logged in, visit your profile page. There, you’ll see a list of all public repositories in your account. To connect the Widen/fullstack-react repository to Travis (which holds the code for our names app), I visited <em>my</em> account page in Travis, found the GitHub repo in the list of my projects, and clicked on the slider to “activate” the project. After doing that, my project entry in the list looked like this:</p>
+
+<p><img src="/images/travis-activate-repo.png" width="400" /></p>
+
+<h4 id="creating-a-config-file-to-control-the-project-build--triggering-a-build">Creating a config file to control the project build &amp; triggering a build</h4>
+<p>All of the configuration for our Travis build must be located in a file named <code class="highlighter-rouge">.travis.yml</code> in the root of our project. <a href="http://yaml.org/spec/">YAML</a> is a type of “data serialization format”, much like JSON and XML. It is unusually human-readable, as you can see by looking at the Travis config file for Widen/fullstack-react:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">language</span><span class="pi">:</span> <span class="s">node_js</span>
+<span class="s">node_js</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s1">'</span><span class="s">5.0'</span>
+</code></pre>
+</div>
+
+<p>As you can see above, the configuration is <em>very</em> minimal. All we really need to do is tell Travis that this is a JavaScript project (via the <code class="highlighter-rouge">language</code> property) and specify the version of Node.JS to install on the environment. Travis CI allows for a number of language-specific conventions to reduce configuration boilerplate. For example, by default, Travis will run <code class="highlighter-rouge">npm install</code> and <code class="highlighter-rouge">npm test</code> on any Node.JS projects. Since we have already defined a <code class="highlighter-rouge">"test"</code> script in our package.json file, we only need to tell Travis that this is indeed a Node.JS project, and it takes care of pulling down dependencies and running our tests automagically.</p>
+
+<p>So, to start your first build on Travis, simply commit the above <code class="highlighter-rouge">.travis.yml</code> file and push it up to GitHub. Take a look at <a href="https://travis-ci.org/Widen/fullstack-react/builds/108709902">a Travis build log</a> for Widen/fullstack-react that matches this very configuration. Note that I had to temporarily change the name of the integration.spec.js file to integration.spec.bak.js. This ensures it is <em>not</em> seen by Jasmine and not executed. We’re not quite ready to run integration tests <em>yet</em>.</p>
+
+<h3 id="adding-integration-tests-to-the-mix-with-browserstack">Adding integration tests to the mix with BrowserStack</h3>
+<p>Now that we have Travis running our frontend and backend unit tests, it’s time to enable integration tests. For this, as described earlier, we need to enlist the help of BrowserStack. The steps required to enable Travis to run our integration test with BrowserStack, alongside our unit tests “locally” using PhantomJS, are as follows:</p>
+
+<ol>
+  <li>Setup a BrowserStack account</li>
+  <li>Update our Travis config file with BrowserStack-related logic and authentication data</li>
+  <li>Provide some configuration data for our integration test that will allow it to execute the test in browsers of our choosing.</li>
+  <li>Push our changes up to GitHub and watch the build log on Travis.</li>
+</ol>
+
+<h4 id="setting-up-a-browserstack-account">Setting up a BrowserStack account</h4>
+<p>You can start using BrowserStack for free, regardless of the status of your project. For open-source projects, contact BrowserStack for free permanent access to one of the paid plans. This is exactly how I procured a free account for Widen/fullstack-react. After you create an account via their web interface, navigate to your account settings and make a note of your username and access key. You will need both of these when establishing configuration next.</p>
+
+<h4 id="configuring-travis-and-browserstack-to-run-our-integration-test">Configuring Travis and BrowserStack to run our integration test</h4>
+<p>There are 5 steps required to create the necessary configuration and start running the integration test on Travis:</p>
+
+<ol>
+  <li>Update the Travis config to start our app server</li>
+  <li>Download and run the BrowserStack tunnel. This will allow the machine running on BrowserStack to see our running app instance on Travis.</li>
+  <li>Specify a list of operating systems and browsers to test against in our Travis config.</li>
+  <li>Include encrypted authentication information for our test &amp; tunnel.</li>
+  <li>Update our integration test to run against the browsers we chose in step 3.</li>
+</ol>
+
+<p>Let’s look at the updated Travis config file first:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s">language</span><span class="pi">:</span> <span class="s">node_js</span>
+<span class="s">node_js</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s1">'</span><span class="s">5.0'</span>
+<span class="s">before_script</span><span class="pi">:</span>
+<span class="pi">-</span> <span class="s">npm start &amp;</span>
+<span class="pi">-</span> <span class="s">wget http://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip</span>
+<span class="pi">-</span> <span class="s">unzip BrowserStackLocal-linux-x64.zip</span>
+<span class="pi">-</span> <span class="s">./BrowserStackLocal $BROWSERSTACK_KEY -localIdentifier $TRAVIS_JOB_NUMBER &amp;</span>
+<span class="pi">-</span> <span class="s">sleep 10</span>
+<span class="s">env</span><span class="pi">:</span>
+  <span class="s">global</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">secure</span><span class="pi">:</span> <span class="s">IKsVq7xmRs/1pJZ/pB3tbOITtbtcBFlBh3IIuhGkh72y0v8PTFfP/r/zlT/Gq5seAIaXN+YnbDPA61qroxGAGJdrsAB0xVae+AWRmBbHV64mq4g3kkj4RJPjv/2rAsTHEBpXPpmHdpjEDFIEqwTKWehZpJZAjLFoRS7LV5ucRc2LBNpfP3J83AJWn3KpBVnw5SBcwUbY8O8vKcaaYyfeorjMXqZ84Rw9jlDyhR8HJmRrvA/FVadg2lpzabFmQ5gBkLFzxEKghvIRkAJDQ1LMjYBmA6aogiJZoH90InRb6ub4KUrrmnYdbn0ug8YxDYXDa34fsBBnipUAYwSnwGujJmHHQ3rbcS12/S+cs75uFowBLP2ej6toznyUIwhfMX9rBFY6salo3jW3Qj7Qyy+68C3aqPLkJLCEgFHN2dGLR4BEoguycxSDoeIc5vj6j3c8uH/pP1Vp1jIRuaDglfyraIiwcZL5l4zznlnaqCOvTG6hJKZHgz1MCxaaCQjCdsKtMjFnmz8aocxmJbW+0BazAhEbbPvUsagKrq0K91bmXKWaplvuo1jhqWOIlkW3L6eNX5880or+BergkjXufnZFLm6soaBdP1/aRN1fBgDPRuPcEh+gHbiSa3A1Y3Fsrx+eAz8mnkyqoXlAvQTPq8XBkIoUyoYWtzWpDp3CAVPGJmg=</span>
+  <span class="pi">-</span> <span class="s">secure</span><span class="pi">:</span> <span class="s">RyXfo5jJrjlcedkk2k5ceT7KeuqdXaqRzREHMFI/FIJy/dkIpFQ2mD/HVF/SO7V/8hcsfA4TBIPb7Qlitl+5NZEgo3TlNpoxML9+jMrzBEnSafiqu1lJrg4z3+D4TtfjTi2ccI9wqhUeYiuPWmdFBgsqgRvFxMgbDLC0KJipsk12PYKCMzV+2+INBxx6SulBlPWS8RMMQeD0kY9JBMyxabZ5E3LtA9ALDedSW/C4qj6H4bchTSU1Vh7UcMOrCypfKGNv4halfoSfgIzZuSpWsnKGMz0RXiPwfUI9UHymA9vwToIzBgk+ZFlRqzIF69ex6llKTMgJARyat5xGmbLFN12u8YhAMde8SxSArNL4s5x1WUFK04OzagYEzPVRniJYK3pEVI0SGQPwWo6l85JUGT0iT4abn4MQRNwVhtHhqv55tMoJ7DlRujoKCa7bqQh/Okqw294Y/mFWMz6pENlT1p4JU5wERdL3Dtf2kHIpBMqRiEP/stHvkKcsRpUugW+4EbZDGyhVEOUnPUM4ZK/SvEqvg3foOSQdnBzrrc46KhBQ2Rh3l0Qyc/sOLXk/LrGmfKINU2wbNZqcpMRY5bjoEpAxRoEWO+mn+Cpfl8JRIfwN6VN88lHVGOvNlOjcdmo0wNhifDFSpTItIvpDZNW93zaIfZacBt0X2R7oqbiApXE=</span>
+  <span class="s">matrix</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">BROWSER</span><span class="pi">:</span> <span class="s">Firefox</span>
+    <span class="s">PLATFORM</span><span class="pi">:</span> <span class="s">Win8</span>
+    <span class="s">VERSION</span><span class="pi">:</span> <span class="s">41</span>
+  <span class="pi">-</span> <span class="s">BROWSER</span><span class="pi">:</span> <span class="s">Chrome</span>
+    <span class="s">PLATFORM</span><span class="pi">:</span> <span class="s">Win8</span>
+    <span class="s">VERSION</span><span class="pi">:</span> <span class="s">46</span>
+  <span class="pi">-</span> <span class="s">BROWSER</span><span class="pi">:</span> <span class="s">Safari</span>
+    <span class="s">PLATFORM</span><span class="pi">:</span> <span class="s">Mac</span>
+    <span class="s">VERSION</span><span class="pi">:</span> <span class="s">9</span>
+</code></pre>
+</div>
+
+<p>We’ve added a number of new items to the configuration. The <code class="highlighter-rouge">before_script</code> block will be executed after <code class="highlighter-rouge">npm install</code> but before <code class="highlighter-rouge">npm test</code>. Here is a line-by-line breakdown of that configuration block:</p>
+
+<ol>
+  <li>Start our application server in a separate process (to prevent it from blocking the rest of the build).</li>
+  <li>Download the BrowserStack tunnel binary.</li>
+  <li>Unzip the tunnel binary.</li>
+  <li>Start the tunnel in a separate process (to prevent it from blocking the rest of the build)</li>
+  <li>Wait 10 seconds for the tunnel to start.</li>
+</ol>
+
+<p>Notice that we are passing an environment variable - <code class="highlighter-rouge">BROWSERSTACK_KEY</code> - to the tunnel on startup. This is our secret API key, but where is this variable coming from? If you look further down at the <code class="highlighter-rouge">env</code> section of the configuration, you’ll see a couple <code class="highlighter-rouge">secure</code> items. These contain our username (<code class="highlighter-rouge">BROWSERSTACK_USERNAME</code>) and BrowserStack API (<code class="highlighter-rouge">BROWSERSTACK_KEY</code>) key. They have been encrypted and added to our config file. Travis’ documentation site contains <a href="https://docs.travis-ci.com/user/environment-variables/#Encrypting-Variables-Using-a-Public-Key">a section that explains how to create and store these encrypted variables</a>. The supplied Travis job number is also passed to the BrowserStack tunnel binary. Since we will have multiple tunnels open concurrently (one for each browser/OS combo), we need to provide a unique ID for each tunnel in order to keep them isolated.</p>
+
+<p>The final portion of the <code class="highlighter-rouge">env</code> configuration block contains a series of <code class="highlighter-rouge">matrix</code> entries. As you can see, these correspond to browser/OS environments that we’d like to test. For each matrix entry, Travis runs a separate virtualized machine, and makes each matrix property (<code class="highlighter-rouge">BROWSER</code>, <code class="highlighter-rouge">PLATFORM</code>, and <code class="highlighter-rouge">VERSION</code>) available as environment variables.</p>
+
+<p>Our last step, before we are able to run our integration tests alongside the unit tests in Travis, is to make a few changes to server/test/integration.spec.js. All we really need to do is pass some configuration to WebdriverIO that allows it to connect to BrowserStack instead of a locally running Selenium server. This configuration will also pass browser and OS information to BrowserStack so it can provision the appropriate environment. That specific information is already defined in our Travis config file. We only need to change the first portion of our integration test module, which now looks like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">webdriverio</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'webdriverio'</span><span class="p">),</span>
+    <span class="nx">options</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CI</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="na">desiredCapabilities</span><span class="p">:</span> <span class="p">{</span>
+            <span class="na">browserName</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">BROWSER</span><span class="p">,</span>
+            <span class="na">version</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">VERSION</span><span class="p">,</span>
+            <span class="na">platform</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PLATFORM</span><span class="p">,</span>
+            <span class="s2">"browserstack.local"</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+            <span class="s2">"browserstack.localIdentifier"</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">TRAVIS_JOB_NUMBER</span>
+        <span class="p">},</span>
+        <span class="na">host</span><span class="p">:</span> <span class="s1">'hub.browserstack.com'</span><span class="p">,</span>
+        <span class="na">port</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span>
+        <span class="na">user</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">BROWSERSTACK_USERNAME</span><span class="p">,</span>
+        <span class="na">key</span><span class="p">:</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">BROWSERSTACK_KEY</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">describe</span><span class="p">(</span><span class="s1">'name adder integration tests'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">jasmine</span><span class="p">.</span><span class="nx">DEFAULT_TIMEOUT_INTERVAL</span> <span class="o">=</span> <span class="mi">30000</span>
+
+    <span class="nx">beforeEach</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">browser</span> <span class="o">=</span> <span class="nx">webdriverio</span><span class="p">.</span><span class="nx">remote</span><span class="p">(</span><span class="nx">options</span><span class="p">).</span><span class="nx">init</span><span class="p">()</span>
+    <span class="p">})</span>
+
+    <span class="cm">/* existing test here... */</span>
+<span class="p">})</span>
+</code></pre>
+</div>
+
+<p>As you can see, the configuration we’ve added grabs the browser, OS, version and BrowserStack-related auth info provided as environment variables in our Travis config. We’re also providing some BrowserStack-specific configuration, such as the tunnel identifier (also used when opening the tunnel in our Travis config). This data is then passed to WebdriverIO as a JavaScript object. I’ve added a check to <em>only</em> provide this new configuration data if the code is running on Travis. We can easily detect this by looking for a <code class="highlighter-rouge">CI</code> environment variable, which Travis sets for us. If our test is <em>not</em> running on Travis, it will attempt to connect to a locally-running Selenium server, as before.</p>
+
+<p>Simply commit these changes, push them up to GitHub, and you will see unit and integration tests run on Travis. Take a look at <a href="https://travis-ci.org/Widen/fullstack-react/builds/108738412">a recent build on Travis of Widen/fullstack-react</a> that illustrates the finished product.</p>
+
+<h2 id="going-further">Going further</h2>
+<p>While <a href="https://github.com/Widen/fullstack-react/tree/2.0.0">Widen/fullstack-react</a> was designed to be simple to allow us to focus on the concepts needed to create and test a futuristic full-stack JavaScript web application, there are certainly areas where we can make improvements. Some of those improvements may include:</p>
+
+<ol>
+  <li>Handle an empty list of names in the code and back it with a unit test for <code class="highlighter-rouge">&lt;NamesList&gt;</code>.</li>
+  <li>Move the integration test configuration to a file in the “config” directory.</li>
+  <li>Improve console reporting for server-side tests.</li>
+  <li>Practive Test Driven Development by writing tests to check for request failures or other unexpected conditions. Fix the code until these new tests are passing.</li>
+  <li>Make use of ES6 modules instead of using CommonJS throughout the project.</li>
+  <li>Compile the server code using Babel &amp; Webpack. This will allow us to use more ES6/7 features on the server as well, and give us to ability to set aliases, use plug-ins, and all of the other conveniences we are already used to client-side.</li>
+  <li>Make use of additional ECMAScript features, such as <a href="https://github.com/tc39/ecmascript-asyncawait">async functions</a> and <a href="https://github.com/wycats/javascript-decorators">decorators</a>.</li>
+</ol>
+
+<p><a href="https://github.com/Widen/fullstack-react/tree/2.0.0">Widen/fullstack-react on GitHub</a> contains all of the code discussed in this article. Let me know in the comments section below, or open up a pull request or issue in <a href="https://github.com/Widen/fullstack-react/issues">the project’s issue tracker</a> if you have any other ideas. Pull requests addressing any of the items above are also welcome.</p>
+
+
+
+    </article>
+
+    
+      
+<div class="comments">
+	<div id="disqus_thread"></div>
+	<script type="text/javascript">
+
+	    var disqus_shortname = 'widen-engineering';
+
+	    (function() {
+	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	    })();
+
+	</script>
+	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+
+    
+</div>
+
+
+      </main>
+
+    </div>
+
+    <div class="full-width">
+      <div class="wrapper">
+    <footer class="site-footer" role="contentinfo">
+        <nav>
+          <ul class="inline">
+          
+            
+          
+            
+          
+            
+          
+          </ul>
+          <br/>
+        </nav >
+        <nav>
+          <ul class="site-social-links inline">
+              <li><a target="_blank" title="RSS Feed" href="/feed.xml" class="ion-social-rss"></a></li>
+              <li><a target="_blank" title="GitHub" href="https://github.com/Widen" class="ion-social-github"></a></li>
+              <li><a target="_blank" title="Twitter" href="https://twitter.com/widendev" class="ion-social-twitter"></a></li>
+          </ul>
+        </nav>
+        <p>© Copyright 2016, <a title="Widen Homepage" target="_blank" href="http://widen.com">Widen Enterprises, Inc.</a></p>
+
+        <p><strong>Looking for work?</strong> <a title="Come engineer with us!" target="_blank" href="http://www.widen.com/careers/">Come engineer with us!</a></p>
+        <p><strong>Something wrong with this page?</strong> Please <a title="Create new issue on bugtracker" target="_blank" href="https://github.com/widen/widen.github.io/issues/new">file a bug</a>.</p>
+        <div class="git-info">
+<nav>
+  <ul class="inline">
+    <li>
+        <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io/">source</a>
+    </li>
+    <li>
+        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/develop/_posts/2016-02-12-testing-future-web-stack.md">view</a>
+    </li>
+    <li>
+        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/_posts/2016-02-12-testing-future-web-stack.md">edit</a>
+    </li>
+    <li>
+        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/975875c">975875c</a>
+    </li>
+    <li>
+        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/975875c">975875c</a>
+    </li>
+  </ul>
+  </nav >
+</div>
+
+    </footer>
+</div>
+
+    </div>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-1206716-19']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+  </body>
+
+</html>

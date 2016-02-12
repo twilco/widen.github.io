@@ -5,9 +5,865 @@
     <description>The blog of the Widen Engineering Team.</description>
     <link>http://engineering.widen.com/</link>
     <atom:link href="http://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 23 Nov 2015 16:23:18 -0600</pubDate>
-    <lastBuildDate>Mon, 23 Nov 2015 16:23:18 -0600</lastBuildDate>
+    <pubDate>Fri, 12 Feb 2016 02:56:47 -0600</pubDate>
+    <lastBuildDate>Fri, 12 Feb 2016 02:56:47 -0600</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
+    
+      <item>
+        <title>The Future of Web Development Part 2 - Full-Stack Automated JavaScript Testing</title>
+        <description>&lt;p&gt;In &lt;a href=&quot;/blog/future-of-the-web-react-falcor/&quot;&gt;my last article&lt;/a&gt;, I showed you how to develop a full-stack JavaScript web application using ECMAScript 6, Falcor, React, Babel, Webpack, and Node.JS. Developing a project using this futuristic stack is undoubtedly fun, but this is only a piece of the puzzle. Any code you write that is meant to be used by others should be tested. Manually testing your code is certainly one approach, though you will find this route cumbersome. In order to make more efficient use of your time and provide executable documentation for future maintainers, it is important to develop a suite of automated tests. In this follow-up article, I’ll show you how to write automated tests for &lt;em&gt;all&lt;/em&gt; of the code we wrote in the first article. We will automate testing of the frontend and server-side code, &lt;em&gt;plus&lt;/em&gt; I’ll show you how to write automated integration (a.k.a. Selenium) tests that exercise the entire application. &lt;strong&gt;Keeping with the spirit of the first article, all tests will be written using JavaScript and made available in &lt;a href=&quot;https://github.com/Widen/fullstack-react/tree/2.0.0&quot;&gt;an updated version of the same GitHub repository&lt;/a&gt;&lt;/strong&gt;. After completing this article and following the coding examples, you’ll see how easy and satisfying it is to write automated tests for &lt;em&gt;your&lt;/em&gt; web applications.&lt;/p&gt;
+
+&lt;p&gt;Automated tests ensure that future changes to our code due to maintenance or evolution do not cause our application to regress. In the context of this simple application, we want to be sure that users are &lt;em&gt;always&lt;/em&gt; able to add new names. It’s also important that the list of names presented to the user be accurate and up-to-date. There are probably some edge cases that should be tested as well. What happens if our server goes down? How does the UI respond? It’s also prudent to ensure that our application works in all supported browsers. If you have spent any amount of time developing for the web, you already know that this is a real concern due to potential browser-specific issues and varying web API and JavaScript implementations. And what if an unexpected condition is encountered server-side? How will our Falcor routes deal with this? While our app is indeed trivial, there is quite a bit that can go wrong, and that means we have a lot of tests to write!&lt;/p&gt;
+
+&lt;p&gt;While manual tests are still important, I’m going to discuss automated testing in this article. Furthermore, I’ll discuss two distinct types of automated tests - unit tests and integration tests. Unit tests are low-level and very narrowly scoped. They exercise only specific sections of the code. For example, we’ll write a different set of unit tests for each frontend React component, along with a set of tests for our backend Falcor routes. It’s critical that we focus on testing the specific roles of each of these modules, and that may mean mocking out a module’s internal dependencies so that we can better control the environment. When we “mock” something, we’re essentially replacing it with a dummy version that we have full control over. This eliminates uncertainty in our testing environment.&lt;/p&gt;
+
+&lt;p&gt;In addition to unit tests, we have integration tests, which may also be known as “workflow” or “Selenium” tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we’ll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, &lt;em&gt;all&lt;/em&gt; of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario. While there are other definitions of “integration” testing, as the meaning of this term seems to be somewhat subjective, we’re going to work with the definition outlined here throughout this article.&lt;/p&gt;
+
+&lt;h2 id=&quot;part-0-bringing-our-code-and-project-up-to-date&quot;&gt;Part 0: Bringing our code and project up-to-date&lt;/h2&gt;
+&lt;p&gt;Since the last article (exactly 4 months ago), most of our project’s dependencies have changed in some way, some of them drastically. The most visible changes were to Falcor and Babel.&lt;/p&gt;
+
+&lt;p&gt;Version 0.1.16 of Falcor brings &lt;a href=&quot;https://github.com/Netflix/falcor/issues/708&quot;&gt;a breaking change&lt;/a&gt; that affected our response parsing code. In short, an unexpected item is visible among expected properties of “get” responses: &lt;code class=&quot;highlighter-rouge&quot;&gt;$__path&lt;/code&gt;. This new property is useful for creating new models based on sections of an existing JSON graph, which is accomplished using &lt;a href=&quot;http://netflix.github.io/falcor/doc/Model.html#deref&quot;&gt;the new &lt;code class=&quot;highlighter-rouge&quot;&gt;Model.deref&lt;/code&gt; method&lt;/a&gt;. However, we don’t have much use for this in our simple app. Since we only want to see the requested values in our “get” responses, we must &lt;a href=&quot;https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-5545284dc279e8d0cac06a735ecc9f64R1&quot;&gt;make use of a new &lt;code class=&quot;highlighter-rouge&quot;&gt;Falcor.keys&lt;/code&gt; method&lt;/a&gt;, which iterates over all of the keys in the response, ignoring the &lt;code class=&quot;highlighter-rouge&quot;&gt;$__path&lt;/code&gt; property. In this way, it functions exactly like &lt;a href=&quot;https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Object.keys&lt;/code&gt;&lt;/a&gt;, except for the added convenience of skipping this unwanted property.&lt;/p&gt;
+
+&lt;p&gt;Babel 6.x brings a number of substantial changes that have a cascading effect on some of our &lt;em&gt;other&lt;/em&gt; dependencies. Essentially, Babel was carved up into many different smaller and more focused libraries in 6.0. This required us to explicitly &lt;a href=&quot;https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-b9cfc7f2cdf78a7f4b91a753d10865a2R19&quot;&gt;pull in separate libraries for ES6, React, and command-line support&lt;/a&gt; with Babel. The “main” Babel library - babel-core - doesn’t perform ES6, ES7, or React compilation tasks anymore. Our &lt;a href=&quot;https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-a58d55bdb5770c78ad512f8e91f8d051R6&quot;&gt;WebPack configuration for the Babel loader also changed&lt;/a&gt; slightly as a result.&lt;/p&gt;
+
+&lt;h2 id=&quot;part-1-browser-side-unit-tests&quot;&gt;Part 1: Browser-side unit tests&lt;/h2&gt;
+&lt;p&gt;We’ll first focus on writing automated tests for our code that runs in the browser. This accounts for portions of our simple application that our users directly interact with. We’ll primarily write tests for our React components, but first it may make sense to refactor our code a bit to make it more conducive to testing.&lt;/p&gt;
+
+&lt;h3 id=&quot;refactoring-for-ease-of-testing&quot;&gt;Refactoring for ease of testing&lt;/h3&gt;
+&lt;p&gt;The &lt;a href=&quot;https://github.com/Widen/fullstack-react/tree/1.2.1&quot;&gt;most recent version of our names application&lt;/a&gt; contains all of our source files organized into a flat structure. While this is a reasonable hierarchy for such a small number of files, it doesn’t scale very well. As we add more files to handle configuration, testing, and to support better modularization of our application, we’ll need a better-defined structure for our project. To start, let’s move our 3 React components and the Falcor model file into a new directory named “app”. Let’s also move our webpack configuration file into a root-level “config” directory, and finally our index.html file into a “site” directory. This new “site” directory will contain all publicly accessible resources, so the Webpack-generated JavaScript bundle should &lt;em&gt;also&lt;/em&gt; live here. After this initial reorganization, our project looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.
++-- app
+|   +-- model.js
+|   +-- name-adder.jsx
+|   +-- name-manager.jsx
+|   +-- names-list.jsx
++-- config
+|   +-- webpack.config.js
++-- site
+|   +-- index.html
++-- server.js
++-- package.json
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;In order to support this new structure, a few changes must be made to some of our existing code. First, webpack.config.js has to be updated to be aware of the new location of our source files. This is a simple as changing the value of the &lt;code class=&quot;highlighter-rouge&quot;&gt;entry&lt;/code&gt; property from “./name-manager.jsx” to “./app/name-manager.jsx”. So &lt;a href=&quot;https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js&quot;&gt;our original app/webpack.config.js&lt;/a&gt; file now looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;entry&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'./app/name-manager.jsx'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'./site/bundle.js'&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;loaders&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;test&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;sr&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\.&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;js/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;loader&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'babel'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;exclude&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;sr&quot;&gt;/node_modules/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;query&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                  &lt;span class=&quot;na&quot;&gt;presets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'es2015'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'react'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;na&quot;&gt;devtool&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'source-map'&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Furthermore, our Node.JS server must be adjusted to serve the HTML and JS bundle files out of the site directory. This requires a simple change to our Express server. This means &lt;code class=&quot;highlighter-rouge&quot;&gt;app.use(express.static('.'))&lt;/code&gt; changes to &lt;code class=&quot;highlighter-rouge&quot;&gt;app.use(express.static('site'))&lt;/code&gt; in our server.js file. So, the last few lines of &lt;a href=&quot;https://github.com/Widen/fullstack-react/blob/1.2.1/server.js&quot;&gt;our original server.js&lt;/a&gt; now look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;express&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;static&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'site'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;9090&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'navigate to http://localhost:9090'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Before we go any further, we should make sure our changes haven’t broken anything, but before we do that, let’s make one additional adjustment. Going forward, it may be beneficial for us to use our package.json file as a place to execute any scripts needed to build, test, and run our application. The usefulness of this approach will become clearer as this exercise progresses. We’ll start by defining a second target in the package.json &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;scripts&quot;&lt;/code&gt; object, one that will startup our server. After this addition, the bottom of &lt;a href=&quot;https://github.com/Widen/fullstack-react/blob/1.2.1/package.json&quot;&gt;our original package.json file&lt;/a&gt; now looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s2&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;start&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;node server&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;webpack&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;webpack --config config/webpack.config.js&quot;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;There are two changes to this section of the file. First, a new &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;start&quot;&lt;/code&gt; tasks has been added, which starts up our Node.JS server. You can simply run &lt;code class=&quot;highlighter-rouge&quot;&gt;npm start&lt;/code&gt; to execute this step. Second, our &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;webpack&quot;&lt;/code&gt; target has been adjusted to include a reference to the new location of our Webpack configuration file. Previously, this file was located in the root of our project, and, by convention, Webpack looks for a file named “webpack.config.js” in the root of the project. Since we’ve moved this to the config directory, we must now let webpack know where this configuration file exists.&lt;/p&gt;
+
+&lt;h3 id=&quot;getting-familiar-with-our-testing-tools&quot;&gt;Getting familiar with our testing tools&lt;/h3&gt;
+
+&lt;p&gt;Our client-side unit tests will be created with the help of a few important and useful tools:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;http://jasmine.github.io/2.3/introduction.html&quot;&gt;Jasmine&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://phantomjs.org/&quot;&gt;PhantomJS&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://github.com/jhnns/rewire&quot;&gt;Rewire&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://karma-runner.github.io/0.13/index.html&quot;&gt;Karma&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Jasmine is a JavaScript library we will use to &lt;em&gt;compose&lt;/em&gt; our unit tests. It includes a rich &lt;a href=&quot;http://jasmine.github.io/2.3/introduction.html#section-Matchers&quot;&gt;set of assertions&lt;/a&gt; for comparing actual values under test with expected values, a full-featured &lt;a href=&quot;http://jasmine.github.io/2.3/introduction.html#section-Spies&quot;&gt;mocking engine&lt;/a&gt; that will allow us to more easily focus on the component under test, as well as a number of other helpers that we will use to &lt;a href=&quot;http://jasmine.github.io/2.3/introduction.html#section-Grouping_Related_Specs_with_&amp;lt;code&amp;gt;describe&amp;lt;/code&amp;gt;&quot;&gt;group our tests&lt;/a&gt; and &lt;a href=&quot;http://jasmine.github.io/2.3/introduction.html#section-Asynchronous_Support&quot;&gt;test asynchronous behaviors&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;PhantomJS is a headless version of &lt;a href=&quot;https://webkit.org/&quot;&gt;WebKit&lt;/a&gt;, the rendering engine currently used in Apple’s Safari browser and formerly used in Google’s Chrome browser (before it was forked as &lt;a href=&quot;http://www.chromium.org/blink&quot;&gt;Blink&lt;/a&gt;). Running our unit tests in a headless browser makes them easy and quick to run, not to mention portable. The entire browser is distributed and contained in a JavaScript package downloaded from npm. Using a conventional browser for unit tests in a development environment can be jarring with browser windows opening and closing, especially if tests are automatically re-run as soon as any code changes are saved.&lt;/p&gt;
+
+&lt;p&gt;Rewire is a Node.js tool primarily used (at least in this project) to mock out sub-modules imported by a module under test. For example, when testing our &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameManager/&amp;gt;&lt;/code&gt; component, we need to be able to control the behavior of its internal dependencies - &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameList/&amp;gt;&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameAdder/&amp;gt;&lt;/code&gt;. We can use Rewire to gain access to these dependencies inside of &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameManager/&amp;gt;&lt;/code&gt; and replace them with dummy modules with inputs and outputs that we can monitor and control in order to more reliably test &lt;em&gt;this&lt;/em&gt; component. Rewire allows us to access internal dependencies in this way by using its own module loader to insert hooks into modules that allow them to be unnaturally accessed and controlled in a testing environment. For our browser-based unit tests, we’ll need to use a Babel plug-in that wraps the Rewire plugin. It is aptly named &lt;a href=&quot;https://github.com/speedskater/babel-plugin-rewire&quot;&gt;babel-plugin-rewire&lt;/a&gt;. We must use this Babel plug-in instead of the native Rewire library due to &lt;a href=&quot;https://github.com/jhnns/rewire/issues/55&quot;&gt;Babel’s unique ECMAScript 6 module transpilation logic&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Karma is a test runner and reporter, initially developed by Google for use with AngularJS unit tests. Fun fact: it was originally known as &lt;a href=&quot;http://googletesting.blogspot.com/2012/11/testacular-spectacular-test-runner-for.html&quot;&gt;Testacular&lt;/a&gt;. It’s hard to imagine why they changed the name, but I digress. Before we can begin writing tests, we must first configure Karma and tie all of our testing and reporting tools together. Remember that Karma is our client-side test &lt;em&gt;runner&lt;/em&gt;. In other words, it will use use Jasmine to execute the tests we are going to write, and it will provision a PhantomJS instance as an environment in which the tests will run. It will report the results using a Karma plugin: karma-spec-reporter. Another plug-in will need to be introduced to allow Karma to use Webpack to generate a temporary source bundle that includes all of the code we intend to test. Our existing webpack.config.js file will be used here to determine how this bundle is generated. But we will need to contribute an addition Babel plug-in to our Webpack configuration just for these tests - babel-plugin-rewire - which will hook into the bundle generation process and add hooks into our code that we will need to mock out dependencies internal to each of the React components we intend to test.&lt;/p&gt;
+
+&lt;p&gt;Our Karma configuration will be named karma.conf.js, and it will be appropriately located inside of our new “config” directory. The completed file will look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;webpackConfig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'./webpack.config'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;webpackConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;loaders&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;query&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;plugins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'babel-plugin-rewire'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]}&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;basePath&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'../'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;browsers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'PhantomJS'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;files&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'app/test/tests.bundle.js'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;frameworks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'jasmine'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;plugins&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'karma-webpack'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'karma-spec-reporter'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'karma-jasmine'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'karma-phantomjs-launcher'&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;preprocessors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;s1&quot;&gt;'app/test/tests.bundle.js'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'webpack'&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;reporters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'spec'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;singleRun&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;webpack&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;webpackConfig&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;webpackMiddleware&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;noInfo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Before we start configuring Karma, you’ll notice that we are referencing our existing Webpack configuration file and adding a plug-in: babel-plugin-rewire. As mentioned previously, this will allow us to more easily mock internal component dependencies. Moving on, our first configuration point is the &lt;code class=&quot;highlighter-rouge&quot;&gt;basePath&lt;/code&gt;. The location here establishes a relative path for all other paths specified in our configuration file. Since our configuration file is located inside of the “config” subdirectory, our base path is set to the root of the project. Next, we must declare any browsers to run our tests against. We’re just using PhantomJS at the moment. Note that a Karma plug-in for PhantomJS is specified in the &lt;code class=&quot;highlighter-rouge&quot;&gt;plugins&lt;/code&gt; section near the middle of the file as well. This plug-in will be used by Karma to start and control PhantomJS.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;files&lt;/code&gt; configuration point is an array containing the path to a file that will be later coded to include all of our test files. Followed by &lt;code class=&quot;highlighter-rouge&quot;&gt;files&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;frameworks&lt;/code&gt;. This array will only contain one value - “jasmine” - which is our unit test framework. Later, we’ll write all of our unit tests using Jasmine. Notice that there is a corresponding plug-in - karma-jasmine - in the following &lt;code class=&quot;highlighter-rouge&quot;&gt;plugins&lt;/code&gt; section. This plug-in provides Karma programmatic access to the Jasmine binaries.&lt;/p&gt;
+
+&lt;p&gt;Skipping down just a tad to the &lt;code class=&quot;highlighter-rouge&quot;&gt;preprocessors&lt;/code&gt; section, we are instructing Karma to run our unit test files through Webpack. The last two items in our config file - &lt;code class=&quot;highlighter-rouge&quot;&gt;webpack&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;webpackMiddleware&lt;/code&gt; - are used to point Karma at our Webpack configuration file (which we pulled in at the top of this file) and ensure info messages are printed to the console, respectively. There is a Webpack plug-in for Karma as well referenced as the first item in our &lt;code class=&quot;highlighter-rouge&quot;&gt;plugins&lt;/code&gt; array.&lt;br /&gt;
+Karma will only run our tests once and then exit, thanks to the &lt;code class=&quot;highlighter-rouge&quot;&gt;singleRun&lt;/code&gt; option set to a value of &lt;code class=&quot;highlighter-rouge&quot;&gt;true&lt;/code&gt;. And finally, our test results will be printed in a useful format to the console using a reporter plug-in: karma-spec-reporter. The alias for this reporter - “spec” - is included in the &lt;code class=&quot;highlighter-rouge&quot;&gt;reporters&lt;/code&gt; array, and the plug-in is mentioned in our &lt;code class=&quot;highlighter-rouge&quot;&gt;plugins&lt;/code&gt; array as well. Karma is ready to go, and next we will begin writing client-side unit tests.&lt;/p&gt;
+
+&lt;h3 id=&quot;writing-our-tests&quot;&gt;Writing our tests&lt;/h3&gt;
+
+&lt;p&gt;I’ve already explained why it’s important to write automated unit tests, covered the tools we will be using to write and run these tests, &lt;em&gt;and&lt;/em&gt; I’ve showed you how to configure Karma to actually run the tests. Just one problem - we don’t have any actual tests to run. Let’s take care of that now by writing comprehensive unit tests that cover each of &lt;a href=&quot;/blog/future-of-the-web-react-falcor#dividing-ui-roles-into-components-with-react&quot;&gt;our three React components from the previous article&lt;/a&gt;: &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameAdder /&amp;gt;&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList /&amp;gt;&lt;/code&gt;, and our “glue” component - &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameManager /&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Each component’s tests will be located in a dedicated file inside of a new subdirectory under our app directory. After writing all of our tests, our file tree will look something like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.
++-- app
+|   +-- model.js
+|   +-- name-adder.jsx
+|   +-- name-manager.jsx
+|   +-- names-list.jsx
+|   +-- test
+|      +-- name-adder.spec.jsx
+|      +-- name-manager.spec.jsx
+|      +-- names-list.spec.jsx
+|      +-- tests.bundle.js
++-- config
+|   +-- karma.conf.js
+|   +-- webpack.config.js
++-- site
+|   +-- index.html
++-- server.js
++-- package.json
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Notice a fourth file in the new tests directory - tests.bundle.js. This was first mentioned in the previous section, as it is referenced as the entry point in our Karma configuration file. Essentially, this file identifies all test files to execute. In fact, it looks for any files ending in .spec.js or .spec.jsx in the current directory and makes them available for execution by, in this case, Karma, and it looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;context&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'.'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;sr&quot;&gt;/.+&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\.&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;spec&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\.&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;js&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;?)?&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;$/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;keys&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;context&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;context&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h4 id=&quot;testing-nameadder&quot;&gt;Testing NameAdder&lt;/h4&gt;
+
+&lt;p&gt;In &lt;a href=&quot;/blog/future-of-the-web-react-falcor/&quot;&gt;the previous article&lt;/a&gt;, we created a React component with a very specific job - allow a new name to be added to our list of names. A simple unit test would ensure that this component is at least able to perform this task. In short, we are going to write a relatively simple test that attempts to enter a new name into the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;input type=&quot;text&quot;&amp;gt;&lt;/code&gt; rendered by this component, click the add button, and then ensure our component calls our Falcor model with the correct data. I’ll start by posting the entire test specification. Don’t worry, I’ll cover this first example in quite a bit of detail, which will be helpful to you when viewing tests for our other React components.&lt;/p&gt;
+
+&lt;p&gt;So, this is app/test/name-adder.spec.jsx:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'react'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;ReactDom&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'react-dom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;NameAdder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'../name-adder.jsx'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;Falcor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'falcor'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'react/lib/ReactTestUtils'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;describe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'NameAdder'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'saves new messages'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;jasmine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createSpyObj&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'model'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'call'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]),&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;onNameAdded&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{},&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;nameAdder&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;renderIntoDocument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;NameAdder&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;onAdded&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onNameAdded&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/&amp;gt;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;,
+&lt;/span&gt;            &lt;span class=&quot;nx&quot;&gt;form&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;findRenderedDOMComponentWithTag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nameAdder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'form'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;input&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;nameAdder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;refs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;input&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;NameAdder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;__Rewire__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'model'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;and&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;returnValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()})&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'new name'&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Simulate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;submit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;form&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toHaveBeenCalledWith&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'add'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'new name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;First, you’ll notice that I’ve imported several dependencies that will be needed to complete this test. &lt;code class=&quot;highlighter-rouge&quot;&gt;React&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;ReactDom&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt;, and &lt;code class=&quot;highlighter-rouge&quot;&gt;Falcor&lt;/code&gt; are probably not surprising, but &lt;code class=&quot;highlighter-rouge&quot;&gt;TestUtils&lt;/code&gt; is a new one. React provides a set of utilities that help you write unit tests against a React component. We’ll use various methods in &lt;code class=&quot;highlighter-rouge&quot;&gt;TestUtils&lt;/code&gt; to easily add our component under test to the DOM, locate children of this component, and simulate DOM events that trigger our component to take specific actions.&lt;/p&gt;
+
+&lt;p&gt;Our test is wrapped in an &lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt; block, which itself is wrapped in a &lt;code class=&quot;highlighter-rouge&quot;&gt;describe&lt;/code&gt; block. These are Jasmine conventions. The &lt;code class=&quot;highlighter-rouge&quot;&gt;describe&lt;/code&gt; block is meant to contain a set of tests, and each &lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt; block contains a single test. Each of them should read like a sentence or phrase. Here, we will &lt;code class=&quot;highlighter-rouge&quot;&gt;describe&lt;/code&gt; a &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; component. What does it do? &lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt; saves new messages. We will test this assertion inside of the &lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt; block.&lt;/p&gt;
+
+&lt;p&gt;Inside of our &lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt; block, we’re first using Jasmine to create a mocked version of our Falcor model, which we will “inject” into our &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; component shortly. By mocking the model, we can easily control and examine inputs and outputs to verify the behavior of the component under test. Next, we’re defining an empty function, which will serve as the value of the &lt;code class=&quot;highlighter-rouge&quot;&gt;onAdded&lt;/code&gt; property passed to our &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; component, which is created and added to our document after that. We don’t much care about the &lt;code class=&quot;highlighter-rouge&quot;&gt;onAdded&lt;/code&gt; property for the purposes of this test - but it must be supplied as it is currently a required property. The last two variable declarations at the top of the &lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt; block locate the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;form&amp;gt;&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;input&amp;gt;&lt;/code&gt; elements inside of our rendered &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; component. We’ll need access to these soon when we test our component.&lt;/p&gt;
+
+&lt;p&gt;Remember when I said we would need to inject a mocked Falcor model into our &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; component instance? That happens immediately after the block of variable declarations. This is where babel-plugin-rewire enters into our testing stack. This Babel plug-in added a bunch of methods to the compiled JavaScript code that makes it easy to access internal dependencies. This is especially useful for replacing real dependencies with mocked ones. The &lt;code class=&quot;highlighter-rouge&quot;&gt;__Rewire__&lt;/code&gt; function, added to our &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; component during Babel compilation, allows us to replace our Falcor model simply by specifying the name of the internal variable that is assigned the import - &lt;code class=&quot;highlighter-rouge&quot;&gt;model&lt;/code&gt; - followed by the new value - our Jasmine-created mock object. Immediately after injecting our mocked model into &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; we’ve defined a behavior, again using Jasmine. When the &lt;code class=&quot;highlighter-rouge&quot;&gt;call&lt;/code&gt; method is invoked by &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; on this mock object, it invokes the promissory success function, indicating that the model update was a success. Remember that the &lt;code class=&quot;highlighter-rouge&quot;&gt;call&lt;/code&gt; function on our Falcor model is used internally by &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; to send a newly added name to the model, which in turn sends the new data to our server to be handled by a matching Falcor route.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;input&amp;gt;&lt;/code&gt; we referenced in the variable block is used next. We’re essentially “typing” in a new name by setting the &lt;code class=&quot;highlighter-rouge&quot;&gt;value&lt;/code&gt; property of this element. Text inputs, among several other input types, will reflect entered data in the &lt;code class=&quot;highlighter-rouge&quot;&gt;value&lt;/code&gt; property on the JavaScript object that represents the element tag in our markup. We can read &lt;em&gt;or&lt;/em&gt; write to this property. Internally, &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt; reads this property when handing a form submission, and sends the value of this &lt;code class=&quot;highlighter-rouge&quot;&gt;value&lt;/code&gt; property to the Falcor model. And so, now that we’ve entered a new name, we need to submit the form. &lt;code class=&quot;highlighter-rouge&quot;&gt;TestUtils&lt;/code&gt; provides a method that will “simulate” a form submit. Without this shortcut, triggering a DOM event can be a bit tricky in some instances. Just think of this as an easy way to invoke the internal &lt;code class=&quot;highlighter-rouge&quot;&gt;onSubmit&lt;/code&gt; function set on the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;form&amp;gt;&lt;/code&gt; component inside of &lt;code class=&quot;highlighter-rouge&quot;&gt;NameAdder&lt;/code&gt;. This function starts the chain of actions that ends in a new name being sent to our server.&lt;/p&gt;
+
+&lt;p&gt;Finally, we have to actually &lt;em&gt;test&lt;/em&gt; something, don’t we? Perhaps the most prudent course at this juncture is to hook into our mocked Falcor model and ensure the proper route has been &lt;code class=&quot;highlighter-rouge&quot;&gt;call&lt;/code&gt;ed with the text of our new name. The &lt;code class=&quot;highlighter-rouge&quot;&gt;expect&lt;/code&gt; function - a utility provided by Jasmine - gives us an easy and intuitive way to describe the expected value of a mocked object.&lt;/p&gt;
+
+&lt;h4 id=&quot;testing-nameslist&quot;&gt;Testing NamesList&lt;/h4&gt;
+
+&lt;p&gt;In case the previous article is a bit fuzzy at this point, remember that we created a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList&amp;gt;&lt;/code&gt; React component with one specific goal - list all names and auto-update when a new name is added. Now it’s time to write tests for this component. Before we write any code, let’s figure out exactly &lt;em&gt;what&lt;/em&gt; we need to test. The simplest test perhaps mocks out our data store and ensures the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList&amp;gt;&lt;/code&gt; component renders all of the names in our mocked store. The critical piece of this test involves inserting a mocked version of our server’s data store. Luckily this is very easy to accomplish with babel-plugin-rewire and Falcor. Let’s take a look at the code for this test first, housed in app/test/names-list.spec.jsx:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'react'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'react/lib/ReactTestUtils'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;NamesList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'../names-list.jsx'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;Falcor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'falcor'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;describe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names-list tests'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;afterEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;NamesList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;__ResetDependency__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'model'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+    &lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'renders with some initial data'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;NamesList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;__Rewire__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'model'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Falcor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'joe'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+                    &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'jane'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+                    &lt;span class=&quot;na&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}))&lt;/span&gt;
+
+        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;namesList&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;renderIntoDocument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;NamesList&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;namesList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;componentDidUpdate&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;nameEls&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;scryRenderedDOMComponentsWithTag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;namesList&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'li'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+            &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nameEls&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toBe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nameEls&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;textContent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toBe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'joe'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nameEls&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;textContent&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toBe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'jane'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+            &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Nothing new in the variable declaration section at the top of the file, other than the import of Falcor. We’ll need to make brief use of Falcor’s client-side API as we work with our mocked model. At the top of the &lt;code class=&quot;highlighter-rouge&quot;&gt;describe&lt;/code&gt; block, there’s an &lt;code class=&quot;highlighter-rouge&quot;&gt;afterEach&lt;/code&gt; function, which may be new to some who are not already familiar with Jasmine. The body of this function will run after each test has completed. Since we only have one test (so far), this will run after the single &lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt; block has completed. While not entirely necessary in our case, it is good practice to reset any internal dependencies that have been tampered with at the end of each test. As you will see soon in our test, we are replacing the imported Falcor model with a mocked version, and the logic in our &lt;code class=&quot;highlighter-rouge&quot;&gt;afterEach&lt;/code&gt; block acts as an “undo” for this action, so as not to pollute other tests.&lt;/p&gt;
+
+&lt;p&gt;We’ve only written one test for &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList&amp;gt;&lt;/code&gt;, which is a sufficient start. As the title of the &lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt; block states, we’re going to ensure that the initial render of this component renders all available names according to the model/store. In the first line of our &lt;code class=&quot;highlighter-rouge&quot;&gt;it&lt;/code&gt; block, babel-plugin-rewire is being used to replace the imported Falcor model with a mocked version. Our mocked model includes two names: “joe” and “jane”. It is perfectly valid to initialize a Falcor model in this way, and this allows us to assert full control over the component’s access to data, which makes writing unit tests much easier.&lt;/p&gt;
+
+&lt;p&gt;After rendering the component into a detached DOM node with the help of React’s &lt;code class=&quot;highlighter-rouge&quot;&gt;TestUtils&lt;/code&gt;, we must wait until the first time our component’s state changes. The initial render will &lt;em&gt;not&lt;/em&gt; include the values from our mocked model, since accessing the model data is an asynchronous operation. Remember: after the model values are retrieved by &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList&amp;gt;&lt;/code&gt;, the component’s internal state will be updated with the new names. And if there &lt;em&gt;are&lt;/em&gt; new names, the &lt;code class=&quot;highlighter-rouge&quot;&gt;componentDidUpdate&lt;/code&gt; method will be called by React. &lt;code class=&quot;highlighter-rouge&quot;&gt;componentDidUpdate&lt;/code&gt; is a &lt;a href=&quot;https://facebook.github.io/react/docs/component-specs.html&quot;&gt;React component lifecycle method&lt;/a&gt; that is called after each state change (but not on the initial component render). Our test hooks into this lifecycle method and checks to ensure that the component’s DOM contains the names represented by our mocked model using Jasmine’s built-in assertion library. Inside of this method, &lt;em&gt;first&lt;/em&gt; a handle on the list item elements containing the names is created, and then each list item is checked to ensure it matches the expected name from the model. The method name used to lookup these elements inside of the component, &lt;a href=&quot;https://facebook.github.io/react/docs/test-utils.html#scryrendereddomcomponentswithtag&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;scryRenderedDOMComponentsWithTag&lt;/code&gt;&lt;/a&gt;, looks a little strange (to me at least). For an explanation of the &lt;code class=&quot;highlighter-rouge&quot;&gt;scry&lt;/code&gt; prefix, have a look at &lt;a href=&quot;https://twitter.com/angustweets/status/590659867926462465&quot;&gt;this twitter conversation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;testing-namemanager&quot;&gt;Testing NameManager&lt;/h4&gt;
+
+&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameManager /&amp;gt;&lt;/code&gt; glues the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList /&amp;gt;&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameAdder /&amp;gt;&lt;/code&gt; components together. When testing it, we need to be sure that it does its job as a workflow conductor. That is, when a name is added, the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameManager /&amp;gt;&lt;/code&gt; must notify the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList /&amp;gt;&lt;/code&gt;, so the list can update with the new names according to the server. We don’t want to test the implementation of &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList /&amp;gt;&lt;/code&gt; or &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameAdder /&amp;gt;&lt;/code&gt;, so we will have to mock both of these out. In fact, as you can see below, most of the code in this test is dedicated to mocking components. Our test, as expected, lives in app/test/name-manager.spec.jsx&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'react'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'react/lib/ReactTestUtils'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;NameManager&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'../name-manager.jsx'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;describe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'NameManager'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'updates NamesList when new name is added'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;kr&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;NameAdder&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Component&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;triggerOnAdded&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;props&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onAdded&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;NameManager&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;__Rewire__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'NameAdder'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;NameAdder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+        &lt;span class=&quot;nx&quot;&gt;NameManager&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;__Rewire__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'NamesList'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;React&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Component&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;update&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;render&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;div&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+
+        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;nameManager&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;renderIntoDocument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;NameManager&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;TestUtils&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;findRenderedComponentWithType&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nameManager&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;NameAdder&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;triggerOnAdded&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;In this test, the instance of NameAdder imported internally by NameManager is replaced with a simple class that invokes the &lt;code class=&quot;highlighter-rouge&quot;&gt;onAdded()&lt;/code&gt; callback passed into the component by NamesManager when the &lt;code class=&quot;highlighter-rouge&quot;&gt;triggerOnAdded()&lt;/code&gt; class method is called. And NamesList is replaced with a trivial class that completes the test when the &lt;code class=&quot;highlighter-rouge&quot;&gt;update()&lt;/code&gt; method is called. First, a name is added using NameAdder, resulting in a call to the &lt;code class=&quot;highlighter-rouge&quot;&gt;onAdded()&lt;/code&gt; function passed to NameAdder. That function results in an update of NamesList via invocation of the &lt;code class=&quot;highlighter-rouge&quot;&gt;update()&lt;/code&gt; method. After rendering &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameManager /&amp;gt;&lt;/code&gt; we simply call &lt;code class=&quot;highlighter-rouge&quot;&gt;triggerOnAdded&lt;/code&gt; on the child &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameAdder /&amp;gt;&lt;/code&gt; component. If everything is working correctly, the last call will be on the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList /&amp;gt;&lt;/code&gt; component’s &lt;code class=&quot;highlighter-rouge&quot;&gt;update()&lt;/code&gt; method, which will complete and pass the test. One new thing about this test is our use of the &lt;code class=&quot;highlighter-rouge&quot;&gt;findRenderedComponentWithType&lt;/code&gt; method on &lt;code class=&quot;highlighter-rouge&quot;&gt;TestUtils&lt;/code&gt;. This allows us to located a specific type of composite component inside another composite component. In this case, we are looking for the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NameAdder /&amp;gt;&lt;/code&gt; component. There are no &lt;code class=&quot;highlighter-rouge&quot;&gt;expect&lt;/code&gt; blocks here and no assertions, but the test will timeout and fail if the &lt;code class=&quot;highlighter-rouge&quot;&gt;update()&lt;/code&gt; method is not called on NamesList.&lt;/p&gt;
+
+&lt;p&gt;And that’s it, now we have tests for &lt;em&gt;all&lt;/em&gt; of our React components!&lt;/p&gt;
+
+&lt;h3 id=&quot;running-our-tests&quot;&gt;Running our tests&lt;/h3&gt;
+&lt;p&gt;Now that we have all of our React components covered with unit tests, it would be nice to be able to actually &lt;em&gt;run&lt;/em&gt; them to verify that everything is working as expected. To make this easy, let’s add a &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test&quot;&lt;/code&gt; entry to the &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;scripts&quot;&lt;/code&gt; property in our package.json file. This will allow us to execute our full suite of tests simply by running &lt;code class=&quot;highlighter-rouge&quot;&gt;npm test&lt;/code&gt;. The relevant portion of package.json now looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s2&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;test&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;karma start config/karma.conf.js&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This will use the &lt;code class=&quot;highlighter-rouge&quot;&gt;karma&lt;/code&gt; binary installed in node_modules/karma to run our Jasmine tests. It’s pretty simple to do this via the command-line, and everything works as expected simply by issuing the &lt;code class=&quot;highlighter-rouge&quot;&gt;start&lt;/code&gt; command and pointing Karma at the configuration file we created earlier. When you run &lt;code class=&quot;highlighter-rouge&quot;&gt;npm test&lt;/code&gt;, all test should pass, and you’ll see this in your terminal:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;NameAdder
+  ✓ saves new messages
+
+NameManager
+  ✓ updates NamesList when new name is added
+
+NamesList
+  ✓ renders with some initial data
+
+PhantomJS 2.1.1 (Mac OS X 0.0.0): Executed 3 of 3 SUCCESS (0.007 secs / 0.021 secs)
+TOTAL: 3 SUCCESS
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;On to the server!&lt;/p&gt;
+
+&lt;h2 id=&quot;part-2-server-side-unit-tests&quot;&gt;Part 2: Server-side unit tests&lt;/h2&gt;
+&lt;p&gt;On the server, most of our code is focused primarily on handling Falcor requests. In order to service these, we have defined three notable routes:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;A “get” route that returns the number of names.&lt;/li&gt;
+  &lt;li&gt;Another “get” route that returns one or more names.&lt;/li&gt;
+  &lt;li&gt;A “call” route that adds a new name.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In this section, you’ll see unit tests that verify the expected behavior of each Falcor route. In order to more easily verify the logic in these routes, we’ll rely on the Rewire library to mock out our “names” data store in order to provide canned values for our tests.&lt;/p&gt;
+
+&lt;h3 id=&quot;neatness-counts---file-reorganization--refactoring&quot;&gt;Neatness counts - file reorganization &amp;amp; refactoring&lt;/h3&gt;
+&lt;p&gt;In order to make our source easier to browse &lt;em&gt;and&lt;/em&gt; test, some changes are necessary. First, we’ll split the original server.js file/module into three modules: one to hold our names data, another for housing our Falcor routes, and then a third that directly handles requests from our frontend and deals with all of the other generic server tasks.&lt;/p&gt;
+
+&lt;p&gt;We’ll start by moving the &lt;a href=&quot;https://github.com/Widen/fullstack-react/blob/1.2.1/server.js#L6&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;data&lt;/code&gt; variable in the original server.js file&lt;/a&gt; into a new names.js file, which will look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'a'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'b'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'c'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Separating this into its own module makes it trivial for us to substitute this data store for a mocked version in our server unit tests.&lt;/p&gt;
+
+&lt;p&gt;Next, we’ll move our &lt;a href=&quot;https://github.com/Widen/fullstack-react/blob/1.2.1/server.js#L13&quot;&gt;Falcor routes from server.js&lt;/a&gt;, along with most Falcor-related dependencies, into a router.js file:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Router&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'falcor-router'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;names&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'./names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;NamesRouter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Router&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createClass&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;route&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'names[{integers:nameIndexes}][&quot;name&quot;]'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;pathSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[];&lt;/span&gt;
+                &lt;span class=&quot;nx&quot;&gt;pathSet&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nameIndexes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nameIndex&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;nameIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                        &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;push&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+                            &lt;span class=&quot;na&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;nameIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt;
+                            &lt;span class=&quot;na&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nameIndex&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;
+                        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+                    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;results&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;...&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exports&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;NamesRouter&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This separation allows us to focus specifically on testing Falcor routes without having to deal with any of the generic server logic that is unimportant to our unit tests.&lt;/p&gt;
+
+&lt;p&gt;All of these changes to promote testable code leaves our original server.js file much smaller and only focused on traditional server tasks, such as routing HTTP requests, serving up static resources (such as our Webpack-generated JavaScript bundles), and starting up the server. Here it is, for reference:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;FalcorServer&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'falcor-express'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;bodyParser&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'body-parser'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;express&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'express'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;express&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;NamesRouter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'./router'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bodyParser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;urlencoded&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;extended&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}));&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'/model.json'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;FalcorServer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dataSourceRoute&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;NamesRouter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()))&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;use&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;express&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;static&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'site'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;app&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;listen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;9090&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'navigate to http://localhost:9090'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;So now it’s easier to test our code since each file/module is focused on a specific task, but we have 2 extra files cluttering up the root of our project. Let’s move those into a new subdirectory, appropriately named “server”. Let’s also rename server.js to index.js. This is a good way to indicate that this is the main entry point for our server, and also allows us to start the server without explicitly specifying the file name. With this change, our project’s structure seems a bit more sane and predictable. Here’s the tree at this point:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.
++-- app
+|   +-- model.js
+|   +-- name-adder.jsx
+|   +-- name-manager.jsx
+|   +-- names-list.jsx
+|   +-- test
+|      +-- name-adder.spec.jsx
+|      +-- name-manager.spec.jsx
+|      +-- names-list.spec.jsx
+|      +-- tests.bundle.js
++-- config
+|   +-- karma.conf.js
+|   +-- webpack.config.js
++-- server
+|   +-- names.js
+|   +-- router.js
+|   +-- index.js
++-- site
+|   +-- index.html
++-- package.json
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;understanding-our-server-side-testing-tools&quot;&gt;Understanding our server-side testing tools&lt;/h3&gt;
+&lt;p&gt;One of the goals of this full-stack JavaScript approach is to blend the frontend and backend together as much as possible. By utilizing the same language across the entire app, we get the benefit of also using the same tools for testing. This is particularly noticeable when we look at the unit testing structure for our server. Our toolset is a subset of the same tools used to write and run unit tests for our frontend. On the backend, we’ll write our tests using the familiar Jasmine library. Mocking out internal dependencies, such as our data store, will again be accomplished using Rewire. While we used Karma to run our frontend Jasmine tests, we can simply use Jasmine’s Node.JS binary to run our server unit tests.&lt;/p&gt;
+
+&lt;h3 id=&quot;configuring-jasmine-to-run-our-tests&quot;&gt;Configuring Jasmine to run our tests&lt;/h3&gt;
+&lt;p&gt;The Jasmine test runner, which will be used to execute our Jasmine server-side unit tests, needs a bit of configuration in order to do its job. We’ll store this configuration, which is quite minimal, in a JSON file inside of our configuration directory, alongside the existing Karma and Webpack configuration files. This Jasmine config revolves around two properties, &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;spec_dir&quot;&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;spec_files&quot;&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;spec_dir&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;server/test&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;spec_files&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;**/*[sS]pec.js&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;“spec” is short for specification. Each set of similar tests are grouped into specifications, and this configuration file tells Jasmine a bit about the specification we’re about to write. &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;spec_dir&quot;&lt;/code&gt; is the directory that holds all of our server-side specifications. Those will eventually live in the “test” subdirectory, inside of the “server” directory. This structure mirrors the setup of our client-side “app” directory. &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;spec_files&quot;&lt;/code&gt; is an array that helps Jasmine find the actual specifications to run inside of our &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;spec_dir&quot;&lt;/code&gt;. Our configuration contains one entry - a regular expression that will match any file inside this directory (or any of its children) that ends with “.spec.js”. So all of our specification files must adhere to this format, and if we do, Jasmine will magically run all defined tests and report the results.&lt;/p&gt;
+
+&lt;h3 id=&quot;unit-testing-our-falcor-routes&quot;&gt;Unit testing our Falcor routes&lt;/h3&gt;
+
+&lt;p&gt;All of our server-side unit tests, which will exercise the three primary Falcor routes defined in server/router.js, will live inside of server/test/router.spec.js. Again, these will be Jasmine tests.&lt;/p&gt;
+
+&lt;p&gt;Before I discuss the setup for these unit tests, lets take a look at the relevant code first:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;describe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'falcor router tests'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;rewire&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'rewire'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;Router&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;rewire&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'../router'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;namesRouter&lt;/span&gt;
+
+    &lt;span class=&quot;nx&quot;&gt;beforeEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;Router&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;__set__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'uno'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'dos'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'tres'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;namesRouter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Router&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;The above code doesn’t actually &lt;em&gt;test&lt;/em&gt; anything, but it is crucial for the tests we are &lt;em&gt;about&lt;/em&gt; to write. Each of these three unit tests will require us to work with some predictable set of data. In order to ensure this, we’ll need to mock out our data store and explicitly specify the data we want to test against. Using Rewire, we can reach inside of the router.js module and replace the imported &lt;code class=&quot;highlighter-rouge&quot;&gt;names&lt;/code&gt; data store instance with our own set of data. This modified instance of the Falcor router is then made available to all of our upcoming unit tests.&lt;/p&gt;
+
+&lt;p&gt;Our first unit test will examine the route that returns the number of names in the list. Remember our mocked data store contains exactly 3 names, so this is the result we are looking for in our test:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'gets the number of names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;namesRouter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'length'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]]).&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;subscribeOnNext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toEqual&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;jsonGraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;na&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Quite simply, we’re calling the &lt;code class=&quot;highlighter-rouge&quot;&gt;names.lenth&lt;/code&gt; route on our Falcor router, and this returns &lt;a href=&quot;https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/observable.md&quot;&gt;an RxJS &lt;code class=&quot;highlighter-rouge&quot;&gt;Observable&lt;/code&gt;&lt;/a&gt;. The &lt;a href=&quot;https://github.com/Reactive-Extensions/RxJS/blob/master/doc/api/core/operators/subscribeonnext.md&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;subscribeOnNext&lt;/code&gt; method&lt;/a&gt; will execute our passed callback with the “response” generated by our code for this route. We’re expecting the result to be described in terms of a &lt;a href=&quot;http://netflix.github.io/falcor/documentation/jsongraph.html&quot;&gt;JSON Graph&lt;/a&gt; that contains a &lt;code class=&quot;highlighter-rouge&quot;&gt;names.length&lt;/code&gt; property with the number of names in the server-maintained list. This test (and all other server-side tests we will write) is asynchronous. To prevent Jasmine from completing the test before we’ve verified the condition in our callback, we ask Jasmine to pass a &lt;code class=&quot;highlighter-rouge&quot;&gt;done&lt;/code&gt; function into our test which we invoke once our test is &lt;a href=&quot;http://images.wisegeek.com/hand-putting-money-in-coin.jpg&quot;&gt;&lt;em&gt;done&lt;/em&gt; done&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Our next test verifies that our names route returns the requested names in the list. We’ll ask for the first two names in our mock data store, “uno” and “dos”, and then verify that our route actually returns these items:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'gets a list of names by index range'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;namesRouter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'from'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'to'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]]).&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;subscribeOnNext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toEqual&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;jsonGraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                &lt;span class=&quot;na&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                    &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'uno'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+                    &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'dos'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+                &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This is very similar to the &lt;code class=&quot;highlighter-rouge&quot;&gt;names.length&lt;/code&gt; route test, with the exception of the additional parameter specifying the range of names.&lt;/p&gt;
+
+&lt;p&gt;This last test will add a new name - “cuatro” - using the &lt;code class=&quot;highlighter-rouge&quot;&gt;names.add&lt;/code&gt; “call” route. It will verify the response to this “call”, and then examine the names data store directly to verify that this new name is available at index 3 in our names list:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'adds a new name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;namesStore&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Router&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;__get__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+  &lt;span class=&quot;nx&quot;&gt;namesRouter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'add'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'cuatro'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]).&lt;/span&gt;
+  &lt;span class=&quot;nx&quot;&gt;subscribeOnNext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;response&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toEqual&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+          &lt;span class=&quot;na&quot;&gt;jsonGraph&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+              &lt;span class=&quot;na&quot;&gt;names&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+                  &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'cuatro'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+                  &lt;span class=&quot;na&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;
+              &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+          &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+          &lt;span class=&quot;na&quot;&gt;paths&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'length'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'names'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]]&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+
+      &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;namesStore&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toBe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'cuatro'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Verifying the response to the “call” involves ensuring the changes to our store are reported. We’re also examining the &lt;code class=&quot;highlighter-rouge&quot;&gt;path&lt;/code&gt; property in the response, which describes what specific elements of the JSON graph have changed as a result of this “call”. The last part of this third test is more of a sanity check. By checking the underlying data store (which we can easily access using Rewire) we’re making absolutely sure that this new name has indeed been added.&lt;/p&gt;
+
+&lt;h3 id=&quot;running-our-tests-1&quot;&gt;Running our tests&lt;/h3&gt;
+&lt;p&gt;We are now accustomed to using npm to perform various operations on our application, such as running unit tests. Carrying forward this pattern, let’s provide a way to run our server-side tests via npm. In fact, let’s modify our package.json scripts so that we can execute both our frontend &lt;em&gt;and&lt;/em&gt; backend tests with a single command. The relevant portions of our package.json now look like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s2&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;test-client&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;karma start config/karma.conf.js&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;test-server&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;jasmine JASMINE_CONFIG_PATH=config/jasmine.json&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;test&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;npm run test-client; npm run test-server&quot;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;You can see two &lt;em&gt;new&lt;/em&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;scripts&quot;&lt;/code&gt; entries above: &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test-client&quot;&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test-server&quot;&lt;/code&gt;. The old &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test&quot;&lt;/code&gt; entry was moved over to a more specific &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test-client&quot;&lt;/code&gt; entry, and a new &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test-server&quot;&lt;/code&gt; entry was created to handle execution of the server tests that we just wrote. The &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test&quot;&lt;/code&gt; entry has been modified to run both the &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test-client&quot;&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test-server&quot;&lt;/code&gt; scripts. Now, when we run &lt;code class=&quot;highlighter-rouge&quot;&gt;npm test&lt;/code&gt;, our terminal contains output that shows three successful frontend unit tests &lt;em&gt;and&lt;/em&gt; three successful backend tests:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;NameAdder
+  ✓ saves new messages
+
+NameManager
+  ✓ updates NamesList when new name is added
+
+NamesList
+  ✓ renders with some initial data
+
+PhantomJS 2.1.1 (Mac OS X 0.0.0): Executed 3 of 3 SUCCESS (0.006 secs / 0.023 secs)
+
+TOTAL: 3 SUCCESS
+
+
+&amp;gt; fullstack-react@2.0.0 test-server /Users/rnicholus/code/fullstack-react
+&amp;gt; jasmine JASMINE_CONFIG_PATH=config/jasmine.json
+
+Started
+...
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;The three dots at the end of the test (which are green in a terminal) represent the success of our three new unit tests. There are ways to provide more verbose reports for our server-side tests, but this is sufficient for now. Note that failures &lt;em&gt;will&lt;/em&gt; include relevant information in the console regarding the failure.&lt;/p&gt;
+
+&lt;p&gt;And that’s it! Now we have all frontend and backend code covered by unit tests, along with a simple way to run these tests.&lt;/p&gt;
+
+&lt;h2 id=&quot;part-3-integration-testing&quot;&gt;Part 3: Integration testing&lt;/h2&gt;
+
+&lt;p&gt;Unit tests have been throughly covered by now, so let’s move on to “integration” testing. These tests will examine how our application functions when a realistic user-generated operation is performed. In contrast to unit tests, integration tests exercise the &lt;em&gt;entire&lt;/em&gt; application, so we will need to have a running server in order to execute these tests. We’ll also need to write code that will open up a browser, load our application, and then perform one or more common tasks.&lt;/p&gt;
+
+&lt;h3 id=&quot;tools-to-help-us-write-and-run-our-tests&quot;&gt;Tools to help us write and run our tests&lt;/h3&gt;
+
+&lt;p&gt;Just like out client-side and sever-side unit tests, we’ll again use Jasmine to write our integration tests. Furthermore, Jasmine will &lt;em&gt;run&lt;/em&gt; these tests as well, just as it runs our server tests. But integration tests are a bit more complex than unit tests, so we need some more help writing and running them. We’ll enlist &lt;a href=&quot;http://webdriver.io/&quot;&gt;WebdriverIO&lt;/a&gt; to make this as easy as possible. WebdriverIO provides an easy to use JavaScript API on top of Selenium Webdriver’s wire protocol, which allows us to control and query any browser programmatically. But &lt;a href=&quot;https://www.w3.org/TR/webdriver/&quot;&gt;wire protocol is low-level and not particularly pleasant to work with&lt;/a&gt;. WebdriverIO “fixes” this for us, and allows us to complete our mission to write and test a web application using nothing but JavaScript.&lt;/p&gt;
+
+&lt;h3 id=&quot;writing-a-simple-but-useful-test&quot;&gt;Writing a simple but useful test&lt;/h3&gt;
+&lt;p&gt;To illustrate the role and structure of a typical Webdriver-dependant integration test using WebdriverIO, let’s create a single simple but incredibly useful test that will ensure a user is able to successfully add a new name.&lt;/p&gt;
+
+&lt;p&gt;Before we get into actually writing any code, let’s outline exactly how this test should be structured. Let’s also assume that our server is already running:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Navigate to our app in a browser.&lt;/li&gt;
+  &lt;li&gt;Determine how many names exist in the list initially (by counting list item elements).&lt;/li&gt;
+  &lt;li&gt;“Type” a value into the text input at the bottom of the page.&lt;/li&gt;
+  &lt;li&gt;Click the “add name” button.&lt;/li&gt;
+  &lt;li&gt;Ensure the number of names in our list has increased by  exactly 1 and it contains the value we entered into the text input.&lt;/li&gt;
+  &lt;li&gt;End test/close browser.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;That’s it - six simple steps. And WebdriverIO provides an elegant API that will allow us to follow this formula &lt;em&gt;and&lt;/em&gt; write code that is mostly self-documenting. This test will live among the other server-side tests - in server/test - and will be named “integration.spec.js”. This will allow it to be automatically executed by Jasmine along with the server unit tests. Let’s have a look at the code:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;webdriverio&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'webdriverio'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;describe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'name adder integration tests'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;jasmine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DEFAULT_TIMEOUT_INTERVAL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30000&lt;/span&gt;
+
+    &lt;span class=&quot;nx&quot;&gt;beforeEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;browser&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;webdriverio&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+
+    &lt;span class=&quot;nx&quot;&gt;it&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'adds a name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;now&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;nameCount&lt;/span&gt;
+
+        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;browser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'http://localhost:9090'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;waitForExist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'li'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'li'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;elements&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;nameCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'input'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;getValue&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'input'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;parseInt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toBe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;click&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'button'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;waitForExist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;li&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;`&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'li'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;then&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;elements&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;expect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;elements&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;toBe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;nameCount&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+            &lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;done&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;The format of this specification is familiar, since we’re again using Jasmine. Notice the “webdriverio” import at the top of the file, and initialization code inside of &lt;code class=&quot;highlighter-rouge&quot;&gt;beforeEach&lt;/code&gt;. This produces a &lt;code class=&quot;highlighter-rouge&quot;&gt;browser&lt;/code&gt; object, created by WebdriverIO, which exposes &lt;a href=&quot;http://webdriver.io/api.html&quot;&gt;a set of methods to control the browser&lt;/a&gt;. We’ve also set a longer-than-normal timeout for our tests. This isn’t really important now, but it may be later when we attempt to run these tests against virtualized browsers in the cloud in the next section.&lt;/p&gt;
+
+&lt;p&gt;The test outlined earlier is represented in our code by a series of chained method calls inside of the “adds a name” test. Starting with &lt;code class=&quot;highlighter-rouge&quot;&gt;this.browser.url(...)&lt;/code&gt;, here is a line-by-line breakdown of our integration test:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Open Firefox (by default) and navigate to the index page of our app.&lt;/li&gt;
+  &lt;li&gt;Wait for a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;li&amp;gt;&lt;/code&gt; to exist on the page (this will represent the first name in our list). If this is not visible within 30 seconds, the test will fail. Again, for testing against a local browser, this long of a timeout is probably unnecessary, but this may be important in the next section.&lt;/li&gt;
+  &lt;li&gt;Find all &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;li&amp;gt;&lt;/code&gt; elements, count them, and set this number to be the value of the &lt;code class=&quot;highlighter-rouge&quot;&gt;nameCount&lt;/code&gt; variable. This is the number of names on page load.&lt;/li&gt;
+  &lt;li&gt;Set the value of the &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;input type=&quot;text&quot;&amp;gt;&lt;/code&gt; at the bottom of the page to the current time in milliseconds.&lt;/li&gt;
+  &lt;li&gt;Make sure this text input reflects the value we just entered.&lt;/li&gt;
+  &lt;li&gt;Click the “add name” button next to the input.&lt;/li&gt;
+  &lt;li&gt;Wait up to 5 seconds for a &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;li&amp;gt;&lt;/code&gt; element to appear on the page with text that equals the value we just submitted. This is the first check to ensure our newly added name exists on the page after a submit.&lt;/li&gt;
+  &lt;li&gt;Count the number of &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;li&amp;gt;&lt;/code&gt; elements on the page again. Remember that each name is housed in a separate &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;li&amp;gt;&lt;/code&gt;, so there should be one more than our last check.&lt;/li&gt;
+  &lt;li&gt;Close the browser.&lt;/li&gt;
+  &lt;li&gt;Signal to Jasmine that the test is complete.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;running-our-test-locally&quot;&gt;Running our test locally&lt;/h3&gt;
+&lt;p&gt;By default, without providing &lt;em&gt;any&lt;/em&gt; configuration options to WebdriverIO, our test will run against Firefox. So, before running this locally, be sure you have Firefox installed. We’ll also need to run a Selenium server locally. WebdriverIO actually drives the browser &lt;em&gt;through&lt;/em&gt; this Selenium server. Downloading, installing, and running this server is &lt;em&gt;much&lt;/em&gt; easier than it sounds. In order to run the server, you’ll need a Java Runtime Environment (JRE) installed on your machine as well. Most machines already have this installed, so you probably don’t have to worry about this.&lt;/p&gt;
+
+&lt;p&gt;In order to make it as easy as possible to setup/startup our Selenium server and run our integration tests, we’ll need to add two more &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;scripts&quot;&lt;/code&gt; to our package.json file:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s2&quot;&gt;&quot;scripts&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;setup-webdriver&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;(mkdir server/test/bin; cd server/test/bin; curl -O http://selenium-release.storage.googleapis.com/2.51/selenium-server-standalone-2.51.0.jar server/test)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+  &lt;span class=&quot;s2&quot;&gt;&quot;start-webdriver&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;java -jar server/test/bin/selenium-server-standalone-2.51.0.jar&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;The above represents only the &lt;em&gt;new&lt;/em&gt; entries in package.json. The first new script - &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;setup-webdriver&quot;&lt;/code&gt; - creates and enters a “bin” directory inside of server/test/, and then downloads the Selenium server binary (which is a Java jar) into that directory. This first new script only needs to be run &lt;em&gt;once&lt;/em&gt;. The second new script - &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;start-webdriver&quot;&lt;/code&gt; - will, as you might expect, start this newly installed Selenium server using the JRE I mentioned earlier.&lt;/p&gt;
+
+&lt;p&gt;So, now we have a running Selenium server. How can we actually execute this new integration test? Simple! Just run &lt;code class=&quot;highlighter-rouge&quot;&gt;npm test&lt;/code&gt;. Since our specification file ends with “.spec.js” all we have to do is ensure it is placed inside the server/test directory, and the Jasmine configuration we created in the previous section will ensure it is run as part of our server-side tests. Go ahead and run the test. You’ll notice that Firefox opens automatically and the steps outlined above are executed before your eyes (and very quickly). Once the browser closes, results are printed to the console. If all goes well, our three green server-side test dots in the terminal will be joined by a fourth dot representing the successful run of our integration test.&lt;/p&gt;
+
+&lt;h2 id=&quot;part-4-full-test-automation-with-travis-ci-and-browserstack&quot;&gt;Part 4: Full Test Automation With Travis CI and BrowserStack&lt;/h2&gt;
+&lt;p&gt;Running the unit and integration tests locally is important and convenient, but we need to be able to verify our code on a location other than our own development machine. It can be surprising just how many new issues surface when you leave the comfort of your own “perfect” environment. Relying on a trusted 3rd party entity to run tests is also a critical part of the continuous integration process. If you have a known third-party service verify your build, like Travis CI, &lt;em&gt;and&lt;/em&gt; you are using GitHub to manage your project, you can create “safe” branches using &lt;a href=&quot;https://help.github.com/articles/about-protected-branches/&quot;&gt;GitHub’s branch protection feature&lt;/a&gt;. When enabled, this will prevent any code from a branch with failing tests (or with untested code) from being merged into the protected branch.&lt;/p&gt;
+
+&lt;p&gt;In this section, I’ll show you how to configure a cloud-based continuous integration service to run your build and all of your tests on each push to GitHub. Furthermore, I’ll show how you can also run your integration tests against &lt;em&gt;any&lt;/em&gt; browser on &lt;em&gt;any&lt;/em&gt; device/OS using a &lt;em&gt;second&lt;/em&gt; cloud service. Both of these useful services will work together to provide you with an elegant and efficient continuous integration environment.&lt;/p&gt;
+
+&lt;h3 id=&quot;getting-familiar-with-our-ci-tools&quot;&gt;Getting familiar with our CI tools&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&quot;https://travis-ci.org/&quot;&gt;Travis CI&lt;/a&gt; is a popular continuous integration service that allows you to perform various project related tasks (such as running your build and tests) on a virtualized Ubuntu machine (or OSX for Objective-C projects). Travis is free for public/OSS projects. For private projects, Travis provides access to additional features, such as resource caching and private builds, for a fee. Since the repository that holds our code is public and open source, we’ll make use of Travis’ free tier to run our unit and integration tests on every push to GitHub. Travis integrates nicely into GitHub, and even works with the branch protection feature I mentioned earlier.&lt;/p&gt;
+
+&lt;p&gt;While Travis can run our unit tests in both PhantomJS and a “headless” Firefox, it cannot run our integration tests. These require a non-headless browser, and potentially access to something other than Linux. Ideally, Travis would still control the build and tests, but delegate to another service to run integration tests on a specific browser/OS combination, reporting back the results along with all unit tests. By integrating BrowserStack into our CI environment, this is entirely achievable. &lt;a href=&quot;https://www.browserstack.com/&quot;&gt;BrowserStack&lt;/a&gt; is a “cloud” service that provides programmatic (and manual) access to any browser on any conceivable operating system. It does this via an API (for programmatic access) and a web interface (for manual access). The most common use for BrowserStack is to facilitate automated cross-browser execution of integration tests. Like Travis, BrowserStack also provides free access to their virtualized machines for open source projects, with various plans offered to private/commercial projects.&lt;/p&gt;
+
+&lt;h3 id=&quot;running-our-unit-tests-on-every-push-with-travis-ci&quot;&gt;Running our unit tests on every push with Travis CI&lt;/h3&gt;
+&lt;p&gt;The steps required to get our unit tests running on Travis with every push to GitHub are as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Setup Travis account.&lt;/li&gt;
+  &lt;li&gt;Make Travis aware of our project.&lt;/li&gt;
+  &lt;li&gt;Create a configuration file detailing our build requirements.&lt;/li&gt;
+  &lt;li&gt;Commit and push the build file up to GitHub.&lt;/li&gt;
+  &lt;li&gt;Profit.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;setting-up-a-travis-ci-account&quot;&gt;Setting up a Travis CI account&lt;/h4&gt;
+&lt;p&gt;Signing up is as easy as clicking the “Sign Up” button on https://travis-ci.org. As I mentioned earlier, Travis integrates almost seamlessly with GitHub, so much so that you can sign into to Travis using your GitHub account.&lt;/p&gt;
+
+&lt;h4 id=&quot;connecting-the-github-repository-to-travis&quot;&gt;Connecting the GitHub repository to Travis&lt;/h4&gt;
+&lt;p&gt;Once logged in, visit your profile page. There, you’ll see a list of all public repositories in your account. To connect the Widen/fullstack-react repository to Travis (which holds the code for our names app), I visited &lt;em&gt;my&lt;/em&gt; account page in Travis, found the GitHub repo in the list of my projects, and clicked on the slider to “activate” the project. After doing that, my project entry in the list looked like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/travis-activate-repo.png&quot; width=&quot;400&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;creating-a-config-file-to-control-the-project-build--triggering-a-build&quot;&gt;Creating a config file to control the project build &amp;amp; triggering a build&lt;/h4&gt;
+&lt;p&gt;All of the configuration for our Travis build must be located in a file named &lt;code class=&quot;highlighter-rouge&quot;&gt;.travis.yml&lt;/code&gt; in the root of our project. &lt;a href=&quot;http://yaml.org/spec/&quot;&gt;YAML&lt;/a&gt; is a type of “data serialization format”, much like JSON and XML. It is unusually human-readable, as you can see by looking at the Travis config file for Widen/fullstack-react:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;language&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;node_js&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;node_js&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;5.0'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;As you can see above, the configuration is &lt;em&gt;very&lt;/em&gt; minimal. All we really need to do is tell Travis that this is a JavaScript project (via the &lt;code class=&quot;highlighter-rouge&quot;&gt;language&lt;/code&gt; property) and specify the version of Node.JS to install on the environment. Travis CI allows for a number of language-specific conventions to reduce configuration boilerplate. For example, by default, Travis will run &lt;code class=&quot;highlighter-rouge&quot;&gt;npm install&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;npm test&lt;/code&gt; on any Node.JS projects. Since we have already defined a &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;test&quot;&lt;/code&gt; script in our package.json file, we only need to tell Travis that this is indeed a Node.JS project, and it takes care of pulling down dependencies and running our tests automagically.&lt;/p&gt;
+
+&lt;p&gt;So, to start your first build on Travis, simply commit the above &lt;code class=&quot;highlighter-rouge&quot;&gt;.travis.yml&lt;/code&gt; file and push it up to GitHub. Take a look at &lt;a href=&quot;https://travis-ci.org/Widen/fullstack-react/builds/108709902&quot;&gt;a Travis build log&lt;/a&gt; for Widen/fullstack-react that matches this very configuration. Note that I had to temporarily change the name of the integration.spec.js file to integration.spec.bak.js. This ensures it is &lt;em&gt;not&lt;/em&gt; seen by Jasmine and not executed. We’re not quite ready to run integration tests &lt;em&gt;yet&lt;/em&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;adding-integration-tests-to-the-mix-with-browserstack&quot;&gt;Adding integration tests to the mix with BrowserStack&lt;/h3&gt;
+&lt;p&gt;Now that we have Travis running our frontend and backend unit tests, it’s time to enable integration tests. For this, as described earlier, we need to enlist the help of BrowserStack. The steps required to enable Travis to run our integration test with BrowserStack, alongside our unit tests “locally” using PhantomJS, are as follows:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Setup a BrowserStack account&lt;/li&gt;
+  &lt;li&gt;Update our Travis config file with BrowserStack-related logic and authentication data&lt;/li&gt;
+  &lt;li&gt;Provide some configuration data for our integration test that will allow it to execute the test in browsers of our choosing.&lt;/li&gt;
+  &lt;li&gt;Push our changes up to GitHub and watch the build log on Travis.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id=&quot;setting-up-a-browserstack-account&quot;&gt;Setting up a BrowserStack account&lt;/h4&gt;
+&lt;p&gt;You can start using BrowserStack for free, regardless of the status of your project. For open-source projects, contact BrowserStack for free permanent access to one of the paid plans. This is exactly how I procured a free account for Widen/fullstack-react. After you create an account via their web interface, navigate to your account settings and make a note of your username and access key. You will need both of these when establishing configuration next.&lt;/p&gt;
+
+&lt;h4 id=&quot;configuring-travis-and-browserstack-to-run-our-integration-test&quot;&gt;Configuring Travis and BrowserStack to run our integration test&lt;/h4&gt;
+&lt;p&gt;There are 5 steps required to create the necessary configuration and start running the integration test on Travis:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Update the Travis config to start our app server&lt;/li&gt;
+  &lt;li&gt;Download and run the BrowserStack tunnel. This will allow the machine running on BrowserStack to see our running app instance on Travis.&lt;/li&gt;
+  &lt;li&gt;Specify a list of operating systems and browsers to test against in our Travis config.&lt;/li&gt;
+  &lt;li&gt;Include encrypted authentication information for our test &amp;amp; tunnel.&lt;/li&gt;
+  &lt;li&gt;Update our integration test to run against the browsers we chose in step 3.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Let’s look at the updated Travis config file first:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;s&quot;&gt;language&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;node_js&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;node_js&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;5.0'&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;before_script&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;npm start &amp;amp;&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;wget http://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;unzip BrowserStackLocal-linux-x64.zip&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;./BrowserStackLocal $BROWSERSTACK_KEY -localIdentifier $TRAVIS_JOB_NUMBER &amp;amp;&lt;/span&gt;
+&lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;sleep 10&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;global&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;secure&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;IKsVq7xmRs/1pJZ/pB3tbOITtbtcBFlBh3IIuhGkh72y0v8PTFfP/r/zlT/Gq5seAIaXN+YnbDPA61qroxGAGJdrsAB0xVae+AWRmBbHV64mq4g3kkj4RJPjv/2rAsTHEBpXPpmHdpjEDFIEqwTKWehZpJZAjLFoRS7LV5ucRc2LBNpfP3J83AJWn3KpBVnw5SBcwUbY8O8vKcaaYyfeorjMXqZ84Rw9jlDyhR8HJmRrvA/FVadg2lpzabFmQ5gBkLFzxEKghvIRkAJDQ1LMjYBmA6aogiJZoH90InRb6ub4KUrrmnYdbn0ug8YxDYXDa34fsBBnipUAYwSnwGujJmHHQ3rbcS12/S+cs75uFowBLP2ej6toznyUIwhfMX9rBFY6salo3jW3Qj7Qyy+68C3aqPLkJLCEgFHN2dGLR4BEoguycxSDoeIc5vj6j3c8uH/pP1Vp1jIRuaDglfyraIiwcZL5l4zznlnaqCOvTG6hJKZHgz1MCxaaCQjCdsKtMjFnmz8aocxmJbW+0BazAhEbbPvUsagKrq0K91bmXKWaplvuo1jhqWOIlkW3L6eNX5880or+BergkjXufnZFLm6soaBdP1/aRN1fBgDPRuPcEh+gHbiSa3A1Y3Fsrx+eAz8mnkyqoXlAvQTPq8XBkIoUyoYWtzWpDp3CAVPGJmg=&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;secure&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;RyXfo5jJrjlcedkk2k5ceT7KeuqdXaqRzREHMFI/FIJy/dkIpFQ2mD/HVF/SO7V/8hcsfA4TBIPb7Qlitl+5NZEgo3TlNpoxML9+jMrzBEnSafiqu1lJrg4z3+D4TtfjTi2ccI9wqhUeYiuPWmdFBgsqgRvFxMgbDLC0KJipsk12PYKCMzV+2+INBxx6SulBlPWS8RMMQeD0kY9JBMyxabZ5E3LtA9ALDedSW/C4qj6H4bchTSU1Vh7UcMOrCypfKGNv4halfoSfgIzZuSpWsnKGMz0RXiPwfUI9UHymA9vwToIzBgk+ZFlRqzIF69ex6llKTMgJARyat5xGmbLFN12u8YhAMde8SxSArNL4s5x1WUFK04OzagYEzPVRniJYK3pEVI0SGQPwWo6l85JUGT0iT4abn4MQRNwVhtHhqv55tMoJ7DlRujoKCa7bqQh/Okqw294Y/mFWMz6pENlT1p4JU5wERdL3Dtf2kHIpBMqRiEP/stHvkKcsRpUugW+4EbZDGyhVEOUnPUM4ZK/SvEqvg3foOSQdnBzrrc46KhBQ2Rh3l0Qyc/sOLXk/LrGmfKINU2wbNZqcpMRY5bjoEpAxRoEWO+mn+Cpfl8JRIfwN6VN88lHVGOvNlOjcdmo0wNhifDFSpTItIvpDZNW93zaIfZacBt0X2R7oqbiApXE=&lt;/span&gt;
+  &lt;span class=&quot;s&quot;&gt;matrix&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;BROWSER&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Firefox&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;PLATFORM&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Win8&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;VERSION&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;41&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;BROWSER&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Chrome&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;PLATFORM&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Win8&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;VERSION&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;46&lt;/span&gt;
+  &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;BROWSER&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Safari&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;PLATFORM&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;Mac&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;VERSION&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;9&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;We’ve added a number of new items to the configuration. The &lt;code class=&quot;highlighter-rouge&quot;&gt;before_script&lt;/code&gt; block will be executed after &lt;code class=&quot;highlighter-rouge&quot;&gt;npm install&lt;/code&gt; but before &lt;code class=&quot;highlighter-rouge&quot;&gt;npm test&lt;/code&gt;. Here is a line-by-line breakdown of that configuration block:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Start our application server in a separate process (to prevent it from blocking the rest of the build).&lt;/li&gt;
+  &lt;li&gt;Download the BrowserStack tunnel binary.&lt;/li&gt;
+  &lt;li&gt;Unzip the tunnel binary.&lt;/li&gt;
+  &lt;li&gt;Start the tunnel in a separate process (to prevent it from blocking the rest of the build)&lt;/li&gt;
+  &lt;li&gt;Wait 10 seconds for the tunnel to start.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Notice that we are passing an environment variable - &lt;code class=&quot;highlighter-rouge&quot;&gt;BROWSERSTACK_KEY&lt;/code&gt; - to the tunnel on startup. This is our secret API key, but where is this variable coming from? If you look further down at the &lt;code class=&quot;highlighter-rouge&quot;&gt;env&lt;/code&gt; section of the configuration, you’ll see a couple &lt;code class=&quot;highlighter-rouge&quot;&gt;secure&lt;/code&gt; items. These contain our username (&lt;code class=&quot;highlighter-rouge&quot;&gt;BROWSERSTACK_USERNAME&lt;/code&gt;) and BrowserStack API (&lt;code class=&quot;highlighter-rouge&quot;&gt;BROWSERSTACK_KEY&lt;/code&gt;) key. They have been encrypted and added to our config file. Travis’ documentation site contains &lt;a href=&quot;https://docs.travis-ci.com/user/environment-variables/#Encrypting-Variables-Using-a-Public-Key&quot;&gt;a section that explains how to create and store these encrypted variables&lt;/a&gt;. The supplied Travis job number is also passed to the BrowserStack tunnel binary. Since we will have multiple tunnels open concurrently (one for each browser/OS combo), we need to provide a unique ID for each tunnel in order to keep them isolated.&lt;/p&gt;
+
+&lt;p&gt;The final portion of the &lt;code class=&quot;highlighter-rouge&quot;&gt;env&lt;/code&gt; configuration block contains a series of &lt;code class=&quot;highlighter-rouge&quot;&gt;matrix&lt;/code&gt; entries. As you can see, these correspond to browser/OS environments that we’d like to test. For each matrix entry, Travis runs a separate virtualized machine, and makes each matrix property (&lt;code class=&quot;highlighter-rouge&quot;&gt;BROWSER&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;PLATFORM&lt;/code&gt;, and &lt;code class=&quot;highlighter-rouge&quot;&gt;VERSION&lt;/code&gt;) available as environment variables.&lt;/p&gt;
+
+&lt;p&gt;Our last step, before we are able to run our integration tests alongside the unit tests in Travis, is to make a few changes to server/test/integration.spec.js. All we really need to do is pass some configuration to WebdriverIO that allows it to connect to BrowserStack instead of a locally running Selenium server. This configuration will also pass browser and OS information to BrowserStack so it can provision the appropriate environment. That specific information is already defined in our Travis config file. We only need to change the first portion of our integration test module, which now looks like this:&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;webdriverio&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'webdriverio'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;CI&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;desiredCapabilities&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;browserName&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;BROWSER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;version&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;VERSION&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;platform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;PLATFORM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s2&quot;&gt;&quot;browserstack.local&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+            &lt;span class=&quot;s2&quot;&gt;&quot;browserstack.localIdentifier&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;TRAVIS_JOB_NUMBER&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'hub.browserstack.com'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;port&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;80&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;BROWSERSTACK_USERNAME&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;BROWSERSTACK_KEY&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;describe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'name adder integration tests'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;jasmine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;DEFAULT_TIMEOUT_INTERVAL&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30000&lt;/span&gt;
+
+    &lt;span class=&quot;nx&quot;&gt;beforeEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;browser&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;webdriverio&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;init&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+
+    &lt;span class=&quot;cm&quot;&gt;/* existing test here... */&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;})&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;As you can see, the configuration we’ve added grabs the browser, OS, version and BrowserStack-related auth info provided as environment variables in our Travis config. We’re also providing some BrowserStack-specific configuration, such as the tunnel identifier (also used when opening the tunnel in our Travis config). This data is then passed to WebdriverIO as a JavaScript object. I’ve added a check to &lt;em&gt;only&lt;/em&gt; provide this new configuration data if the code is running on Travis. We can easily detect this by looking for a &lt;code class=&quot;highlighter-rouge&quot;&gt;CI&lt;/code&gt; environment variable, which Travis sets for us. If our test is &lt;em&gt;not&lt;/em&gt; running on Travis, it will attempt to connect to a locally-running Selenium server, as before.&lt;/p&gt;
+
+&lt;p&gt;Simply commit these changes, push them up to GitHub, and you will see unit and integration tests run on Travis. Take a look at &lt;a href=&quot;https://travis-ci.org/Widen/fullstack-react/builds/108738412&quot;&gt;a recent build on Travis of Widen/fullstack-react&lt;/a&gt; that illustrates the finished product.&lt;/p&gt;
+
+&lt;h2 id=&quot;going-further&quot;&gt;Going further&lt;/h2&gt;
+&lt;p&gt;While &lt;a href=&quot;https://github.com/Widen/fullstack-react/tree/2.0.0&quot;&gt;Widen/fullstack-react&lt;/a&gt; was designed to be simple to allow us to focus on the concepts needed to create and test a futuristic full-stack JavaScript web application, there are certainly areas where we can make improvements. Some of those improvements may include:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Handle an empty list of names in the code and back it with a unit test for &lt;code class=&quot;highlighter-rouge&quot;&gt;&amp;lt;NamesList&amp;gt;&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Move the integration test configuration to a file in the “config” directory.&lt;/li&gt;
+  &lt;li&gt;Improve console reporting for server-side tests.&lt;/li&gt;
+  &lt;li&gt;Practive Test Driven Development by writing tests to check for request failures or other unexpected conditions. Fix the code until these new tests are passing.&lt;/li&gt;
+  &lt;li&gt;Make use of ES6 modules instead of using CommonJS throughout the project.&lt;/li&gt;
+  &lt;li&gt;Compile the server code using Babel &amp;amp; Webpack. This will allow us to use more ES6/7 features on the server as well, and give us to ability to set aliases, use plug-ins, and all of the other conveniences we are already used to client-side.&lt;/li&gt;
+  &lt;li&gt;Make use of additional ECMAScript features, such as &lt;a href=&quot;https://github.com/tc39/ecmascript-asyncawait&quot;&gt;async functions&lt;/a&gt; and &lt;a href=&quot;https://github.com/wycats/javascript-decorators&quot;&gt;decorators&lt;/a&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/Widen/fullstack-react/tree/2.0.0&quot;&gt;Widen/fullstack-react on GitHub&lt;/a&gt; contains all of the code discussed in this article. Let me know in the comments section below, or open up a pull request or issue in &lt;a href=&quot;https://github.com/Widen/fullstack-react/issues&quot;&gt;the project’s issue tracker&lt;/a&gt; if you have any other ideas. Pull requests addressing any of the items above are also welcome.&lt;/p&gt;
+
+</description>
+        <pubDate>Fri, 12 Feb 2016 00:00:00 -0600</pubDate>
+        <link>http://engineering.widen.com/blog/testing-future-web-stack/</link>
+        <guid isPermaLink="true">http://engineering.widen.com/blog/testing-future-web-stack/</guid>
+        
+        
+        <category>react</category>
+        
+        <category>falcor</category>
+        
+        <category>webpack</category>
+        
+        <category>web</category>
+        
+        <category>server</category>
+        
+        <category>json</category>
+        
+        <category>http</category>
+        
+        <category>node.js</category>
+        
+        <category>javascript</category>
+        
+        <category>es6</category>
+        
+        <category>jasmine</category>
+        
+        <category>selenium</category>
+        
+        <category>webdriver</category>
+        
+        <category>testing</category>
+        
+      </item>
     
       <item>
         <title>The Future of Web Development - React, Falcor, and ES6</title>
