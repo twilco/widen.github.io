@@ -5,18 +5,18 @@ categories: react falcor webpack web server JSON HTTP node.js JavaScript ES6 jas
 excerpt: "In my last article, I showed you how to develop a full-stack JavaScript web application using some pretty interesting and futuristic libraries and web specifications. In this follow-up, I'm going to demonstrate how you can write server-side and client-side unit and integration/Selenium tests for that app entirely in JavaScript."
 ---
 
-In [my last article][part1], I showed you how to developer a full-stack JavaScript web application using ECMAScript 6, Falcor, React, Babel, Webpack, and NodeJS. Developing a project using this futuristic stack is undoubtedly fun, but this is only a piece of the puzzle. Any code you write that is meant to be used by others should be tested. Manually testing your code is certainly one approach, though you will find this route cumbersome. In order to make more efficient use of your time and provide executable documentation for future maintainers, it is important to develop a suite of automated tests. In this follow-up article, I'll show you how to write automated tests for _all_ of the code we wrote in the first article. We will automate testing of the frontend and server-side code, _plus_ I'll show you how to write automated integration (a.k.a. Selenium) tests that exercise the entire application. **Keeping with the spirit of the first article, all tests will be written using JavaScript and made available in [an updated version of the same GitHub repository][repo-v2]**. After completing this article and following the coding examples, you'll see how easy and satisfying it is to write automated tests for _your_ web applications.
+In [my last article][part1], I showed you how to develop a full-stack JavaScript web application using ECMAScript 6, Falcor, React, Babel, Webpack, and Node.JS. Developing a project using this futuristic stack is undoubtedly fun, but this is only a piece of the puzzle. Any code you write that is meant to be used by others should be tested. Manually testing your code is certainly one approach, though you will find this route cumbersome. In order to make more efficient use of your time and provide executable documentation for future maintainers, it is important to develop a suite of automated tests. In this follow-up article, I'll show you how to write automated tests for _all_ of the code we wrote in the first article. We will automate testing of the frontend and server-side code, _plus_ I'll show you how to write automated integration (a.k.a. Selenium) tests that exercise the entire application. **Keeping with the spirit of the first article, all tests will be written using JavaScript and made available in [an updated version of the same GitHub repository][repo-v2]**. After completing this article and following the coding examples, you'll see how easy and satisfying it is to write automated tests for _your_ web applications.
 
-Generally speaking, automated tests ensure that future changes to our code due to maintenance or evolution do not cause our application to regress. In other words, we want to be sure that our users are _always_ able to add new names. It's also important that the list of names presented to the user is accurate and up-to-date. There are probably some edge cases that should be tested as well. What happens if our server goes down? How does the UI respond? It's also prudent to ensure that our application works in all supported browsers. If you have spent any amount of time developing for the web, you already know that this is a real concern due to potential browser-specific issues and varying web API and JavaScript implementations. And what if an unexpected condition is encountered server-side? How will our Falcor routes deal with this? While our app is indeed trivial, there is quite a bit that can go wrong, and that means we have a lot of tests to write!
+Automated tests ensure that future changes to our code due to maintenance or evolution do not cause our application to regress. In the context of this simple application, we want to be sure that users are _always_ able to add new names. It's also important that the list of names presented to the user be accurate and up-to-date. There are probably some edge cases that should be tested as well. What happens if our server goes down? How does the UI respond? It's also prudent to ensure that our application works in all supported browsers. If you have spent any amount of time developing for the web, you already know that this is a real concern due to potential browser-specific issues and varying web API and JavaScript implementations. And what if an unexpected condition is encountered server-side? How will our Falcor routes deal with this? While our app is indeed trivial, there is quite a bit that can go wrong, and that means we have a lot of tests to write!
 
-While manual tests are still important, I'm going to discuss automated tests in this article. Furthermore, I'll discuss two distinct types of automated tests - unit tests, and integration tests. Unit tests are low-level and very narrowly scoped. They exercise only specific sections of your code. For example, we'll write a different set of unit tests for each frontend React component, along with a set of tests for our backend Falcor routes. It's critical that we focus on testing the specific roles of each of these modules, and that may mean mocking out a module's internal dependencies so that we can better control the environment. When we "mock" something, we're essentially replacing it with a dummy version that we have full control over. This eliminates uncertainty in our testing environment.
+While manual tests are still important, I'm going to discuss automated testing in this article. Furthermore, I'll discuss two distinct types of automated tests - unit tests and integration tests. Unit tests are low-level and very narrowly scoped. They exercise only specific sections of the code. For example, we'll write a different set of unit tests for each frontend React component, along with a set of tests for our backend Falcor routes. It's critical that we focus on testing the specific roles of each of these modules, and that may mean mocking out a module's internal dependencies so that we can better control the environment. When we "mock" something, we're essentially replacing it with a dummy version that we have full control over. This eliminates uncertainty in our testing environment.
 
-In addition to unit tests, we have integration tests, which may also be known as "Selenium" or "" tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we'll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, _all_ of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario. While there are other definitions of "integration" testing as meaning of this term seems to be somewhat subjective, we're going to work with the definition outlined here throughout this article.
+In addition to unit tests, we have integration tests, which may also be known as "workflow" or "Selenium" tests due to the tool most commonly used to execute them. Integration tests differ from unit tests in their purpose and focus. While unit tests exercise specific code paths inside of a specific isolated module of code, integration tests are aimed at testing user workflows. They are high-level tests and are written with our users in mind. Instead of testing the module that is responsible for adding a new name, we'll instead load the app in a browser, type a new name into the input field, hit enter, and then ensure that name is added to the list on the page. In this respect, _all_ of our code is being tested at once. Our job is to not only ensure user workflows are covered, but also that all of our components play nicely together in a realistic scenario. While there are other definitions of "integration" testing, as the meaning of this term seems to be somewhat subjective, we're going to work with the definition outlined here throughout this article.
 
 ## Part 0: Bringing our code and project up-to-date
-Since the last article 4 months ago, most of our project's dependencies have changed in some way, some of them drastically. The most visible changes were to Falcor and Babel.
+Since the last article (exactly 4 months ago), most of our project's dependencies have changed in some way, some of them drastically. The most visible changes were to Falcor and Babel.
 
-Version 0.1.16 of Falcor brings [a breaking change][falcor-path-change] that affected our response parsing code. In short, an unexpected item is visible among expected properties of "get" resonses: `$__path`. This new property is useful for creating new models based on sections of an existing JSON graph. This is accomplished using [the new `Model.deref` method][falcor-model-deref]. However, we don't have much use for this in our simple app. Since we only want to see the requested values in our "get" responses, we must [make use of a new `Falcor.keys` method][falcor-code-updates], which iterates over all of the keys in the response, ignoring the `$__path` property. In this way, it functions exactly like [`Object.keys`][object-keys-mdn], except for the added convenience of skipping this unwanted property.
+Version 0.1.16 of Falcor brings [a breaking change][falcor-path-change] that affected our response parsing code. In short, an unexpected item is visible among expected properties of "get" responses: `$__path`. This new property is useful for creating new models based on sections of an existing JSON graph, which is accomplished using [the new `Model.deref` method][falcor-model-deref]. However, we don't have much use for this in our simple app. Since we only want to see the requested values in our "get" responses, we must [make use of a new `Falcor.keys` method][falcor-code-updates], which iterates over all of the keys in the response, ignoring the `$__path` property. In this way, it functions exactly like [`Object.keys`][object-keys-mdn], except for the added convenience of skipping this unwanted property.
 
 Babel 6.x brings a number of substantial changes that have a cascading effect on some of our _other_ dependencies. Essentially, Babel was carved up into many different smaller and more focused libraries in 6.0. This required us to explicitly [pull in separate libraries for ES6, React, and command-line support][package.json-babel-updates] with Babel. The "main" Babel library - babel-core - doesn't perform ES6, ES7, or React compilation tasks anymore. Our [WebPack configuration for the Babel loader also changed][webpack-babel-updates] slightly as a result.
 
@@ -25,7 +25,7 @@ Babel 6.x brings a number of substantial changes that have a cascading effect on
 We'll first focus on writing automated tests for our code that runs in the browser. This accounts for portions of our simple application that our users directly interact with. We'll primarily write tests for our React components, but first it may make sense to refactor our code a bit to make it more conducive to testing.
 
 ### Refactoring for ease of testing
-The [most recent version of our names application][repo-v1] contains all of our source files organized into a flat structure. While this is a reasonable hierarchy for such a small number of files, it doesn't scale very well. As we add more files to handle configuration, testing, and to support better modularization of our application, we'll need a better-defined structure for our project. To start, let's move our 3 React components and the Falcor model file into a new directory named "app". Let's also move our webpack configuration file into a root-level "config" directory, and finally our index.html file into a "site" directory. This new "site" directory will contain all publicly accessible resources, so the webpack-generated bundle JavaScript should also live here. After this initial reorganization, our project looks like this:
+The [most recent version of our names application][repo-v1] contains all of our source files organized into a flat structure. While this is a reasonable hierarchy for such a small number of files, it doesn't scale very well. As we add more files to handle configuration, testing, and to support better modularization of our application, we'll need a better-defined structure for our project. To start, let's move our 3 React components and the Falcor model file into a new directory named "app". Let's also move our webpack configuration file into a root-level "config" directory, and finally our index.html file into a "site" directory. This new "site" directory will contain all publicly accessible resources, so the Webpack-generated JavaScript bundle should _also_ live here. After this initial reorganization, our project looks like this:
 
 ```
 .
@@ -42,7 +42,7 @@ The [most recent version of our names application][repo-v1] contains all of our 
 +-- package.json
 ```
 
-In order to support this new structure, a few changes must be made to some of our existing code. First, webpack.config.js has to be updated to be aware of the new location of our source files. This is a simple as change the value of the `entry` property from `./name-manager.jsx` to `./app/name-manager.jsx`. So [our original app/webpack.config.js][webpack.config.js-v1] file now looks like this:
+In order to support this new structure, a few changes must be made to some of our existing code. First, webpack.config.js has to be updated to be aware of the new location of our source files. This is a simple as changing the value of the `entry` property from "./name-manager.jsx" to "./app/name-manager.jsx". So [our original app/webpack.config.js][webpack.config.js-v1] file now looks like this:
 
 ```javascript
 module.exports = {
@@ -55,7 +55,10 @@ module.exports = {
             {
                 test: /\.js/,
                 loader: 'babel',
-                exclude: /node_modules/
+                exclude: /node_modules/,
+                query: {
+                  presets: ['es2015', 'react']
+                }
             }
         ]
     },
@@ -63,7 +66,7 @@ module.exports = {
 }
 ```
 
-Furthermore, our NodeJS server must be adjusted to serve the HTML and JS bundle files out of the site directory. This requires a simple change to our Express server. This means `app.use(express.static('.'))`, changes to `app.use(express.static('site'))` in our server.js file. So, the last few lines of [our original server.js][server.js-v1] now look like this:
+Furthermore, our Node.JS server must be adjusted to serve the HTML and JS bundle files out of the site directory. This requires a simple change to our Express server. This means `app.use(express.static('.'))` changes to `app.use(express.static('site'))` in our server.js file. So, the last few lines of [our original server.js][server.js-v1] now look like this:
 
 ```javascript
 app.use(express.static('site'))
@@ -85,7 +88,7 @@ Before we go any further, we should make sure our changes haven't broken anythin
 }
 ```
 
-There are two changes to this section of the file. First, a new `"start"` tasks has been added, which starts up our NodeJS server. You can simple run `npm start` to execute this step. Second, our `"webpack"` target has been adjusted to include a reference to the new location of our webpack configuration file. Previously, this file was located in the root of our project, and, by convention, webpack looks for a file named "webpack.config.js" in the root of the project. Since we've moved this to the config directory, we must now let webpack know where this configuration file exists.
+There are two changes to this section of the file. First, a new `"start"` tasks has been added, which starts up our Node.JS server. You can simply run `npm start` to execute this step. Second, our `"webpack"` target has been adjusted to include a reference to the new location of our Webpack configuration file. Previously, this file was located in the root of our project, and, by convention, Webpack looks for a file named "webpack.config.js" in the root of the project. Since we've moved this to the config directory, we must now let webpack know where this configuration file exists.
 
 ### Getting familiar with our testing tools
 
@@ -96,13 +99,13 @@ Our client-side unit tests will be created with the help of a few important and 
 3. [Rewire][rewire]
 4. [Karma][karma]
 
-Jasmine is a JavaScript library we will use to write our unit tests. It includes a rich [set of assertions][jasmine-matchers] for comparing actual values under test with expected values, a full-featured [mocking engine][jasmine-spies] that will allow us to more easily focus on the component under test, as well as a number of other helpers that we will use to [group our tests][jasmine-describe] and [test asynchronous behaviors][jasmine-async].
+Jasmine is a JavaScript library we will use to _compose_ our unit tests. It includes a rich [set of assertions][jasmine-matchers] for comparing actual values under test with expected values, a full-featured [mocking engine][jasmine-spies] that will allow us to more easily focus on the component under test, as well as a number of other helpers that we will use to [group our tests][jasmine-describe] and [test asynchronous behaviors][jasmine-async].
 
-PhantomJS is a headless version of [Webkit][webkit], the rendering engine currently used in Apple's Safari browser and formerly used in Google's Chrome browser (before it was forked as [Blink][blink]). Running our unit tests in a headless browser makes them easy and quick to run, not to mention portable. The entire browser is distributed and contained in a JavaScript package downloaded from npm. Using a conventional browser for unit tests in a development environment can be jarring with browser windows opening and closing, especially if tests are automatically re-run as soon as any code changes are saved.
+PhantomJS is a headless version of [WebKit][webkit], the rendering engine currently used in Apple's Safari browser and formerly used in Google's Chrome browser (before it was forked as [Blink][blink]). Running our unit tests in a headless browser makes them easy and quick to run, not to mention portable. The entire browser is distributed and contained in a JavaScript package downloaded from npm. Using a conventional browser for unit tests in a development environment can be jarring with browser windows opening and closing, especially if tests are automatically re-run as soon as any code changes are saved.
 
 Rewire is a Node.js tool primarily used (at least in this project) to mock out sub-modules imported by a module under test. For example, when testing our `<NameManager/>` component, we need to be able to control the behavior of its internal dependencies - `<NameList/>` and `<NameAdder/>`. We can use Rewire to gain access to these dependencies inside of `<NameManager/>` and replace them with dummy modules with inputs and outputs that we can monitor and control in order to more reliably test _this_ component. Rewire allows us to access internal dependencies in this way by using its own module loader to insert hooks into modules that allow them to be unnaturally accessed and controlled in a testing environment. For our browser-based unit tests, we'll need to use a Babel plug-in that wraps the Rewire plugin. It is aptly named [babel-plugin-rewire][rewire-babel]. We must use this Babel plug-in instead of the native Rewire library due to [Babel's unique ECMAScript 6 module transpilation logic][rewire-babel-bug].
 
-Karma is a test runner and reporter, initially developed by Google for use with AngularJS unit tests. Fun fact: it was originally known as [Testacular][testacular]. It's hard to imagine why they changed the name, but I digress. Before we can begin writing tests, we must first configure Karma and tie all of our testing and reporting tools together. Remember that karma is our client-side test _runner_. In other words, it will use use Jasmine to execute the tests we are going to write, and it will provision a PhantomJS instance as an environment in which the tests will run. It will report the results using a karma plugin: karma-spec-reporter. A plug-in will allow Karma to use Webpack to generate a temporary source bundle that includes all of the code we intend to test. Our existing webpack.config.js file will be used here to determine how this bundle is generated. But we will contribute an addition Babel plug-in to our Webpack configuration just for these tests - babel-plugin-rewire - which will hook into the bundle generation process and add hooks into our code that we will need to mock out dependencies internal to each of the React components we intend to test.
+Karma is a test runner and reporter, initially developed by Google for use with AngularJS unit tests. Fun fact: it was originally known as [Testacular][testacular]. It's hard to imagine why they changed the name, but I digress. Before we can begin writing tests, we must first configure Karma and tie all of our testing and reporting tools together. Remember that Karma is our client-side test _runner_. In other words, it will use use Jasmine to execute the tests we are going to write, and it will provision a PhantomJS instance as an environment in which the tests will run. It will report the results using a Karma plugin: karma-spec-reporter. Another plug-in will need to be introduced to allow Karma to use Webpack to generate a temporary source bundle that includes all of the code we intend to test. Our existing webpack.config.js file will be used here to determine how this bundle is generated. But we will need to contribute an addition Babel plug-in to our Webpack configuration just for these tests - babel-plugin-rewire - which will hook into the bundle generation process and add hooks into our code that we will need to mock out dependencies internal to each of the React components we intend to test.
 
 Our Karma configuration will be named karma.conf.js, and it will be appropriately located inside of our new "config" directory. The completed file will look like this:
 
@@ -133,17 +136,17 @@ module.exports = function (config) {
 };
 ```
 
-Before we start configuring Karma, you'll notice that we are referencing our existing Webpack configuration file and adding a plug-in - babel-plugin-rewire. As mentioned previously, this will allow us to more easily mock internal component dependencies. Moving on, our first configuration point is the `basePath`. The location here establishes a relative path for all other paths specified in our configuration file. Since our configuration file is located inside of the "config" subdirectory, our base path is set to the root of the project. Next, we must declare any browsers to run our tests against. We're just using PhantomJS at the moment. Note that a Karma plug-in for PhantomJS is specified in the `plugins` section near the middle of the file as well. This plug-in will be used by Karma to start and control PhantomJS.
+Before we start configuring Karma, you'll notice that we are referencing our existing Webpack configuration file and adding a plug-in: babel-plugin-rewire. As mentioned previously, this will allow us to more easily mock internal component dependencies. Moving on, our first configuration point is the `basePath`. The location here establishes a relative path for all other paths specified in our configuration file. Since our configuration file is located inside of the "config" subdirectory, our base path is set to the root of the project. Next, we must declare any browsers to run our tests against. We're just using PhantomJS at the moment. Note that a Karma plug-in for PhantomJS is specified in the `plugins` section near the middle of the file as well. This plug-in will be used by Karma to start and control PhantomJS.
 
-The `files` configuration point is an array containing a path to the ECMAScript 5 shim used to fill-in missing ES5 support for PhantomJS, followed by a file that will be later coded to include all of our test files. Followed by `files` is `frameworks`. This array will only contain one value - "jasmine" - which is our unit test framework. Later, we'll write all of our unit tests using Jasmine. Notice that there is a corresponding plug-in - karma-jasmine - in the following `plugins` section. This plug-in provides Karma programmatic access to the Jasmine binaries.
+The `files` configuration point is an array containing the path to a file that will be later coded to include all of our test files. Followed by `files` is `frameworks`. This array will only contain one value - "jasmine" - which is our unit test framework. Later, we'll write all of our unit tests using Jasmine. Notice that there is a corresponding plug-in - karma-jasmine - in the following `plugins` section. This plug-in provides Karma programmatic access to the Jasmine binaries.
 
 Skipping down just a tad to the `preprocessors` section, we are instructing Karma to run our unit test files through Webpack. The last two items in our config file - `webpack` and `webpackMiddleware` - are used to point Karma at our Webpack configuration file (which we pulled in at the top of this file) and ensure info messages are printed to the console, respectively. There is a Webpack plug-in for Karma as well referenced as the first item in our `plugins` array.
-Karma will only run our tests once and then exit, thanks to the `singleRun` option set to a value of `true`. And finally, our test results will be printed in a useful format to the console using a reporter plug-in - karma-spec-reporter. The alias for this reporter - "spec" - is include in the `reporters` array, and the plug-in is mentioned in our `plugins` array as well. Karma is ready to go, and next we will begin writing client-side unit tests.
+Karma will only run our tests once and then exit, thanks to the `singleRun` option set to a value of `true`. And finally, our test results will be printed in a useful format to the console using a reporter plug-in: karma-spec-reporter. The alias for this reporter - "spec" - is included in the `reporters` array, and the plug-in is mentioned in our `plugins` array as well. Karma is ready to go, and next we will begin writing client-side unit tests.
 
 
 ### Writing our tests
 
-I've explained why it is important to write automated unit tests, covered the tools we will be using to write and run these tests, _and_ I've showed you how to configure karma to actually run the tests. Just one problem - we don't have any tests to run. Let's take care of that now by writing comprehensive unit tests that cover each of [our three React components from the previous article][part1-components]: `<NameAdder />`, `<NamesList />`, and our "glue" component - `<NameManager />`.
+I've already explained why it's important to write automated unit tests, covered the tools we will be using to write and run these tests, _and_ I've showed you how to configure Karma to actually run the tests. Just one problem - we don't have any actual tests to run. Let's take care of that now by writing comprehensive unit tests that cover each of [our three React components from the previous article][part1-components]: `<NameAdder />`, `<NamesList />`, and our "glue" component - `<NameManager />`.
 
 Each component's tests will be located in a dedicated file inside of a new subdirectory under our app directory. After writing all of our tests, our file tree will look something like this:
 
@@ -208,17 +211,17 @@ describe('NameAdder', () => {
 })
 ```
 
-First, you'll notice that I've imported several dependencies that will be needed to complete this test. `React`, `ReactDom`, `NameAdder`, and `Falcor` are probably not surprising, but `TestUtils` is a new one. React provides a set of utilities that help writing unit tests against React component. We'll use various methods in `TestUtils` to easily add our component under test to the DOM, locate children of this component, and simulate DOM events that trigger our component to take specific actions.
+First, you'll notice that I've imported several dependencies that will be needed to complete this test. `React`, `ReactDom`, `NameAdder`, and `Falcor` are probably not surprising, but `TestUtils` is a new one. React provides a set of utilities that help you write unit tests against a React component. We'll use various methods in `TestUtils` to easily add our component under test to the DOM, locate children of this component, and simulate DOM events that trigger our component to take specific actions.
 
 Our test is wrapped in an `it` block, which itself is wrapped in a `describe` block. These are Jasmine conventions. The `describe` block is meant to contain a set of tests, and each `it` block contains a single test. Each of them should read like a sentence or phrase. Here, we will `describe` a `NameAdder` component. What does it do? `it` saves new messages. We will test this assertion inside of the `it` block.
 
-Inside of our `it` block, we're first using Jasmine to created a mocked version of our Falcor model, which we will "inject" into our `NameAdder` component shortly. By mocking the model, we can easily control and examine inputs and outputs to verify the behavior of the component under test. Next, we're defining an empty function, which will serve as the value of the `onAdded` property passed to our `NameAdder` component, which is created and added to our document after that. We don't much care about the `onAdded` property for the purposes of this test - but it must be supplied as it is current a required property. The last two variable declarations at the top of the `it` block locate the `<form>` and `<input>` elements inside of our rendered `NameAdder` component. We'll need access to these soon when we test our component.
+Inside of our `it` block, we're first using Jasmine to create a mocked version of our Falcor model, which we will "inject" into our `NameAdder` component shortly. By mocking the model, we can easily control and examine inputs and outputs to verify the behavior of the component under test. Next, we're defining an empty function, which will serve as the value of the `onAdded` property passed to our `NameAdder` component, which is created and added to our document after that. We don't much care about the `onAdded` property for the purposes of this test - but it must be supplied as it is currently a required property. The last two variable declarations at the top of the `it` block locate the `<form>` and `<input>` elements inside of our rendered `NameAdder` component. We'll need access to these soon when we test our component.
 
-Remember when I said we would need to inject the mocked Falcor model into our `NameAdder` component instance? That happens immediately after the block of variable declarations. This is where babel-plugin-rewire enters into our testing stack. This babel plug-in added a bunch of methods to the compiled JavaScript code that makes it easy to access internal dependencies. This is especially useful for replacing real dependencies with mocked ones. The `__Rewire__` function, added to our `NameAdder` component during babel compilation, allows us to replace our Falcor model simply by specifying the name of the internal variable that is assigned the import - `model` - followed by the new value - our Jasmine-created mock object. immediately after injecting our mocked model into `NameAdder` we're defining a behavior, again using Jasmine. When the `call` method is invoked by `NameAdder` on this mock object, invoke the promissory success function, indicating that the model update was a success. Remember that the `call` function on our Falcor model is used internally by `NameAdder` to send a newly added name to the model.
+Remember when I said we would need to inject a mocked Falcor model into our `NameAdder` component instance? That happens immediately after the block of variable declarations. This is where babel-plugin-rewire enters into our testing stack. This Babel plug-in added a bunch of methods to the compiled JavaScript code that makes it easy to access internal dependencies. This is especially useful for replacing real dependencies with mocked ones. The `__Rewire__` function, added to our `NameAdder` component during Babel compilation, allows us to replace our Falcor model simply by specifying the name of the internal variable that is assigned the import - `model` - followed by the new value - our Jasmine-created mock object. Immediately after injecting our mocked model into `NameAdder` we've defined a behavior, again using Jasmine. When the `call` method is invoked by `NameAdder` on this mock object, it invokes the promissory success function, indicating that the model update was a success. Remember that the `call` function on our Falcor model is used internally by `NameAdder` to send a newly added name to the model, which in turn sends the new data to our server to be handled by a matching Falcor route.
 
-The `<input>` we referenced in the variable block is used next. We're essentially "typing" in a new name by setting the `value` property of this element. Text inputs, among several other input types, will reflect entered data on the `value` property on the JavaScript object that represents the element tag in our markup. We can read _or_ write to this property. Internally, `NameAdder` reads this property when handing a form submission, and sends the value of this `value` property to the Falcor model. And so, now that we've entered a new name, we need to submit the form. `TestUtils` provides a method that will "simulate" a form submit. Without this shortcut, triggering a DOM event can be a bit tricky in some instances. Just think of this as an easy way to invoke the internal `onSubmit` function set on the `<form>` component inside of `NameAdder`. This function starts the chain of actions that ends in a new name being sent to our server.
+The `<input>` we referenced in the variable block is used next. We're essentially "typing" in a new name by setting the `value` property of this element. Text inputs, among several other input types, will reflect entered data in the `value` property on the JavaScript object that represents the element tag in our markup. We can read _or_ write to this property. Internally, `NameAdder` reads this property when handing a form submission, and sends the value of this `value` property to the Falcor model. And so, now that we've entered a new name, we need to submit the form. `TestUtils` provides a method that will "simulate" a form submit. Without this shortcut, triggering a DOM event can be a bit tricky in some instances. Just think of this as an easy way to invoke the internal `onSubmit` function set on the `<form>` component inside of `NameAdder`. This function starts the chain of actions that ends in a new name being sent to our server.
 
-Finally, we have to actually _test_ something, don't we? Perhaps the most prudent course at this juncture is to hook into our mocked Falcor model, ensure proper route has been `call`ed with the text of our new name. The `expect` function - a utility provided by Jasmine - gives us an easy and intuitive way to describe the expected value of a mocked object.
+Finally, we have to actually _test_ something, don't we? Perhaps the most prudent course at this juncture is to hook into our mocked Falcor model and ensure the proper route has been `call`ed with the text of our new name. The `expect` function - a utility provided by Jasmine - gives us an easy and intuitive way to describe the expected value of a mocked object.
 
 
 #### Testing NamesList
@@ -260,16 +263,16 @@ describe('names-list tests', () => {
 })
 ```
 
-Nothing new in the variable declaration section at the top of the file, other than the import of Falcor. We'll need to make brief use of Falcor's client-side API as we work with our mocked model. At the top of the `describe` block, there's an `afterEach` function, which may be new to some who are not already familiar with Jasmine. The body of this function will run after each test has completed. Since we only have one test (so far), this will run after the single `it` block has completed. While not entirely necessary in our case it is good practice to reset any internal dependencies that have been tampered with at the end of each test. As you will see soon in our test, we are replacing the imported Falcor model with a mocked version, and the logic in our `afterEach` block acts as an "undo" for this action, so as not to pollute other tests.
+Nothing new in the variable declaration section at the top of the file, other than the import of Falcor. We'll need to make brief use of Falcor's client-side API as we work with our mocked model. At the top of the `describe` block, there's an `afterEach` function, which may be new to some who are not already familiar with Jasmine. The body of this function will run after each test has completed. Since we only have one test (so far), this will run after the single `it` block has completed. While not entirely necessary in our case, it is good practice to reset any internal dependencies that have been tampered with at the end of each test. As you will see soon in our test, we are replacing the imported Falcor model with a mocked version, and the logic in our `afterEach` block acts as an "undo" for this action, so as not to pollute other tests.
 
 We've only written one test for `<NamesList>`, which is a sufficient start. As the title of the `it` block states, we're going to ensure that the initial render of this component renders all available names according to the model/store. In the first line of our `it` block, babel-plugin-rewire is being used to replace the imported Falcor model with a mocked version. Our mocked model includes two names: "joe" and "jane". It is perfectly valid to initialize a Falcor model in this way, and this allows us to assert full control over the component's access to data, which makes writing unit tests much easier.
 
-After rendering the component into a detached DOM node with the help of React's `TestUtils`, are waiting until the first time our component's state changes. The initial render will _not_ include the values from our mocked model, since accessing the model data is an asynchronous operation. Remember: after the model values are retrieved by `<NamesList>`, the component's internal state will be updated with the new names. And if there _are_ new names, the `componentDidUpdate` method will be called by React. `componentDidUpdate` is a [React component lifecycle method][react-lifecycle] that is called after each state change (but not on the initial component render). Our test hooks into this lifecycle method and checks to ensure that the component's DOM contains the names represented by our mocked model using Jasmine's built-in assertion library. Inside of this method, first are handle on the list item elements containing the names is created, and then each list item is checked to ensure it matches the expected name from the model. The method name used to lookup these elements inside of the component, [`scryRenderedDOMComponentsWithTag`][scryRenderedDOMComponentsWithTag], looks a little strange, and it is (to me at least). For an explanation of the `scry` prefix, have a look at [this twitter conversation][whyscry-twitter].
+After rendering the component into a detached DOM node with the help of React's `TestUtils`, we must wait until the first time our component's state changes. The initial render will _not_ include the values from our mocked model, since accessing the model data is an asynchronous operation. Remember: after the model values are retrieved by `<NamesList>`, the component's internal state will be updated with the new names. And if there _are_ new names, the `componentDidUpdate` method will be called by React. `componentDidUpdate` is a [React component lifecycle method][react-lifecycle] that is called after each state change (but not on the initial component render). Our test hooks into this lifecycle method and checks to ensure that the component's DOM contains the names represented by our mocked model using Jasmine's built-in assertion library. Inside of this method, _first_ a handle on the list item elements containing the names is created, and then each list item is checked to ensure it matches the expected name from the model. The method name used to lookup these elements inside of the component, [`scryRenderedDOMComponentsWithTag`][scryRenderedDOMComponentsWithTag], looks a little strange (to me at least). For an explanation of the `scry` prefix, have a look at [this twitter conversation][whyscry-twitter].
 
 
 #### Testing NameManager
 
-The `<NameManager />` glues the `<NamesList />` and `<NameAdder />` component together. When testing it, we need to be sure that it does its job as a workflow conductor. That is, when a name is added, the `<NameManager />` must notify the `<NamesList />`, so the list can update with the new names according to the server. We don't want to test the implementation of `<NamesList />` or `<NameAdder />`, so we will have to mock both of these out. In fact, as you can see below, most of the code in this test is dedicated to mocking components. Our test, as expected, lives in app/test/name-manager.spec.jsx
+The `<NameManager />` glues the `<NamesList />` and `<NameAdder />` components together. When testing it, we need to be sure that it does its job as a workflow conductor. That is, when a name is added, the `<NameManager />` must notify the `<NamesList />`, so the list can update with the new names according to the server. We don't want to test the implementation of `<NamesList />` or `<NameAdder />`, so we will have to mock both of these out. In fact, as you can see below, most of the code in this test is dedicated to mocking components. Our test, as expected, lives in app/test/name-manager.spec.jsx
 
 ```javascript
 var React = require('react'),
@@ -299,14 +302,14 @@ describe('NameManager', () => {
 })
 ```
 
-In this test, the instance of NameAdder imported internally by NameManager is replaced with a simple class that invokes the `onAdded()` callback passed into the component by NamesManager when the `triggerOnAdded()` class method is called. And NamesList is replaced with a trivial class that completes the test when the `update()` method is called. The workflow is: a name is added using NameAdder, resulting in a call to the `onAdded()` function passed to NameAdder. That function results in an update of NamesList via invocation of the `update()` method. After rendering `<NameManager />` we simply call `triggerOnAdded` on the child `<NameAdder />` component. If everything is working correctly, the last call will be on the `<NamesList />` component's `update()` method, which will complete and pass the test. One new thing about this test is our use of the `findRenderedComponentWithType` method on `TestUtils`. This allows us to located a specific type of composite component inside another composite component. In this case, we are looking for the `<NameAdder />` component. There are no `expect` blocks here, no assertions, but the test will timeout and fail if the `update()` method is not called on NamesList.
+In this test, the instance of NameAdder imported internally by NameManager is replaced with a simple class that invokes the `onAdded()` callback passed into the component by NamesManager when the `triggerOnAdded()` class method is called. And NamesList is replaced with a trivial class that completes the test when the `update()` method is called. First, a name is added using NameAdder, resulting in a call to the `onAdded()` function passed to NameAdder. That function results in an update of NamesList via invocation of the `update()` method. After rendering `<NameManager />` we simply call `triggerOnAdded` on the child `<NameAdder />` component. If everything is working correctly, the last call will be on the `<NamesList />` component's `update()` method, which will complete and pass the test. One new thing about this test is our use of the `findRenderedComponentWithType` method on `TestUtils`. This allows us to located a specific type of composite component inside another composite component. In this case, we are looking for the `<NameAdder />` component. There are no `expect` blocks here and no assertions, but the test will timeout and fail if the `update()` method is not called on NamesList.
 
 
 And that's it, now we have tests for _all_ of our React components!
 
 
 ### Running our tests
-Now that we have all of our React components covered with unit tests, it would be nice to be able to actually _run_ them to verify that everything is working as expected. To make this easy, let's add a `test` entry to the `scripts` property in our package.json file. This will allow us to execute our full suite of tests simply by running `npm test`. This new script looks like this:
+Now that we have all of our React components covered with unit tests, it would be nice to be able to actually _run_ them to verify that everything is working as expected. To make this easy, let's add a `"test"` entry to the `"scripts"` property in our package.json file. This will allow us to execute our full suite of tests simply by running `npm test`. The relevant portion of package.json now looks like this:
 
 ```javascript
 "scripts": {
@@ -334,7 +337,7 @@ On to the server!
 
 
 ## Part 2: Server-side unit tests
-On the server, most of our code is focused primarily at handling Falcor requests. In order to service these, we have defined three primary routes:
+On the server, most of our code is focused primarily on handling Falcor requests. In order to service these, we have defined three notable routes:
 
 1. A "get" route that returns the number of names.
 2. Another "get" route that returns one or more names.
@@ -387,7 +390,7 @@ module.exports = NamesRouter
 
 This separation allows us to focus specifically on testing Falcor routes without having to deal with any of the generic server logic that is unimportant to our unit tests.
 
-All of these changes to promote testable code leaves our original server.js file much smaller and only focused on traditional server tasks, such as routing HTTP requests, serving up static resources (such as our WebPack-generated JavaScript bundles), and starting up the server. Here it is, for reference:
+All of these changes to promote testable code leaves our original server.js file much smaller and only focused on traditional server tasks, such as routing HTTP requests, serving up static resources (such as our Webpack-generated JavaScript bundles), and starting up the server. Here it is, for reference:
 
 ```javascript
 var FalcorServer = require('falcor-express'),
@@ -408,7 +411,7 @@ app.listen(9090, err => {
 });
 ```
 
-So now it's easier to test our code since each file/module is focused on a specific task, but we have 2 extra files cluttering up the root of our project. Let's move those into a new subdirectory, appropriately named "server". With this change, our project's structure seems a bit more sane and predictable. Here's the tree at this point:
+So now it's easier to test our code since each file/module is focused on a specific task, but we have 2 extra files cluttering up the root of our project. Let's move those into a new subdirectory, appropriately named "server". Let's also rename server.js to index.js. This is a good way to indicate that this is the main entry point for our server, and also allows us to start the server without explicitly specifying the file name. With this change, our project's structure seems a bit more sane and predictable. Here's the tree at this point:
 
 ```
 .
@@ -428,27 +431,18 @@ So now it's easier to test our code since each file/module is focused on a speci
 +-- server
 |   +-- names.js
 |   +-- router.js
-|   +-- server.js
+|   +-- index.js
 +-- site
 |   +-- index.html
 +-- package.json
 ```
-
-Don't forget to change the `start` script in package.json! It should reflect the new path of the server entry point:
-
-```javascript
-"scripts": {
-  "start": "node server/server",
-}
-```
-
 
 ### Understanding our server-side testing tools
 One of the goals of this full-stack JavaScript approach is to blend the frontend and backend together as much as possible. By utilizing the same language across the entire app, we get the benefit of also using the same tools for testing. This is particularly noticeable when we look at the unit testing structure for our server. Our toolset is a subset of the same tools used to write and run unit tests for our frontend. On the backend, we'll write our tests using the familiar Jasmine library. Mocking out internal dependencies, such as our data store, will again be accomplished using Rewire. While we used Karma to run our frontend Jasmine tests, we can simply use Jasmine's Node.JS binary to run our server unit tests.
 
 
 ### Configuring Jasmine to run our tests
-The Jasmine test runner, which will be used to execute our Jasmine server-side unit tests, needs a bit of configuration in order to do its job. We'll store this configuration, which is quite minimal, in a JSON file inside of our configuration directory, alongside the existing Karma and WebPack configuration files. This Jasmine config revolves around two properties, `"spec_dir"` and `"spec_files"`:
+The Jasmine test runner, which will be used to execute our Jasmine server-side unit tests, needs a bit of configuration in order to do its job. We'll store this configuration, which is quite minimal, in a JSON file inside of our configuration directory, alongside the existing Karma and Webpack configuration files. This Jasmine config revolves around two properties, `"spec_dir"` and `"spec_files"`:
 
 ```javascript
 {
@@ -462,7 +456,7 @@ The Jasmine test runner, which will be used to execute our Jasmine server-side u
 
 ### Unit testing our Falcor routes
 
-All of our server-side unit tests, which will exercise the three primary Falcor routes defined in server/router.js, will live inside of server/test/router.spec.js. Again, these will be Jasmine tests, which I previously demonstrated in the previous section where we wrote unit tests for our 3 primary React components.
+All of our server-side unit tests, which will exercise the three primary Falcor routes defined in server/router.js, will live inside of server/test/router.spec.js. Again, these will be Jasmine tests.
 
 Before I discuss the setup for these unit tests, lets take a look at the relevant code first:
 
@@ -526,38 +520,30 @@ it('gets a list of names by index range', (done) => {
 
 This is very similar to the `names.length` route test, with the exception of the additional parameter specifying the range of names.
 
-This last test will add a new name - "cuatro" - using the `names.add` "call" route. It will verify the response to this "call", and then use the names "get" route to verify that this new name is available at index 3 in our names list:
+This last test will add a new name - "cuatro" - using the `names.add` "call" route. It will verify the response to this "call", and then examine the names data store directly to verify that this new name is available at index 3 in our names list:
 
 ```javascript
 it('adds a new name', (done) => {
-    namesRouter.call(['names', 'add'], ['cuatro'], ['name']).
-    subscribeOnNext((response) => {
-        expect(response).toEqual({
-            jsonGraph: {
-                names: {
-                    3: {name: 'cuatro'},
-                    length: 4
-                }
-            },
-            paths: [['names', 'length'], ['names', 3, 'name']]
-        })
+  var namesStore = Router.__get__('names')
 
-        namesRouter.get([['names', [3], 'name']]).
-        subscribeOnNext(response => {
-            expect(response).toEqual({
-                jsonGraph: {
-                    names: {
-                        3: {name: 'cuatro'}
-                    }
-                }
-            })
-            done()
-        })
-    })
+  namesRouter.call(['names', 'add'], ['cuatro'], ['name']).
+  subscribeOnNext((response) => {
+      expect(response).toEqual({
+          jsonGraph: {
+              names: {
+                  3: {name: 'cuatro'},
+                  length: 4
+              }
+          },
+          paths: [['names', 'length'], ['names', 3, 'name']]
+      })
+
+      expect(namesStore[3].name).toBe('cuatro')
+      done()
 })
 ```
 
-Verifying the response to the "call" involves ensuring the changes to our store are reported. We're also examining the `path` property in the response, which describes what specific elements of the JSON graph have changed as a result of this "call". The last part of this third test is more of a sanity check. By checking the response of a call to our names "get" route with the index of the new name, we're making absolutely sure that this new name has indeed been added. Arguably, checking the response to the "call" is all that is really needed.
+Verifying the response to the "call" involves ensuring the changes to our store are reported. We're also examining the `path` property in the response, which describes what specific elements of the JSON graph have changed as a result of this "call". The last part of this third test is more of a sanity check. By checking the underlying data store (which we can easily access using Rewire) we're making absolutely sure that this new name has indeed been added.
 
 
 ### Running our tests
@@ -602,7 +588,7 @@ And that's it! Now we have all frontend and backend code covered by unit tests, 
 
 ## Part 3: Integration testing
 
-Unit tests have been throughly covered by now, so let's move on to "integration" testing. These tests will examine how our application functions when a realistic user-generated operation is performed. In contrast to unit tests, integration tests exercise the _entire_ application, so we will need to have a running server in order to run these tests. We'll need to write code that will open up a browser, load our application, and then perform one or more common tasks.
+Unit tests have been throughly covered by now, so let's move on to "integration" testing. These tests will examine how our application functions when a realistic user-generated operation is performed. In contrast to unit tests, integration tests exercise the _entire_ application, so we will need to have a running server in order to execute these tests. We'll also need to write code that will open up a browser, load our application, and then perform one or more common tasks.
 
 
 ### Tools to help us write and run our tests
@@ -652,12 +638,12 @@ describe('name adder integration tests', () => {
 })
 ```
 
-The format of this specification is familiar, since we're again using Jasmine. Notice the "webdriverio" import at the top of the file, and initialization code inside of `beforeEach`. This produces a `browser` object which exposes a set of methods to control the browser. We've also set a longer-than-normal timeout for our tests. This isn't really important now, but it may be later when we attempt to run these tests against virtualized browsers in the cloud in the next section.
+The format of this specification is familiar, since we're again using Jasmine. Notice the "webdriverio" import at the top of the file, and initialization code inside of `beforeEach`. This produces a `browser` object, created by WebdriverIO, which exposes [a set of methods to control the browser][webdriverio-api]. We've also set a longer-than-normal timeout for our tests. This isn't really important now, but it may be later when we attempt to run these tests against virtualized browsers in the cloud in the next section.
 
-The test outlined earlier is represented by a series of chained method calls inside of the "adds a name" test. Starting with `this.browser.url(...)`, here is a line-by-line breakdown of our integration test:
+The test outlined earlier is represented in our code by a series of chained method calls inside of the "adds a name" test. Starting with `this.browser.url(...)`, here is a line-by-line breakdown of our integration test:
 
 1. Open Firefox (by default) and navigate to the index page of our app.
-2. Wait for a `<li>` to exist on the page (this will represent the first initial name in our list). If this is not visible within 30 seconds, the test will fail. Again, for testing against a local browser, this long of a timeout is probably unnecessary, but this may be important in the next section.
+2. Wait for a `<li>` to exist on the page (this will represent the first name in our list). If this is not visible within 30 seconds, the test will fail. Again, for testing against a local browser, this long of a timeout is probably unnecessary, but this may be important in the next section.
 3. Find all `<li>` elements, count them, and set this number to be the value of the `nameCount` variable. This is the number of names on page load.
 4. Set the value of the `<input type="text">` at the bottom of the page to the current time in milliseconds.
 5. Make sure this text input reflects the value we just entered.
@@ -682,13 +668,13 @@ In order to make it as easy as possible to setup/startup our Selenium server and
 
 The above represents only the _new_ entries in package.json. The first new script - `"setup-webdriver"` - creates and enters a "bin" directory inside of server/test/, and then downloads the Selenium server binary (which is a Java jar) into that directory. This first new script only needs to be run _once_. The second new script - `"start-webdriver"` - will, as you might expect, start this newly installed Selenium server using the JRE I mentioned earlier.
 
-So, now we have a running Selenium server. How can we actually execute this new integration test? Simple! Just run `npm test`. Since our specification file ends with ".spec.js" all we have to do is ensure it is placed inside the server/test directory, and the Jasmine configuration we create in the previous section will ensure it is run as part of our server-side tests. Go ahead and run the test. You'll notice that Firefox opens automatically and the steps outlined above are executed before your eyes (and very quickly). Once the browser closes, results are printed to the console. If all goes well, our three green server-side test dots in the terminal will be joined by a fourth dot representing the successful run of our integration test.
+So, now we have a running Selenium server. How can we actually execute this new integration test? Simple! Just run `npm test`. Since our specification file ends with ".spec.js" all we have to do is ensure it is placed inside the server/test directory, and the Jasmine configuration we created in the previous section will ensure it is run as part of our server-side tests. Go ahead and run the test. You'll notice that Firefox opens automatically and the steps outlined above are executed before your eyes (and very quickly). Once the browser closes, results are printed to the console. If all goes well, our three green server-side test dots in the terminal will be joined by a fourth dot representing the successful run of our integration test.
 
 
 ## Part 4: Full Test Automation With Travis CI and BrowserStack
 Running the unit and integration tests locally is important and convenient, but we need to be able to verify our code on a location other than our own development machine. It can be surprising just how many new issues surface when you leave the comfort of your own "perfect" environment. Relying on a trusted 3rd party entity to run tests is also a critical part of the continuous integration process. If you have a known third-party service verify your build, like Travis CI, _and_ you are using GitHub to manage your project, you can create "safe" branches using [GitHub's branch protection feature][github-branch-protection]. When enabled, this will prevent any code from a branch with failing tests (or with untested code) from being merged into the protected branch.
 
-In this section, I'll show you how to configure a cloud-based continuous integration service to run your build and all of your tests on each push to GitHub. Furthermore, I'll show how you can also run your integration tests against _any_ browser on _any_ device/OS using a _second_ cloud service. Both of these useful services will work together to provide you with an elegant and efficient continuos integration environment.
+In this section, I'll show you how to configure a cloud-based continuous integration service to run your build and all of your tests on each push to GitHub. Furthermore, I'll show how you can also run your integration tests against _any_ browser on _any_ device/OS using a _second_ cloud service. Both of these useful services will work together to provide you with an elegant and efficient continuous integration environment.
 
 
 ### Getting familiar with our CI tools
@@ -710,7 +696,7 @@ The steps required to get our unit tests running on Travis with every push to Gi
 Signing up is as easy as clicking the "Sign Up" button on https://travis-ci.org. As I mentioned earlier, Travis integrates almost seamlessly with GitHub, so much so that you can sign into to Travis using your GitHub account.
 
 #### Connecting the GitHub repository to Travis
-Once logged in, visit your profile page. There, you'll see a list of all public repositories in your account. To connect the Widen/fullstack-react repository to Travis (which holds the code for our names app), I visited _my_ account page in Travis, found the GitHub repo in the list of my projects, and clicked on the slider to "activate" the project. It should look something like this:
+Once logged in, visit your profile page. There, you'll see a list of all public repositories in your account. To connect the Widen/fullstack-react repository to Travis (which holds the code for our names app), I visited _my_ account page in Travis, found the GitHub repo in the list of my projects, and clicked on the slider to "activate" the project. After doing that, my project entry in the list looked like this:
 
 <img src="{{base}}/images/travis-activate-repo.png" width="400" />
 
@@ -725,11 +711,11 @@ node_js:
 
 As you can see above, the configuration is _very_ minimal. All we really need to do is tell Travis that this is a JavaScript project (via the `language` property) and specify the version of Node.JS to install on the environment. Travis CI allows for a number of language-specific conventions to reduce configuration boilerplate. For example, by default, Travis will run `npm install` and `npm test` on any Node.JS projects. Since we have already defined a `"test"` script in our package.json file, we only need to tell Travis that this is indeed a Node.JS project, and it takes care of pulling down dependencies and running our tests automagically.
 
-So, to start your first build on Travis, simply commit the above `.travis.yml` file and push it up to GitHub. Take a look at [a Travis build log][travis-temp-log] for Widen/fullstack-react hat matches this very configuration. Note that I had to temporarily change the name of the integration.spec.js file to integration.spec.bak.js. This ensures it is _not_ seen by Jasmine and not executed. We're not quite ready to run integration tests _yet_.
+So, to start your first build on Travis, simply commit the above `.travis.yml` file and push it up to GitHub. Take a look at [a Travis build log][travis-temp-log] for Widen/fullstack-react that matches this very configuration. Note that I had to temporarily change the name of the integration.spec.js file to integration.spec.bak.js. This ensures it is _not_ seen by Jasmine and not executed. We're not quite ready to run integration tests _yet_.
 
 
 ### Adding integration tests to the mix with BrowserStack
-Now that we have Travis running our frontend and backend unit tests, it's time to add integration tests to the mix. For this, as described earlier, we need to enlist the help of BrowserStack. The steps required to enable Travis to run our integration test with BrowserStack, alongside our unit tests "locally" using PhantomJS, are as follows:
+Now that we have Travis running our frontend and backend unit tests, it's time to enable integration tests. For this, as described earlier, we need to enlist the help of BrowserStack. The steps required to enable Travis to run our integration test with BrowserStack, alongside our unit tests "locally" using PhantomJS, are as follows:
 
 1. Setup a BrowserStack account
 2. Update our Travis config file with BrowserStack-related logic and authentication data
@@ -743,10 +729,10 @@ You can start using BrowserStack for free, regardless of the status of your proj
 There are 5 steps required to create the necessary configuration and start running the integration test on Travis:
 
 1. Update the Travis config to start our app server
-2. Download and run the BrowserStack tunnel. This will the machine running on BrowserStack to see our running app instance on Travis.
-3. Specify a list of operating systems and browsers to test against.
+2. Download and run the BrowserStack tunnel. This will allow the machine running on BrowserStack to see our running app instance on Travis.
+3. Specify a list of operating systems and browsers to test against in our Travis config.
 4. Include encrypted authentication information for our test & tunnel.
-5. Update our integration test to run against the browsers we chose in step 4.
+5. Update our integration test to run against the browsers we chose in step 3.
 
 Let's look at the updated Travis config file first:
 
@@ -758,7 +744,7 @@ before_script:
 - npm start &
 - wget http://www.browserstack.com/browserstack-local/BrowserStackLocal-linux-x64.zip
 - unzip BrowserStackLocal-linux-x64.zip
-- ./BrowserStackLocal $BROWSERSTACK_KEY &
+- ./BrowserStackLocal $BROWSERSTACK_KEY -localIdentifier $TRAVIS_JOB_NUMBER &
 - sleep 10
 env:
   global:
@@ -776,7 +762,7 @@ env:
     VERSION: 9
 ```
 
-We've add a number of new items to the configuration. The `before_script` block will be executed after `npm install` but before `npm test`. Here, is a line-by-line breakdown of that configurarion block:
+We've added a number of new items to the configuration. The `before_script` block will be executed after `npm install` but before `npm test`. Here is a line-by-line breakdown of that configuration block:
 
 1. Start our application server in a separate process (to prevent it from blocking the rest of the build).
 2. Download the BrowserStack tunnel binary.
@@ -784,9 +770,9 @@ We've add a number of new items to the configuration. The `before_script` block 
 4. Start the tunnel in a separate process (to prevent it from blocking the rest of the build)
 5. Wait 10 seconds for the tunnel to start.
 
-Notice that we are passing an environment variable - `BROWSERSTACK_KEY` - to the tunnel on startup. This is our secret API key, but where is this variable coming from? If you look further down at the `env` section of the configuration, you'll see a couple `secure` items. These contain our username (`BROWSERSTACK_USERNAME`) and BrowserStack API (`BROWSERSTACK_KEY`) key. They have been encrypted and added to our config file. Travis' documentation site contains [a section that explains how to create and store these encrypted variables][travis-secure-variables].
+Notice that we are passing an environment variable - `BROWSERSTACK_KEY` - to the tunnel on startup. This is our secret API key, but where is this variable coming from? If you look further down at the `env` section of the configuration, you'll see a couple `secure` items. These contain our username (`BROWSERSTACK_USERNAME`) and BrowserStack API (`BROWSERSTACK_KEY`) key. They have been encrypted and added to our config file. Travis' documentation site contains [a section that explains how to create and store these encrypted variables][travis-secure-variables]. The supplied Travis job number is also passed to the BrowserStack tunnel binary. Since we will have multiple tunnels open concurrently (one for each browser/OS combo), we need to provide a unique ID for each tunnel in order to keep them isolated.
 
-The final portion of the `env` configuration block contains a series of `matrix` entries. As you can see, these correspond to browser/OS environments that we'd like to test. For each matrix entry, Travis runs a separate virtualized machine, and makes each matrix property (`BROWSER`, `PLATFORM`, and `VERSION`) available to as environment variables.
+The final portion of the `env` configuration block contains a series of `matrix` entries. As you can see, these correspond to browser/OS environments that we'd like to test. For each matrix entry, Travis runs a separate virtualized machine, and makes each matrix property (`BROWSER`, `PLATFORM`, and `VERSION`) available as environment variables.
 
 Our last step, before we are able to run our integration tests alongside the unit tests in Travis, is to make a few changes to server/test/integration.spec.js. All we really need to do is pass some configuration to WebdriverIO that allows it to connect to BrowserStack instead of a locally running Selenium server. This configuration will also pass browser and OS information to BrowserStack so it can provision the appropriate environment. That specific information is already defined in our Travis config file. We only need to change the first portion of our integration test module, which now looks like this:
 
@@ -800,7 +786,8 @@ if (process.env.CI) {
             browserName: process.env.BROWSER,
             version: process.env.VERSION,
             platform: process.env.PLATFORM,
-            "browserstack.local": true
+            "browserstack.local": true,
+            "browserstack.localIdentifier": process.env.TRAVIS_JOB_NUMBER
         },
         host: 'hub.browserstack.com',
         port: 80,
@@ -820,25 +807,29 @@ describe('name adder integration tests', () => {
 })
 ```
 
-As you can see, the configuration we've added grabs the browser, OS, version and BrowserStack-related auth info provided as environment variables in our Travis config. This data is then passed to WebdriverIO as a JavaScript object. I've added a check to _only_ provide this new configuration data if the code is running on Travis. We can easily detect this by looking for a `CI` environment variable, which Travis sets for us. If our test is _not_ running on Travis, it will attempt to connect to a locally-running Selenium server, as before.
+As you can see, the configuration we've added grabs the browser, OS, version and BrowserStack-related auth info provided as environment variables in our Travis config. We're also providing some BrowserStack-specific configuration, such as the tunnel identifier (also used when opening the tunnel in our Travis config). This data is then passed to WebdriverIO as a JavaScript object. I've added a check to _only_ provide this new configuration data if the code is running on Travis. We can easily detect this by looking for a `CI` environment variable, which Travis sets for us. If our test is _not_ running on Travis, it will attempt to connect to a locally-running Selenium server, as before.
 
 Simply commit these changes, push them up to GitHub, and you will see unit and integration tests run on Travis. Take a look at [a recent build on Travis of Widen/fullstack-react][travis-passing-build] that illustrates the finished product.
 
 ## Going further
 While [Widen/fullstack-react][repo-v2] was designed to be simple to allow us to focus on the concepts needed to create and test a futuristic full-stack JavaScript web application, there are certainly areas where we can make improvements. Some of those improvements may include:
 
-* Handle an empty list of names in the code and back it with a unit test for `<NamesList>`.
-* Move the integration test configuration to a file in config directory.
-* Improve console reporting for server-side tests.
-* Make use of ES6 modules instead of using CommonJS throughout the project.
-* Compile the server code using Babel & Webpack. This will allow us to use more ES6/7 features on the server as well, and give us to ability to set aliases, use plug-ins, and all of the other conveniences we are already used to client-side.
+1. Handle an empty list of names in the code and back it with a unit test for `<NamesList>`.
+2. Move the integration test configuration to a file in the "config" directory.
+3. Improve console reporting for server-side tests.
+4. Practive Test Driven Development by writing tests to check for request failures or other unexpected conditions. Fix the code until these new tests are passing.
+5. Make use of ES6 modules instead of using CommonJS throughout the project.
+6. Compile the server code using Babel & Webpack. This will allow us to use more ES6/7 features on the server as well, and give us to ability to set aliases, use plug-ins, and all of the other conveniences we are already used to client-side.
+7. Make use of additional ECMAScript features, such as [async functions][async-spec] and [decorators][decorators-spec].
 
-Let me know in the comments section below, or open up a pull request or issue in [the project's issue tracker][issues] if you have any other ideas.
+[Widen/fullstack-react on GitHub][repo-v2] contains all of the code discussed in this article. Let me know in the comments section below, or open up a pull request or issue in [the project's issue tracker][issues] if you have any other ideas. Pull requests addressing any of the items above are also welcome.
 
 
+[async-spec]: https://github.com/tc39/ecmascript-asyncawait
 [blink]: http://www.chromium.org/blink
 [browserstack]: https://www.browserstack.com/
 [data-server-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/server.js#L6
+[decorators-spec]: https://github.com/wycats/javascript-decorators
 [donedone-jar]: http://images.wisegeek.com/hand-putting-money-in-coin.jpg
 [falcor-code-updates]: https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-5545284dc279e8d0cac06a735ecc9f64R1
 [falcor-model-deref]: http://netflix.github.io/falcor/doc/Model.html#deref
@@ -872,11 +863,12 @@ Let me know in the comments section below, or open up a pull request or issue in
 [testacular]: http://googletesting.blogspot.com/2012/11/testacular-spectacular-test-runner-for.html
 [testing-slides]: http://slides.com/raynicholus/automated-testing
 [travis]: https://travis-ci.org/
-[travis-passing-build]: https://travis-ci.org/Widen/fullstack-react/builds/108453063
+[travis-passing-build]: https://travis-ci.org/Widen/fullstack-react/builds/108733319
 [travis-secure-variables]: https://docs.travis-ci.com/user/environment-variables/#Encrypting-Variables-Using-a-Public-Key
 [travis-temp-log]: https://travis-ci.org/Widen/fullstack-react/builds/108709902
 [webdriver-w3c]: https://www.w3.org/TR/webdriver/
 [webdriverio]: http://webdriver.io/
+[webdriverio-api]: http://webdriver.io/api.html
 [webkit]: https://webkit.org/
 [webpack-babel-updates]: https://github.com/Widen/fullstack-react/commit/ae683e31daa7993f06d9d452e64cde3b84bf1fde#diff-a58d55bdb5770c78ad512f8e91f8d051R6
 [webpack.config.js-v1]: https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js
