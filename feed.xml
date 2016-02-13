@@ -5,12 +5,12 @@
     <description>The blog of the Widen Engineering Team.</description>
     <link>http://engineering.widen.com/</link>
     <atom:link href="http://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 13 Feb 2016 08:02:07 -0600</pubDate>
-    <lastBuildDate>Sat, 13 Feb 2016 08:02:07 -0600</lastBuildDate>
+    <pubDate>Sat, 13 Feb 2016 08:05:29 -0600</pubDate>
+    <lastBuildDate>Sat, 13 Feb 2016 08:05:29 -0600</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
-        <title>Testing Future Web Stack</title>
+        <title>The Future of Web Development (Part 2)&amp;#58; Full-Stack Automated JavaScript Testing</title>
         <description>&lt;p&gt;In &lt;a href=&quot;/blog/future-of-the-web-react-falcor/&quot;&gt;my last article&lt;/a&gt;, I showed you how to develop a full-stack JavaScript web application using ECMAScript 6, Falcor, React, Babel, Webpack, and Node.JS. Developing a project using this futuristic stack is undoubtedly fun, but this is only a piece of the puzzle. Any code you write that is meant to be used by others should be tested. Manually testing your code is certainly one approach, though you will find this route cumbersome. In order to make more efficient use of your time and provide executable documentation for future maintainers, it is important to develop a suite of automated tests. In this follow-up article, I’ll show you how to write automated tests for &lt;em&gt;all&lt;/em&gt; of the code we wrote in the first article. We will automate testing of the frontend and server-side code, &lt;em&gt;plus&lt;/em&gt; I’ll show you how to write automated integration (a.k.a. Selenium) tests that exercise the entire application. &lt;strong&gt;Keeping with the spirit of the first article, all tests will be written using JavaScript and made available in &lt;a href=&quot;https://github.com/Widen/fullstack-react/tree/2.0.0&quot;&gt;an updated version of the same GitHub repository&lt;/a&gt;&lt;/strong&gt;. After completing this article and following the coding examples, you’ll see how easy and satisfying it is to write automated tests for &lt;em&gt;your&lt;/em&gt; web applications.&lt;/p&gt;
 
 &lt;p&gt;Automated tests ensure that future changes to our code due to maintenance or evolution do not cause our application to regress. In the context of this simple application, we want to be sure that users are &lt;em&gt;always&lt;/em&gt; able to add new names. It’s also important that the list of names presented to the user be accurate and up-to-date. There are probably some edge cases that should be tested as well. What happens if our server goes down? How does the UI respond? It’s also prudent to ensure that our application works in all supported browsers. If you have spent any amount of time developing for the web, you already know that this is a real concern due to potential browser-specific issues and varying web API and JavaScript implementations. And what if an unexpected condition is encountered server-side? How will our Falcor routes deal with this? While our app is indeed trivial, there is quite a bit that can go wrong, and that means we have a lot of tests to write!&lt;/p&gt;
@@ -834,6 +834,34 @@ Started
         <link>http://engineering.widen.com/blog/testing-future-web-stack/</link>
         <guid isPermaLink="true">http://engineering.widen.com/blog/testing-future-web-stack/</guid>
         
+        
+        <category>react</category>
+        
+        <category>falcor</category>
+        
+        <category>webpack</category>
+        
+        <category>web</category>
+        
+        <category>server</category>
+        
+        <category>json</category>
+        
+        <category>http</category>
+        
+        <category>node.js</category>
+        
+        <category>javascript</category>
+        
+        <category>es6</category>
+        
+        <category>jasmine</category>
+        
+        <category>selenium</category>
+        
+        <category>webdriver</category>
+        
+        <category>testing</category>
         
       </item>
     
