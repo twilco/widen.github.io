@@ -3,11 +3,11 @@ title: "AWS CloudFront User Authentication using Lambda@Edge"
 date: 2018-02-07
 author: Payton Garland
 categories: aws cloudfront lambda@edge authentication authorization widen
-excerpt: "We want to protect private S3 content distributed by Amazon's CloudFront service, but we don't want to run a proxy server to authenticate requests. I'll explain the development process of creating a dynamic Lambda function that authenticates viewer requests utilizing the AWS CloudFront feature, Lambda@Edge."
+excerpt: "We want to protect private S3 content distributed by Amazon's CloudFront service, but we don't want to run a proxy server to authenticate requests. We explain the development process of creating a dynamic Lambda function that authenticates viewer requests utilizing the AWS CloudFront feature, Lambda@Edge."
 comments: false
 ---
 
-Our CI server is configured to write build reports to a S3 bucket. However, we found that there's no easy way to serve __private__ files without running an EC2 instance with [proxy software](https://github.com/jcomo/s3-proxy) or living with the limitations of [IP address restrictions](https://pete.wtf/2012/05/01/how-to-setup-aws-s3-access-from-specific-ips/) using IAM rules.
+Our CI system is configured to write build reports to a S3 bucket. However, we found that there's no easy way to serve __private__ files without running an EC2 instance with [proxy software](https://github.com/jcomo/s3-proxy) or living with the limitations of [IP address restrictions](https://pete.wtf/2012/05/01/how-to-setup-aws-s3-access-from-specific-ips/) using IAM rules.
 
 CloudFront has a feature named [origin access identity](http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html#private-content-creating-oai-console) that allows you to serve private S3 content. The missing link is the ability to validate requests as they are received by CloudFront. On July 17, 2017, Amazon released a new AWS Lambda feature named [Lambda@Edge](https://docs.aws.amazon.com/lambda/latest/dg/lambda-edge.html). From a developer's perspective, Lambda@Edge allows Node.js functions to inspect, and modify, requests as they arrive at CloudFront POPs around the world.
 
@@ -63,13 +63,13 @@ As is the case with every new project, the original plan never lasts long. Lambd
 1. Max size of zipped Lambda function (including libraries) is 1MB
 2. Environment variables are not supported
 
-Having such a small size limit posed a big issue with the use of an OpenID implementation to interact with OpenID Connect providers. All of the supported implementations exceeded the 1MB limit alone (typically ~2MB). I wrote the URL query parameter composition from scratch focusing on the bare minimum we needed for full functionality.
+Having such a small size limit posed a big issue with the use of an OpenID implementation to interact with OpenID Connect providers. All of the supported implementations exceeded the 1MB limit alone (typically ~2MB). Writing the URL query parameter composition, focusing on the bare minimum we needed for full functionality, using the built-in functions in Node proved an easy way to keep us under the limit.
 
-The lack of environment variables created another hurdle to overcome. My end goal for this project was to allow the user to configure a function without having to touch the code. Not having environment variables at hand meant user-specific variables must be stored in the Lambda@Edge Javascript function itself. The next best option seemed to be an interactive build script allowing the Lambda function to be dynamically built without having to manually edit a configuration file.
+The lack of environment variables created another hurdle to overcome. The end goal for this project was to allow users to configure a function without having to edit source code. Not having environment variables at hand meant user-specific data must be stored in the uploaded Lambda@Edge Javascript function itself. The next best option seemed to be an interactive build script allowing the Lambda function to be dynamically built without having to manually edit a configuration file.
 
-Although having a configuration file and build script seemed cumbersome at first, it proved to be a useful addition. The build script freed up expansion options greatly by easily processing user input and automating the creation of the ZIP file to upload to Lambda. For example, the build script will also make structural changes to the project based on the selections chosen (e.g. moving the Google Groups authorization file to the root as auth.js).
+Although having a configuration file and build script seemed cumbersome at first, it proved to be a useful addition. The build script freed up expansion options greatly by easily processing user input and automating the creation of the ZIP file to upload to Lambda. For example, the build script will make structural changes to the project based on the selections chosen (e.g. moving the Google Groups authorization file to the root as auth.js).
 
-After our set of detours, it was an open road. After completing the Google version, we also added support for GitHub and Microsoft authentication. The authentication providers have different authorization methods based upon the specific user data available:
+After our set of detours, it was an open road. After completing the Google version, we also added support for GitHub and Microsoft authentication. The providers have different authorization methods based upon specific user data available in their authentication callback:
 
   - **Google**: Hosted domain verification, email whitelist or Google Groups membership
   - **Microsoft**: Azure AD membership or Azure AD username whitelist
