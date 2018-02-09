@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>AWS CloudFront User Authentication using Lambda@Edge | Widen Engineering</title>
+  <meta name="description" content="We want to protect private S3 content distributed by Amazon's CloudFront service, but we don't want to run a proxy server to authenticate requests. I'll expl...">
+
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/favicon/apple-icon-57x57-443078e666f8564fe94d070b2e527a4e.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/assets/favicon/apple-icon-60x60-8a893e3ab71590ed3057de7e6cd3ae98.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/favicon/apple-icon-72x72-f8c2f3ae23146687e05cc43b079e20f7.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/favicon/apple-icon-76x76-c8d92c837a6f23b049e992c8d1ac4300.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/favicon/apple-icon-114x114-e2a336df00d1c5b863ba753bbc65685b.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/assets/favicon/apple-icon-120x120-9dd8c2247c71ee7257d91cefcd651488.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/assets/favicon/apple-icon-144x144-977c40f1283a726696a38f03ca13d462.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/assets/favicon/apple-icon-152x152-a2b19091ea27d58f71346b1230fb6695.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-icon-180x180-c5f20e7c26f328953ad1bc7456a6b132.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="/assets/favicon/android-icon-192x192-c18592872a77026c84201ce58a5c2b56.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32-ba8c5bfb24d4e1d4c9249c63a689dbc0.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon/favicon-96x96-e3521be3d5d9e10952a430e073a28fd3.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16-c488d0fbd40d0408f7ccb9b2fe8c787d.png">
+
+<link rel="manifest" href="/assets/favicon/manifest-1ec559e0a7d1bdd5863ea8923dc00726.json">
+
+<meta name="msapplication-TileColor" content="#B72822">
+<meta name="msapplication-TileImage" content="/assets/favicon/ms-icon-144x144-977c40f1283a726696a38f03ca13d462.png">
+<meta name="theme-color" content="#B72822">
+
+  <link rel="stylesheet" href="/assets/app-87142aaebc5b8564f9220127fd8b5a59.css">
+  <link rel="canonical" href="http://engineering.widen.com/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/">
+  <link rel="alternate" type="application/rss+xml" title="Widen Engineering" href="http://engineering.widen.com/feed.xml" />
+</head>
+
+
+  <body>
+
+    <div class="full-width">
+      <header class="site-header" role="banner">
+    <div class="wrapper">
+        <div class="logo">
+            <a href="/">
+                <img width="400" alt="Widen-Engineering-White-Logo" src="http://embed.widencdn.net/img/widen/c17yrvuaac/400px@2x/Widen Engineering White Logo.png?u=mcuc7i">
+            </a>
+        </div>
+        <br class="clear"/>
+  </div>
+
+</header>
+
+    </div>
+
+    <div class="wrapper">
+
+      <main class="content" role="main">
+
+        <div class="post">
+    <header>
+        <h1><a title="AWS CloudFront User Authentication using Lambda@Edge" href="/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/">AWS CloudFront User Authentication using Lambda@Edge</a></h1>
+        <time datetime="2018-02-07T00:00:00-06:00">Feb 7, 2018</time> • Payton Garland
+    </header>
+
+    <article role="article">
+
+      <p>Our CI server is configured to write build reports to a S3 bucket. However, we found that there’s no easy way to serve <strong>private</strong> files without running an EC2 instance with <a href="https://github.com/jcomo/s3-proxy">proxy software</a> or living with the limitations of <a href="https://pete.wtf/2012/05/01/how-to-setup-aws-s3-access-from-specific-ips/">IP address restrictions</a> using IAM rules.</p>
+
+<p>CloudFront has a feature named <a href="http://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html#private-content-creating-oai-console">origin access identity</a> that allows you to serve private S3 content. The missing link is the ability to validate requests as they are received by CloudFront. On July 17, 2017, Amazon released a new AWS Lambda feature named <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-edge.html">Lambda@Edge</a>. From a developer’s perspective, Lambda@Edge allows Node.js functions to inspect, and modify, requests as they arrive at CloudFront POPs around the world.</p>
+
+<p>Having the ability to execute Lambda functions upon <em><a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-cloudfront-trigger-events.html">viewer request</a></em> gives us the opportunity to authenticate the request in any way we wish. For our initial proof of concept, we checked for basic authentication with a static username/password.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>'use strict';
+exports.handler = (event, context, callback) =&gt; {
+
+    const request = event.Records[0].cf.request;
+    const headers = request.headers;
+
+    // Configure authentication
+    const authUser = 'widen-user';
+    const authPass = 'secret-password';
+
+    // Construct expected basic auth header value
+    const authString = 'Basic ' + new Buffer(authUser + ':' + authPass).toString('base64');
+
+    // If basic auth header does not match, send WWW-Authenticate response
+    if (typeof headers.authorization == 'undefined' || headers.authorization[0].value != authString) {
+        const body = 'Unauthorized';
+        const response = {
+            status: '401',
+            statusDescription: 'Unauthorized',
+            body: body,
+            headers: {
+                'www-authenticate': [{key: 'WWW-Authenticate', value:'Basic realm="Widen CI Artifacts"'}]
+            },
+        };
+        callback(null, response);
+    }
+
+    // Continue request processing if authentication passed
+    callback(null, request);
+};
+</code></pre>
+</div>
+
+<p>This works surprisingly well; however, there was a lot of room for improvement. The most glaring obvious scalability problem is having a single shared password. One option we considered was to extend this code to improve the loading of passwords; the major downsides were still needing to manually manage user credentials and requiring users to remember yet another password.</p>
+
+<p>We use <a href="https://gsuite.google.com/">Google’s G Suite</a> internally for email; we thought if we were to leverage their support of <a href="http://openid.net/connect/">OpenID Connect</a> as a relying party we could completely remove the need for our Lambda@Edge function to know anything about usernames or passwords.</p>
+
+<p>At this point, the plan seemed clear:</p>
+
+<ol>
+  <li>Configure CloudFront to inspect HTTP requests as they were received.</li>
+  <li>If the request is not already <strong>authenticated</strong>, use one of the many <a href="http://openid.net/developers/certified/">OpenID implementations</a> to redirect the user to the Google login UX.</li>
+  <li>Perform user <strong>authorization</strong> (email whitelist, Google Groups membership, etc.)</li>
+  <li>Set a stateless JWT authentication token, as a cookie, with a configurable TTL.</li>
+  <li>Redirect user to original request path.</li>
+</ol>
+
+<p>As is the case with every new project, the original plan never lasts long. Lambda@Edge has a few major <a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html#limits-lambda-at-edge">limitations</a> that interfered:</p>
+
+<ol>
+  <li>Max size of zipped Lambda function (including libraries) is 1MB</li>
+  <li>Environment variables are not supported</li>
+</ol>
+
+<p>Having such a small size limit posed a big issue with the use of an OpenID implementation to interact with OpenID Connect providers. All of the supported implementations exceeded the 1MB limit alone (typically ~2MB). I wrote the URL query parameter composition from scratch focusing on the bare minimum we needed for full functionality.</p>
+
+<p>The lack of environment variables created another hurdle to overcome. My end goal for this project was to allow the user to configure a function without having to touch the code. Not having environment variables at hand meant user-specific variables must be stored in the Lambda@Edge Javascript function itself. The next best option seemed to be an interactive build script allowing the Lambda function to be dynamically built without having to manually edit a configuration file.</p>
+
+<p>Although having a configuration file and build script seemed cumbersome at first, it proved to be a useful addition. The build script freed up expansion options greatly by easily processing user input and automating the creation of the ZIP file to upload to Lambda. For example, the build script will also make structural changes to the project based on the selections chosen (e.g. moving the Google Groups authorization file to the root as auth.js).</p>
+
+<p>After our set of detours, it was an open road. After completing the Google version, we also added support for GitHub and Microsoft authentication. The authentication providers have different authorization methods based upon the specific user data available:</p>
+
+<ul>
+  <li><strong>Google</strong>: Hosted domain verification, email whitelist or Google Groups membership</li>
+  <li><strong>Microsoft</strong>: Azure AD membership or Azure AD username whitelist</li>
+  <li><strong>GitHub</strong>: Organization membership</li>
+</ul>
+
+<p><a href="https://github.com/widen/cloudfront-auth">cloudfront-auth</a> is now available on GitHub as an open source project under the <a href="https://opensource.org/licenses/ISC">ISC License</a>.</p>
+
+
+
+    </article>
+
+    
+</div>
+
+
+      </main>
+
+    </div>
+
+    <div class="full-width">
+      <div class="wrapper">
+    <footer class="site-footer" role="contentinfo">
+        <nav>
+          <ul class="inline">
+          
+            
+          
+            
+          
+            
+          
+            
+          
+          </ul>
+          <br/>
+        </nav >
+        <nav>
+          <ul class="site-social-links inline">
+              <li><a target="_blank" title="RSS Feed" href="/feed.xml" class="ion-social-rss"></a></li>
+              <li><a target="_blank" title="GitHub" href="https://github.com/Widen" class="ion-social-github"></a></li>
+              <li><a target="_blank" title="Twitter" href="https://twitter.com/widendev" class="ion-social-twitter"></a></li>
+          </ul>
+        </nav>
+        <p>© Copyright 2018, <a title="Widen Homepage" target="_blank" href="http://widen.com">Widen Enterprises, Inc.</a></p>
+
+        <p><strong>Looking for work?</strong> <a title="Come engineer with us!" target="_blank" href="http://www.widen.com/careers/">Come engineer with us!</a></p>
+        <p><strong>Something wrong with this page?</strong> Please <a title="Create new issue on bugtracker" target="_blank" href="https://github.com/widen/widen.github.io/issues/new">file a bug</a>.</p>
+        <div class="git-info">
+<nav>
+  <ul class="inline">
+    <li>
+        <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io/">source</a>
+    </li>
+    <li>
+        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/develop/_posts/2018-02-07-AWS-CloudFront-User-Authentication-using-Lambda@Edge.md">view</a>
+    </li>
+    <li>
+        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/_posts/2018-02-07-AWS-CloudFront-User-Authentication-using-Lambda@Edge.md">edit</a>
+    </li>
+    <li>
+        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/affe82c">affe82c</a>
+    </li>
+    <li>
+        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/6070b19">6070b19</a>
+    </li>
+  </ul>
+  </nav >
+</div>
+
+    </footer>
+</div>
+
+    </div>
+
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-1206716-19']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+
+  </body>
+
+</html>
