@@ -4,7 +4,7 @@ build:
 	bundle exec jekyll build
 
 cleanMerge:
-	git merge -s ours origin/master --no-edit
+	git merge -s ours origin/master --no-edit --allow-unrelated-histories
 	git checkout master
 
 commitSiteOnly:
