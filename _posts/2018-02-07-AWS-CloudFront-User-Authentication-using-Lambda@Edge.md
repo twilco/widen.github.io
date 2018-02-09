@@ -46,7 +46,7 @@ exports.handler = (event, context, callback) => {
 };
 ```
 
-This works surprising well; however, there was a lot of room for improvement. The most glaring obvious scalability problem is having a single shared password. One option we considered was to extend this code to improve the loading of passwords; the major downsides were still needing to manually manage user credentials and requiring users to remember yet another password.
+This works surprisingly well; however, there was a lot of room for improvement. The most glaring obvious scalability problem is having a single shared password. One option we considered was to extend this code to improve the loading of passwords; the major downsides were still needing to manually manage user credentials and requiring users to remember yet another password.
 
 We use [Google's G Suite](https://gsuite.google.com/) internally for email; we thought if we were to leverage their support of [OpenID Connect](http://openid.net/connect/) as a relying party we could completely remove the need for our Lambda@Edge function to know anything about usernames or passwords.
 
@@ -58,7 +58,7 @@ At this point, the plan seemed clear:
 3. Set a stateless JWT authentication token, as a cookie, with a configurable TTL.
 4. Redirect user to original request path.
 
-As what seems happen with every new project, the original plan never lasts long. Lambda@Edge has a few major [limitations](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html#limits-lambda-at-edge) that interfered:
+As is the case with every new project, the original plan never lasts long. Lambda@Edge has a few major [limitations](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-limits.html#limits-lambda-at-edge) that interfered:
 
 1. Max size of zipped Lambda function (including libraries) is 1MB
 2. Environment variables are not supported
