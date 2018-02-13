@@ -13,7 +13,7 @@ CloudFront has a feature named [origin access identity](http://docs.aws.amazon.c
 
 Having the ability to execute Lambda functions upon *[viewer request](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-cloudfront-trigger-events.html)* gives us the opportunity to authenticate the request in any way we wish. For our initial proof of concept, we checked for basic authentication with a static username/password.
 
-```
+```javascript
 'use strict';
 exports.handler = (event, context, callback) => {
 
