@@ -70,36 +70,36 @@
 
 <p>Having the ability to execute Lambda functions upon <em><a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-cloudfront-trigger-events.html">viewer request</a></em> gives us the opportunity to authenticate the request in any way we wish. For our initial proof of concept, we checked for basic authentication with a static username/password.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>'use strict';
-exports.handler = (event, context, callback) =&gt; {
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="s1">'use strict'</span><span class="p">;</span>
+<span class="nx">exports</span><span class="p">.</span><span class="nx">handler</span> <span class="o">=</span> <span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">context</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
 
-    const request = event.Records[0].cf.request;
-    const headers = request.headers;
+    <span class="kr">const</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">Records</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">cf</span><span class="p">.</span><span class="nx">request</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">headers</span> <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">headers</span><span class="p">;</span>
 
-    // Configure authentication
-    const authUser = 'widen-user';
-    const authPass = 'secret-password';
+    <span class="c1">// Configure authentication</span>
+    <span class="kr">const</span> <span class="nx">authUser</span> <span class="o">=</span> <span class="s1">'widen-user'</span><span class="p">;</span>
+    <span class="kr">const</span> <span class="nx">authPass</span> <span class="o">=</span> <span class="s1">'secret-password'</span><span class="p">;</span>
 
-    // Construct expected basic auth header value
-    const authString = 'Basic ' + new Buffer(authUser + ':' + authPass).toString('base64');
+    <span class="c1">// Construct expected basic auth header value</span>
+    <span class="kr">const</span> <span class="nx">authString</span> <span class="o">=</span> <span class="s1">'Basic '</span> <span class="o">+</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">authUser</span> <span class="o">+</span> <span class="s1">':'</span> <span class="o">+</span> <span class="nx">authPass</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="s1">'base64'</span><span class="p">);</span>
 
-    // If basic auth header does not match, send WWW-Authenticate response
-    if (typeof headers.authorization == 'undefined' || headers.authorization[0].value != authString) {
-        const body = 'Unauthorized';
-        const response = {
-            status: '401',
-            statusDescription: 'Unauthorized',
-            body: body,
-            headers: {
-                'www-authenticate': [{key: 'WWW-Authenticate', value:'Basic realm="Widen CI Artifacts"'}]
-            },
-        };
-        callback(null, response);
-    }
+    <span class="c1">// If basic auth header does not match, send WWW-Authenticate response</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">headers</span><span class="p">.</span><span class="nx">authorization</span> <span class="o">==</span> <span class="s1">'undefined'</span> <span class="o">||</span> <span class="nx">headers</span><span class="p">.</span><span class="nx">authorization</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span> <span class="o">!=</span> <span class="nx">authString</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kr">const</span> <span class="nx">body</span> <span class="o">=</span> <span class="s1">'Unauthorized'</span><span class="p">;</span>
+        <span class="kr">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="na">status</span><span class="p">:</span> <span class="s1">'401'</span><span class="p">,</span>
+            <span class="na">statusDescription</span><span class="p">:</span> <span class="s1">'Unauthorized'</span><span class="p">,</span>
+            <span class="na">body</span><span class="p">:</span> <span class="nx">body</span><span class="p">,</span>
+            <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">'www-authenticate'</span><span class="p">:</span> <span class="p">[{</span><span class="na">key</span><span class="p">:</span> <span class="s1">'WWW-Authenticate'</span><span class="p">,</span> <span class="na">value</span><span class="p">:</span><span class="s1">'Basic realm="Widen CI Artifacts"'</span><span class="p">}]</span>
+            <span class="p">},</span>
+        <span class="p">};</span>
+        <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">response</span><span class="p">);</span>
+    <span class="p">}</span>
 
-    // Continue request processing if authentication passed
-    callback(null, request);
-};
+    <span class="c1">// Continue request processing if authentication passed</span>
+    <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">request</span><span class="p">);</span>
+<span class="p">};</span>
 </code></pre>
 </div>
 
@@ -193,10 +193,10 @@ exports.handler = (event, context, callback) =&gt; {
         <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/_posts/2018-02-07-AWS-CloudFront-User-Authentication-using-Lambda@Edge.md">edit</a>
     </li>
     <li>
-        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/1fb2741">1fb2741</a>
+        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/361f32c">361f32c</a>
     </li>
     <li>
-        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/1fb2741">1fb2741</a>
+        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/361f32c">361f32c</a>
     </li>
   </ul>
   </nav >
