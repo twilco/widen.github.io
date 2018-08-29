@@ -14,6 +14,7 @@ Ruby, RubyGems, and Bundler.
 ```sh
 git clone git@github.com:Widen/widen.github.io.git
 cd widen.github.io
+gem install bundle
 bundle install
 jekyll serve --drafts
 ```
