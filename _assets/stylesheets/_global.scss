@@ -21,6 +21,12 @@ h4 { font-size: 2.0rem; }
 h5 { font-size: 1.7rem; }
 h6 { font-size: 1.4rem; }
 
+blockquote {
+  padding: 0 1em;
+  color: #6a737d;
+  border-left: 0.25em solid #dfe2e5;
+}
+
 h1,h2,h3,h4,h5,h6 {
     font-family: $header-font-family;
     color: $red;
