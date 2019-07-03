@@ -2,7 +2,7 @@ title: "Widen Engineering"
 description: "The blog of the Widen Engineering Team."
 timezone: "America/Chicago"
 baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://engineering.widen.com"
+url: "https://engineering.widen.com"
 email: "engineering@widen.com"
 disqus: widen-engineering
 
