@@ -3,10 +3,10 @@
   <channel>
     <title>Widen Engineering</title>
     <description>The blog of the Widen Engineering Team.</description>
-    <link>http://engineering.widen.com/</link>
-    <atom:link href="http://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 03 Jul 2019 15:06:18 -0500</pubDate>
-    <lastBuildDate>Wed, 03 Jul 2019 15:06:18 -0500</lastBuildDate>
+    <link>https://engineering.widen.com/</link>
+    <atom:link href="https://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Wed, 03 Jul 2019 15:12:46 -0500</pubDate>
+    <lastBuildDate>Wed, 03 Jul 2019 15:12:46 -0500</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -611,8 +611,8 @@ cargo generate --git https://github.com/rustwasm/wasm-pack-template
 &lt;p&gt;Thanks for reading!  If you have any questions or comments, feel free to leave them below.  Also, if you want the chance to work with some cool people and some cool technology, &lt;a href=&quot;https://www.widen.com/careers&quot; target=&quot;_blank&quot;&gt;come join us!&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Mon, 14 Jan 2019 00:00:00 -0600</pubDate>
-        <link>http://engineering.widen.com/blog/A-Tale-of-Performance---Javascript,-Rust,-and-WebAssembly/</link>
-        <guid isPermaLink="true">http://engineering.widen.com/blog/A-Tale-of-Performance---Javascript,-Rust,-and-WebAssembly/</guid>
+        <link>https://engineering.widen.com/blog/A-Tale-of-Performance---Javascript,-Rust,-and-WebAssembly/</link>
+        <guid isPermaLink="true">https://engineering.widen.com/blog/A-Tale-of-Performance---Javascript,-Rust,-and-WebAssembly/</guid>
         
         
         <category>javascript</category>
@@ -703,8 +703,8 @@ cargo generate --git https://github.com/rustwasm/wasm-pack-template
 
 </description>
         <pubDate>Wed, 07 Feb 2018 00:00:00 -0600</pubDate>
-        <link>http://engineering.widen.com/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/</link>
-        <guid isPermaLink="true">http://engineering.widen.com/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/</guid>
+        <link>https://engineering.widen.com/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/</link>
+        <guid isPermaLink="true">https://engineering.widen.com/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/</guid>
         
         
         <category>aws</category>
@@ -818,8 +818,8 @@ cargo generate --git https://github.com/rustwasm/wasm-pack-template
 &lt;p&gt;For those who did not find as much value, the theme seemed to be that not everyone had the level of coding or hardware skills where they felt they could contribute as much as others on the team. This will be good input to consider modifications for next year. So far 88% said we should host it again next year, so I suspect we’ll see its return.&lt;/p&gt;
 </description>
         <pubDate>Fri, 11 Aug 2017 00:00:00 -0500</pubDate>
-        <link>http://engineering.widen.com/blog/Maker-Day-2017/</link>
-        <guid isPermaLink="true">http://engineering.widen.com/blog/Maker-Day-2017/</guid>
+        <link>https://engineering.widen.com/blog/Maker-Day-2017/</link>
+        <guid isPermaLink="true">https://engineering.widen.com/blog/Maker-Day-2017/</guid>
         
         
         <category>maker</category>
@@ -1656,8 +1656,8 @@ Started
 
 </description>
         <pubDate>Fri, 12 Feb 2016 00:00:00 -0600</pubDate>
-        <link>http://engineering.widen.com/blog/testing-future-web-stack/</link>
-        <guid isPermaLink="true">http://engineering.widen.com/blog/testing-future-web-stack/</guid>
+        <link>https://engineering.widen.com/blog/testing-future-web-stack/</link>
+        <guid isPermaLink="true">https://engineering.widen.com/blog/testing-future-web-stack/</guid>
         
         
         <category>react</category>
@@ -2209,8 +2209,8 @@ Started
 
 </description>
         <pubDate>Mon, 12 Oct 2015 00:00:00 -0500</pubDate>
-        <link>http://engineering.widen.com/blog/future-of-the-web-react-falcor/</link>
-        <guid isPermaLink="true">http://engineering.widen.com/blog/future-of-the-web-react-falcor/</guid>
+        <link>https://engineering.widen.com/blog/future-of-the-web-react-falcor/</link>
+        <guid isPermaLink="true">https://engineering.widen.com/blog/future-of-the-web-react-falcor/</guid>
         
         
         <category>react</category>
@@ -2319,8 +2319,8 @@ Started
 
 </description>
         <pubDate>Wed, 02 Sep 2015 00:00:00 -0500</pubDate>
-        <link>http://engineering.widen.com/blog/tomcat-slashes/</link>
-        <guid isPermaLink="true">http://engineering.widen.com/blog/tomcat-slashes/</guid>
+        <link>https://engineering.widen.com/blog/tomcat-slashes/</link>
+        <guid isPermaLink="true">https://engineering.widen.com/blog/tomcat-slashes/</guid>
         
         
         <category>tomcat</category>
@@ -2393,8 +2393,8 @@ I wanted this model with Lambda, and it seemed to fit perfectly, but alas it was
 &lt;p&gt;As always, weigh the risks and benefits.&lt;/p&gt;
 </description>
         <pubDate>Thu, 27 Aug 2015 00:00:00 -0500</pubDate>
-        <link>http://engineering.widen.com/blog/2015/08/27/AWS-Lambda-Runtime-Configuration</link>
-        <guid isPermaLink="true">http://engineering.widen.com/blog/2015/08/27/AWS-Lambda-Runtime-Configuration</guid>
+        <link>https://engineering.widen.com/blog/2015/08/27/AWS-Lambda-Runtime-Configuration</link>
+        <guid isPermaLink="true">https://engineering.widen.com/blog/2015/08/27/AWS-Lambda-Runtime-Configuration</guid>
         
         
         <category>aws</category>
