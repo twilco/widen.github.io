@@ -1,6 +1,7 @@
 header.site-header{
 
     background-color: $dark-grey;
+    background-image: url("//embed.widencdn.net/img/widen/m4ml1kuspv/exact/1680x90_Engineering Blog Banner.png?keep=c&crop=yes&u=ksmgip");
     padding: 20px 0 18px 0;
 
     .logo {
