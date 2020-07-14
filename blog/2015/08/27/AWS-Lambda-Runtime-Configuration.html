@@ -9,27 +9,27 @@
   <title>Runtime Configuration for AWS' Lambda | Widen Engineering</title>
   <meta name="description" content="A while ago Amazon released its Lambda service. Lambdas are simple, stateless  functions that get executed as callbacks to arbitrary AWS events.">
 
-  <link rel="apple-touch-icon" sizes="57x57" href="/assets/favicon/apple-icon-57x57-ff42219994f7b0f656ffcad0ba264a75.png">
-<link rel="apple-touch-icon" sizes="60x60" href="/assets/favicon/apple-icon-60x60-ab8b491cd6f98d7a529486efabe4acdb.png">
-<link rel="apple-touch-icon" sizes="72x72" href="/assets/favicon/apple-icon-72x72-f91dd5bd6c559a9e40a08b1deed6e431.png">
-<link rel="apple-touch-icon" sizes="76x76" href="/assets/favicon/apple-icon-76x76-707077860f7779206dba9bb48d19a512.png">
-<link rel="apple-touch-icon" sizes="114x114" href="/assets/favicon/apple-icon-114x114-14db05cbd372a5d6a08da6bc73ddc34b.png">
-<link rel="apple-touch-icon" sizes="120x120" href="/assets/favicon/apple-icon-120x120-23990f59e240ceed96367c004a5e7fb2.png">
-<link rel="apple-touch-icon" sizes="144x144" href="/assets/favicon/apple-icon-144x144-3d533b233e4578032b5dfc6d5c0efcaa.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/assets/favicon/apple-icon-152x152-444f94897e7ef7e70831f735c7c62a5e.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-icon-180x180-c14938a49be032ffbea32c8aedc5cb91.png">
-<link rel="icon" type="image/png" sizes="192x192"  href="/assets/favicon/android-icon-192x192-cc3dce93709d292d764aac5decf8049a.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32-02f9df411973b3e68a1209a864af9ffd.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon/favicon-96x96-e973328488d9787937aadf45798e569d.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16-5558f12adefff3f88493750388234933.png">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/images/favicon/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicon/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicon/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicon/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicon/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicon/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicon/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicon/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="/assets/images/favicon/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png">
 
-<link rel="manifest" href="/assets/favicon/manifest-f5ec1febffe24c0f830fd7907521de82.json">
+<link rel="manifest" href="/assets/images/favicon/manifest.json">
 
 <meta name="msapplication-TileColor" content="#B72822">
-<meta name="msapplication-TileImage" content="/assets/favicon/ms-icon-144x144-3d533b233e4578032b5dfc6d5c0efcaa.png">
+<meta name="msapplication-TileImage" content="/assets/images/favicon/ms-icon-144x144.png">
 <meta name="theme-color" content="#B72822">
 
-  <link rel="stylesheet" href="/assets/app-e8f20f52771ff90bfe6c533f8adc01b7.css">
+  <link rel="stylesheet" href="/assets/css/app.css">
   <link rel="canonical" href="https://engineering.widen.com/blog/2015/08/27/AWS-Lambda-Runtime-Configuration">
   <link rel="alternate" type="application/rss+xml" title="Widen Engineering" href="https://engineering.widen.com/feed.xml" />
 </head>
@@ -39,15 +39,14 @@
 
     <div class="full-width">
       <header class="site-header" role="banner">
-    <div class="wrapper">
-        <div class="logo">
-            <a href="/">
-                <img width="400" alt="Widen-Engineering-White-Logo" src="https://embed.widencdn.net/img/widen/c17yrvuaac/400px@2x/Widen Engineering White Logo.png?u=mcuc7i">
-            </a>
-        </div>
-        <br class="clear"/>
+  <div class="wrapper">
+    <div class="logo">
+      <a href="/">
+        <img width="400" alt="Widen Engineering Logo" src="https://embed.widencdn.net/img/widen/c17yrvuaac/400px@2x/Widen Engineering White Logo.png?u=mcuc7i">
+      </a>
+    </div>
+    <br class="clear"/>
   </div>
-
 </header>
 
     </div>
@@ -70,14 +69,14 @@
 
 <p>Rebuilding and re-uploading a zip every time a configuration point changed was cumbersome, and having configuration baked into my Lambda seemed wrong. I wanted something like Elasticbeanstalk or ECS where I can just pass in environment variables and write my code to adapt.</p>
 
-<p>The beauty of the Elasticbeanstalk/ECS model is that you do not have to write<br />
-or ship new code to deal with a changing configuration value. When your<br />
-database goes down would you rather deploy code to just change a value to a new endpoint?<br />
+<p>The beauty of the Elasticbeanstalk/ECS model is that you do not have to write
+or ship new code to deal with a changing configuration value. When your
+database goes down would you rather deploy code to just change a value to a new endpoint?
 I wanted this model with Lambda, and it seemed to fit perfectly, but alas it was not so.</p>
 
 <p>Development was slow, and dynamically configured Lambdas were looking less likely as time wore on.</p>
 
-<p>Until the day I realized Lambdas can have an optional <code class="highlighter-rouge">description</code> <a href="http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#createFunction-property">when created</a>. Also, Lambdas can use the <a href="https://github.com/aws/aws-sdk-js">node aws-sdk</a> to make requests to other AWS web services, including Lambda itself.</p>
+<p>Until the day I realized Lambdas can have an optional <code class="language-plaintext highlighter-rouge">description</code> <a href="http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#createFunction-property">when created</a>. Also, Lambdas can use the <a href="https://github.com/aws/aws-sdk-js">node aws-sdk</a> to make requests to other AWS web services, including Lambda itself.</p>
 
 <p>I thought, “what if we used the description as configuration?”.</p>
 
@@ -85,29 +84,28 @@ I wanted this model with Lambda, and it seemed to fit perfectly, but alas it was
 
 <p>Here’s an example of a Lambda that is processing its own description as a sort of runtime configuration.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1">// This function is called 'whatstheenv'</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Loading event'</span><span class="p">);</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// This function is called 'whatstheenv'</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">Loading event</span><span class="dl">'</span><span class="p">);</span>
 
-<span class="kd">var</span> <span class="nx">aws</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'aws-sdk'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">aws</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">aws-sdk</span><span class="dl">'</span><span class="p">);</span>
 
 <span class="nx">exports</span><span class="p">.</span><span class="nx">handler</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
 
-    <span class="kd">var</span> <span class="nx">lambda</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">aws</span><span class="p">.</span><span class="nx">Lambda</span><span class="p">({</span><span class="na">apiVersion</span><span class="p">:</span> <span class="s1">'2014-11-11'</span><span class="p">});</span>
-    <span class="nx">lambda</span><span class="p">.</span><span class="nx">getFunctionConfiguration</span><span class="p">({</span> <span class="na">FunctionName</span><span class="p">:</span> <span class="s2">"whatstheenv"</span> <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">data</span><span class="p">){</span>
+    <span class="kd">var</span> <span class="nx">lambda</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">aws</span><span class="p">.</span><span class="nx">Lambda</span><span class="p">({</span><span class="na">apiVersion</span><span class="p">:</span> <span class="dl">'</span><span class="s1">2014-11-11</span><span class="dl">'</span><span class="p">});</span>
+    <span class="nx">lambda</span><span class="p">.</span><span class="nx">getFunctionConfiguration</span><span class="p">({</span> <span class="na">FunctionName</span><span class="p">:</span> <span class="dl">"</span><span class="s2">whatstheenv</span><span class="dl">"</span> <span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">data</span><span class="p">){</span>
         <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span><span class="nx">context</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nx">stack</span><span class="p">);</span> <span class="p">}</span>
         <span class="kd">var</span> <span class="nx">runtimeConfiguration</span> <span class="o">=</span> <span class="p">{};</span>
         <span class="k">try</span> <span class="p">{</span>
             <span class="nx">runtimeConfiguration</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">Description</span><span class="p">);</span>
         <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">except</span><span class="p">)</span> <span class="p">{</span>
-            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"unable to parse description as JSON"</span><span class="p">);</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">unable to parse description as JSON</span><span class="dl">"</span><span class="p">);</span>
         <span class="p">}</span>
         <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">runtimeConfiguration</span><span class="p">);</span>
-        <span class="nx">context</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="s2">"We are done here."</span><span class="p">);</span>
+        <span class="nx">context</span><span class="p">.</span><span class="nx">done</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="dl">"</span><span class="s2">We are done here.</span><span class="dl">"</span><span class="p">);</span>
     <span class="p">});</span>
 
 <span class="p">};</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Now, we can simply edit the description in the console, and voilà, our next lambda run will have different data!</p>
 
@@ -142,13 +140,17 @@ I wanted this model with Lambda, and it seemed to fit perfectly, but alas it was
           
             
           
+            
+          
+            
+          
           </ul>
           <br/>
         </nav >
         <nav>
           <ul class="site-social-links inline">
               <li><a target="_blank" title="RSS Feed" href="/feed.xml" class="ion-social-rss"></a></li>
-              <li><a target="_blank" title="GitHub" href="https://github.com/Widen" class="ion-social-github"></a></li>
+              <li><a target="_blank" title="GitHub" href="https://github.com/widen" class="ion-social-github"></a></li>
               <li><a target="_blank" title="Twitter" href="https://twitter.com/widendev" class="ion-social-twitter"></a></li>
           </ul>
         </nav>
@@ -160,19 +162,19 @@ I wanted this model with Lambda, and it seemed to fit perfectly, but alas it was
 <nav>
   <ul class="inline">
     <li>
-        <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io/">source</a>
+        <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io">source</a>
     </li>
     <li>
-        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/develop/_posts/2015-08-27-AWS-Lambda-Runtime-Configuration.md">view</a>
+        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/master/_posts/2015-08-27-AWS-Lambda-Runtime-Configuration.md">view</a>
     </li>
     <li>
-        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/_posts/2015-08-27-AWS-Lambda-Runtime-Configuration.md">edit</a>
+        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/master/_posts/2015-08-27-AWS-Lambda-Runtime-Configuration.md">edit</a>
     </li>
     <li>
-        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/0e8f8d6">0e8f8d6</a>
+        <a target="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/"></a>
     </li>
     <li>
-        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/c64fd46">c64fd46</a>
+        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/"></a>
     </li>
   </ul>
   </nav >
@@ -183,8 +185,8 @@ I wanted this model with Lambda, and it seemed to fit perfectly, but alas it was
 
     </div>
 
-    <script type="text/javascript">
-
+    
+<script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-1206716-19']);
   _gaq.push(['_trackPageview']);
@@ -194,8 +196,8 @@ I wanted this model with Lambda, and it seemed to fit perfectly, but alas it was
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
-
 </script>
+
 
 
   </body>

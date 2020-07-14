@@ -9,27 +9,27 @@
   <title>The Future of Web Development - React, Falcor, and ES6 | Widen Engineering</title>
   <meta name="description" content="The future of web application development looks a bit different than what we are all used to. I'll show you how to build a simple full-stack JavaScript app u...">
 
-  <link rel="apple-touch-icon" sizes="57x57" href="/assets/favicon/apple-icon-57x57-ff42219994f7b0f656ffcad0ba264a75.png">
-<link rel="apple-touch-icon" sizes="60x60" href="/assets/favicon/apple-icon-60x60-ab8b491cd6f98d7a529486efabe4acdb.png">
-<link rel="apple-touch-icon" sizes="72x72" href="/assets/favicon/apple-icon-72x72-f91dd5bd6c559a9e40a08b1deed6e431.png">
-<link rel="apple-touch-icon" sizes="76x76" href="/assets/favicon/apple-icon-76x76-707077860f7779206dba9bb48d19a512.png">
-<link rel="apple-touch-icon" sizes="114x114" href="/assets/favicon/apple-icon-114x114-14db05cbd372a5d6a08da6bc73ddc34b.png">
-<link rel="apple-touch-icon" sizes="120x120" href="/assets/favicon/apple-icon-120x120-23990f59e240ceed96367c004a5e7fb2.png">
-<link rel="apple-touch-icon" sizes="144x144" href="/assets/favicon/apple-icon-144x144-3d533b233e4578032b5dfc6d5c0efcaa.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/assets/favicon/apple-icon-152x152-444f94897e7ef7e70831f735c7c62a5e.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-icon-180x180-c14938a49be032ffbea32c8aedc5cb91.png">
-<link rel="icon" type="image/png" sizes="192x192"  href="/assets/favicon/android-icon-192x192-cc3dce93709d292d764aac5decf8049a.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32-02f9df411973b3e68a1209a864af9ffd.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon/favicon-96x96-e973328488d9787937aadf45798e569d.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16-5558f12adefff3f88493750388234933.png">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/images/favicon/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicon/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicon/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicon/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicon/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicon/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicon/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicon/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="/assets/images/favicon/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png">
 
-<link rel="manifest" href="/assets/favicon/manifest-f5ec1febffe24c0f830fd7907521de82.json">
+<link rel="manifest" href="/assets/images/favicon/manifest.json">
 
 <meta name="msapplication-TileColor" content="#B72822">
-<meta name="msapplication-TileImage" content="/assets/favicon/ms-icon-144x144-3d533b233e4578032b5dfc6d5c0efcaa.png">
+<meta name="msapplication-TileImage" content="/assets/images/favicon/ms-icon-144x144.png">
 <meta name="theme-color" content="#B72822">
 
-  <link rel="stylesheet" href="/assets/app-e8f20f52771ff90bfe6c533f8adc01b7.css">
+  <link rel="stylesheet" href="/assets/css/app.css">
   <link rel="canonical" href="https://engineering.widen.com/blog/future-of-the-web-react-falcor/">
   <link rel="alternate" type="application/rss+xml" title="Widen Engineering" href="https://engineering.widen.com/feed.xml" />
 </head>
@@ -39,15 +39,14 @@
 
     <div class="full-width">
       <header class="site-header" role="banner">
-    <div class="wrapper">
-        <div class="logo">
-            <a href="/">
-                <img width="400" alt="Widen-Engineering-White-Logo" src="https://embed.widencdn.net/img/widen/c17yrvuaac/400px@2x/Widen Engineering White Logo.png?u=mcuc7i">
-            </a>
-        </div>
-        <br class="clear"/>
+  <div class="wrapper">
+    <div class="logo">
+      <a href="/">
+        <img width="400" alt="Widen Engineering Logo" src="https://embed.widencdn.net/img/widen/c17yrvuaac/400px@2x/Widen Engineering White Logo.png?u=mcuc7i">
+      </a>
+    </div>
+    <br class="clear"/>
   </div>
-
 </header>
 
     </div>
@@ -127,7 +126,7 @@
 
 <h3 id="setup">Setup</h3>
 
-<p>Let’s start by dividing up this application into logical pieces. At the most basic level, we have 2 segments - a client and a server. Our client exists entirely in the browser, and our server is a simple API endpoint. On the client, we must expose an interface that will allow our users to see and manipulate the names list. This list will be represented by a model that is understood by both the client and server. Essentially, our model will be expressed in JSON format in our “database”, and will consist of an array of objects, with each object having a <code class="highlighter-rouge">name</code> property. While it is certainly <em>not</em> a requirement for our model to be expressed in JSON format in our backing storage system, this will make our example app a bit easier to setup and understand.</p>
+<p>Let’s start by dividing up this application into logical pieces. At the most basic level, we have 2 segments - a client and a server. Our client exists entirely in the browser, and our server is a simple API endpoint. On the client, we must expose an interface that will allow our users to see and manipulate the names list. This list will be represented by a model that is understood by both the client and server. Essentially, our model will be expressed in JSON format in our “database”, and will consist of an array of objects, with each object having a <code class="language-plaintext highlighter-rouge">name</code> property. While it is certainly <em>not</em> a requirement for our model to be expressed in JSON format in our backing storage system, this will make our example app a bit easier to setup and understand.</p>
 
 <p>Another important step, before diving into the code, is to think of our application in terms of reusable components that are not dependent on each other (wherever possible). Client-side, I can see three components - one that lists the names, another that allows names to be added, and a third that ties these two components together. This third component is important, as it allows us to forgo coding an explicit dependency between the list and “add name” components. Of these three components, at least two are reusable outside of our application.</p>
 
@@ -154,29 +153,27 @@
 
 <p>We will represent our server using a single JavaScript file for simplicity. The first logical step is to reference all of our dependencies:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">FalcorServer</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor-express'</span><span class="p">),</span>
-    <span class="nx">bodyParser</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'body-parser'</span><span class="p">),</span>
-    <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'express'</span><span class="p">),</span>
-    <span class="nx">Router</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor-router'</span><span class="p">),</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">FalcorServer</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">falcor-express</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">bodyParser</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">body-parser</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">express</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">Router</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">falcor-router</span><span class="dl">'</span><span class="p">),</span>
     <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">()</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>There are two Falcor-related dependencies. The first, <code class="highlighter-rouge">FalcorServer</code>, will be used to forward API requests to the most appropriate handler. The <code class="highlighter-rouge">Router</code> is what we will use to <em>define</em> all these handlers. Each handler will be tied to a route string, which defines the type of model data associated with the request. While this may all seem a bit mysterious now, it will become clearer before the server-side section is complete.</p>
+<p>There are two Falcor-related dependencies. The first, <code class="language-plaintext highlighter-rouge">FalcorServer</code>, will be used to forward API requests to the most appropriate handler. The <code class="language-plaintext highlighter-rouge">Router</code> is what we will use to <em>define</em> all these handlers. Each handler will be tied to a route string, which defines the type of model data associated with the request. While this may all seem a bit mysterious now, it will become clearer before the server-side section is complete.</p>
 
-<p>The other three dependencies help us to serve static resources and parse HTTP requests into a more manageable form. For example, <code class="highlighter-rouge">express</code> listens to all HTTP requests on a specific port and either serves up static resources (such as our JS and HTML files) or routes the request to a more specific handler, such as our Falcor <code class="highlighter-rouge">Router</code>.</p>
+<p>The other three dependencies help us to serve static resources and parse HTTP requests into a more manageable form. For example, <code class="language-plaintext highlighter-rouge">express</code> listens to all HTTP requests on a specific port and either serves up static resources (such as our JS and HTML files) or routes the request to a more specific handler, such as our Falcor <code class="language-plaintext highlighter-rouge">Router</code>.</p>
 
 <p>Let’s also define our data store. Again, for simplicity, we will maintain our data directly in our node server via a simple JavaScript object:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="p">{</span>
   <span class="na">names</span><span class="p">:</span> <span class="p">[</span>
-    <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'a'</span><span class="p">},</span>
-    <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'b'</span><span class="p">},</span>
-    <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="s1">'c'</span><span class="p">}</span>
+    <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">a</span><span class="dl">'</span><span class="p">},</span>
+    <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">b</span><span class="dl">'</span><span class="p">},</span>
+    <span class="p">{</span><span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">c</span><span class="dl">'</span><span class="p">}</span>
   <span class="p">]</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The above store also contains an initial list of names to be displayed to the user.</p>
 
@@ -184,36 +181,34 @@
 
 <p>Let’s continue by configuring our request handlers:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">bodyParser</span><span class="p">.</span><span class="nx">urlencoded</span><span class="p">({</span><span class="na">extended</span><span class="p">:</span> <span class="kc">false</span><span class="p">}));</span>
-<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="s1">'/model.json'</span><span class="p">,</span> <span class="nx">FalcorServer</span><span class="p">.</span><span class="nx">dataSourceRoute</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">new</span> <span class="nx">NamesRouter</span><span class="p">()))</span>
-<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="s1">'.'</span><span class="p">))</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">bodyParser</span><span class="p">.</span><span class="nx">urlencoded</span><span class="p">({</span><span class="na">extended</span><span class="p">:</span> <span class="kc">false</span><span class="p">}));</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="dl">'</span><span class="s1">/model.json</span><span class="dl">'</span><span class="p">,</span> <span class="nx">FalcorServer</span><span class="p">.</span><span class="nx">dataSourceRoute</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="k">new</span> <span class="nx">NamesRouter</span><span class="p">()))</span>
+<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kd">static</span><span class="p">(</span><span class="dl">'</span><span class="s1">.</span><span class="dl">'</span><span class="p">))</span>
 <span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">9090</span><span class="p">,</span> <span class="nx">err</span> <span class="o">=&gt;</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="p">}</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'navigate to http://localhost:9090'</span><span class="p">)</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">navigate to http://localhost:9090</span><span class="dl">'</span><span class="p">)</span>
 <span class="p">});</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>In the first line, we’re asking the <code class="highlighter-rouge">bodyParser</code> library to take any requests that contain application/x-www-form-urlencoded message bodies and parse the contents into a JavaScript object. This object is passed along as <a href="http://expressjs.com/api.html#req.body">a <code class="highlighter-rouge">body</code> property on the <code class="highlighter-rouge">Request</code> object</a> maintained by express. In our application, POST requests, which add new names to the list and contain URL-encoded name data, will be parsed by this handler before being forwarded on to a more specific handler by express.</p>
+<p>In the first line, we’re asking the <code class="language-plaintext highlighter-rouge">bodyParser</code> library to take any requests that contain application/x-www-form-urlencoded message bodies and parse the contents into a JavaScript object. This object is passed along as <a href="http://expressjs.com/api.html#req.body">a <code class="language-plaintext highlighter-rouge">body</code> property on the <code class="language-plaintext highlighter-rouge">Request</code> object</a> maintained by express. In our application, POST requests, which add new names to the list and contain URL-encoded name data, will be parsed by this handler before being forwarded on to a more specific handler by express.</p>
 
-<p>The second line instructs express to delegate <em>any</em> request for the “model.json” endpoint to our Falcor router, which we have not yet defined (we will soon). So, a GET request to “http://localhost:9090/model.json” will be handled here, as will POST requests to the same endpoint. For POST requests to this endpoint with a URL-encoded body, the body will first be parsed by <code class="highlighter-rouge">bodyParser</code> before being forwarded on to our router.</p>
+<p>The second line instructs express to delegate <em>any</em> request for the “model.json” endpoint to our Falcor router, which we have not yet defined (we will soon). So, a GET request to “http://localhost:9090/model.json” will be handled here, as will POST requests to the same endpoint. For POST requests to this endpoint with a URL-encoded body, the body will first be parsed by <code class="language-plaintext highlighter-rouge">bodyParser</code> before being forwarded on to our router.</p>
 
 <p>The third line serves up any static resources in the root of our project. While this wildcard is probably not appropriate for production, it is sufficient for this type of simple demo. Ideally, you should restrict access to static resources instead of allowing all source files to be served up.</p>
 
 <p>Finally, the above code instructs express to listen to all HTTP requests on port 9090. This is the port that you must use client-side for access to static resources, as well as the API. Notice that we are making use of some ECMAScript 6 syntax here, specifically an <a href="http://www.ecma-international.org/ecma-262/6.0/#sec-arrow-function-definitions">arrow function</a>. In this case, an arrow function is simply a more elegant way of expressing a function argument. In ES5 syntax, our listener function is equivalent to:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">9090</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">9090</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="p">}</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'navigate to http://localhost:9090'</span><span class="p">)</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">navigate to http://localhost:9090</span><span class="dl">'</span><span class="p">)</span>
 <span class="p">});</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h4 id="api-route-handlers">API route handlers</h4>
 
@@ -223,31 +218,30 @@
 
 <p>First, we can expect our client to ask for the number of names in the list. The necessity of this information will become clear when we define our next route. The Falcor route that supplies the number of names in our list looks like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">NamesRouter</span> <span class="o">=</span> <span class="nx">Router</span><span class="p">.</span><span class="nx">createClass</span><span class="p">([</span>
-  <span class="nx">route</span><span class="err">:</span> <span class="s1">'names.length'</span><span class="p">,</span>
-  <span class="nx">get</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
-    <span class="p">{</span><span class="nl">path</span><span class="p">:</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="s1">'length'</span><span class="p">],</span> <span class="na">value</span><span class="p">:</span> <span class="nx">data</span><span class="p">.</span><span class="nx">names</span><span class="p">.</span><span class="nx">length</span><span class="p">}</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">NamesRouter</span> <span class="o">=</span> <span class="nx">Router</span><span class="p">.</span><span class="nx">createClass</span><span class="p">([</span>
+  <span class="nx">route</span><span class="p">:</span> <span class="dl">'</span><span class="s1">names.length</span><span class="dl">'</span><span class="p">,</span>
+  <span class="kd">get</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="p">{</span><span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">length</span><span class="dl">'</span><span class="p">],</span> <span class="na">value</span><span class="p">:</span> <span class="nx">data</span><span class="p">.</span><span class="nx">names</span><span class="p">.</span><span class="nx">length</span><span class="p">}</span>
   <span class="p">}</span>
 <span class="p">]);</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>Remember the <code class="highlighter-rouge">NamesRouter</code> we referenced in the previous section? This is our Falcor request router, and express will forward all appropriate API requests here. Our length route is simple, but exposes some Falcor-specific syntax that I have not yet explained. The <code class="highlighter-rouge">route</code> property identifies the “signature” of the request. If our Falcor client asks for the length of all names, the server-side Falcor router will match on this route string and execute the <code class="highlighter-rouge">get</code> function, which will describe the data to be returned to our Falcor client.</p>
+<p>Remember the <code class="language-plaintext highlighter-rouge">NamesRouter</code> we referenced in the previous section? This is our Falcor request router, and express will forward all appropriate API requests here. Our length route is simple, but exposes some Falcor-specific syntax that I have not yet explained. The <code class="language-plaintext highlighter-rouge">route</code> property identifies the “signature” of the request. If our Falcor client asks for the length of all names, the server-side Falcor router will match on this route string and execute the <code class="language-plaintext highlighter-rouge">get</code> function, which will describe the data to be returned to our Falcor client.</p>
 
-<p>The response consists of two properties. The first such property, <code class="highlighter-rouge">path</code>, in our case, simply mirrors the route signature. The second property in our route’s <code class="highlighter-rouge">get</code> handler is <code class="highlighter-rouge">value</code>. As you might expect, this holds the actual number of names in our list. We’re simply pulling this value by checking the <code class="highlighter-rouge">length</code> property on the array that makes up our backing data store.</p>
+<p>The response consists of two properties. The first such property, <code class="language-plaintext highlighter-rouge">path</code>, in our case, simply mirrors the route signature. The second property in our route’s <code class="language-plaintext highlighter-rouge">get</code> handler is <code class="language-plaintext highlighter-rouge">value</code>. As you might expect, this holds the actual number of names in our list. We’re simply pulling this value by checking the <code class="language-plaintext highlighter-rouge">length</code> property on the array that makes up our backing data store.</p>
 
-<h5 id="display-names-for-n-name-records">Display names for <code class="highlighter-rouge">n</code> name records</h5>
+<h5 id="display-names-for-n-name-records">Display names for <code class="language-plaintext highlighter-rouge">n</code> name records</h5>
 
 <p>When our page loads, we will want to display at least some of the names in our database to the user. At this point, we don’t have a concept of name records, name record IDs, or any other metadata associated with these names. Our goal is simple: display names to the user. So, how do we do this? First, we ask our server for the total number of names in our database. Then, we can construct a query that returns names, given a range. Say we want <em>all</em> of the names in the DB, we can ask the server for name values starting with index 0 and ending with number of names - 1. I’ve already showed you what the “number of names” route looks like. Below is the route that returns the actual names, given a range parameter.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span>
-    <span class="nl">route</span><span class="p">:</span> <span class="s1">'names[{integers:nameIndexes}]["name"]'</span><span class="p">,</span>
-    <span class="nx">get</span><span class="err">:</span> <span class="p">(</span><span class="nx">pathSet</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span>
+    <span class="nl">route</span><span class="p">:</span> <span class="dl">'</span><span class="s1">names[{integers:nameIndexes}]["name"]</span><span class="dl">'</span><span class="p">,</span>
+    <span class="kd">get</span><span class="p">:</span> <span class="p">(</span><span class="nx">pathSet</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">results</span> <span class="o">=</span> <span class="p">[];</span>
         <span class="nx">pathSet</span><span class="p">.</span><span class="nx">nameIndexes</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">nameIndex</span> <span class="o">=&gt;</span> <span class="p">{</span>
             <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">names</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="nx">nameIndex</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">results</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
-                    <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="nx">nameIndex</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">],</span>
+                    <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="nx">nameIndex</span><span class="p">,</span> <span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">],</span>
                     <span class="na">value</span><span class="p">:</span> <span class="nx">data</span><span class="p">.</span><span class="nx">names</span><span class="p">[</span><span class="nx">nameIndex</span><span class="p">].</span><span class="nx">name</span>
                 <span class="p">})</span>
             <span class="p">}</span>
@@ -255,25 +249,23 @@
         <span class="k">return</span> <span class="nx">results</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>Above, the <code class="highlighter-rouge">route</code> property identifies this route as one that will be invoked if the client requests a range of names. More specifically, a client request that is interested in only the <code class="highlighter-rouge">name</code> property of one or more name records. Our route handler generates an object containing a <code class="highlighter-rouge">path</code> and <code class="highlighter-rouge">value</code> property for each index in the range parameter.</p>
+<p>Above, the <code class="language-plaintext highlighter-rouge">route</code> property identifies this route as one that will be invoked if the client requests a range of names. More specifically, a client request that is interested in only the <code class="language-plaintext highlighter-rouge">name</code> property of one or more name records. Our route handler generates an object containing a <code class="language-plaintext highlighter-rouge">path</code> and <code class="language-plaintext highlighter-rouge">value</code> property for each index in the range parameter.</p>
 
-<p>For example, if we request the first two names in our DB, and these two records have respective <code class="highlighter-rouge">name</code> properties of “Joe” and “Jane”, then our route handler will generate an array that looks like this:</p>
+<p>For example, if we request the first two names in our DB, and these two records have respective <code class="language-plaintext highlighter-rouge">name</code> properties of “Joe” and “Jane”, then our route handler will generate an array that looks like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">[</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span>
     <span class="p">{</span>
-        <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">],</span>
-        <span class="na">value</span><span class="p">:</span> <span class="s1">'joe'</span>
+        <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">],</span>
+        <span class="na">value</span><span class="p">:</span> <span class="dl">'</span><span class="s1">joe</span><span class="dl">'</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">],</span>
-        <span class="na">value</span><span class="p">:</span> <span class="s1">'jane'</span>
+        <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">],</span>
+        <span class="na">value</span><span class="p">:</span> <span class="dl">'</span><span class="s1">jane</span><span class="dl">'</span>
     <span class="p">}</span>
 <span class="p">]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This will be returned to the Falcor response handler client-side, which will result in an update of the model cache. The caller will be provided with these names as well.</p>
 
@@ -281,42 +273,40 @@
 
 <p>Our simple names widget also allows us to add new names. I’ll cover the client-side portion of this operation shortly. First, take a look at the server-side Falcor route:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span>
-    <span class="nl">route</span><span class="p">:</span> <span class="s1">'names.add'</span><span class="p">,</span>
-    <span class="nx">call</span><span class="err">:</span> <span class="p">(</span><span class="nx">callPath</span><span class="p">,</span> <span class="nx">args</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span>
+    <span class="nl">route</span><span class="p">:</span> <span class="dl">'</span><span class="s1">names.add</span><span class="dl">'</span><span class="p">,</span>
+    <span class="nx">call</span><span class="p">:</span> <span class="p">(</span><span class="nx">callPath</span><span class="p">,</span> <span class="nx">args</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
         <span class="kd">var</span> <span class="nx">newName</span> <span class="o">=</span> <span class="nx">args</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
 
         <span class="nx">data</span><span class="p">.</span><span class="nx">names</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="na">name</span><span class="p">:</span> <span class="nx">newName</span><span class="p">})</span>
 
         <span class="k">return</span> <span class="p">[</span>
             <span class="p">{</span>
-                <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">names</span><span class="p">.</span><span class="nx">length</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">],</span>
+                <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="nx">data</span><span class="p">.</span><span class="nx">names</span><span class="p">.</span><span class="nx">length</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">],</span>
                 <span class="na">value</span><span class="p">:</span> <span class="nx">newName</span>
             <span class="p">},</span>
             <span class="p">{</span>
-                <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="s1">'length'</span><span class="p">],</span>
+                <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">length</span><span class="dl">'</span><span class="p">],</span>
                 <span class="na">value</span><span class="p">:</span> <span class="nx">data</span><span class="p">.</span><span class="nx">names</span><span class="p">.</span><span class="nx">length</span>
             <span class="p">}</span>
         <span class="p">]</span>
     <span class="p">}</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This is an example of a <a href="http://netflix.github.io/falcor/doc/DataSource.html#call">Falcor “call”</a> route. The client will include “names.add” as the path parameter, along with the name to add, as part of a “POST” request. The endpoint described above will be hit, resulting in a new name in our DB. That is expected and straightforward, but the response to this request is interesting. Notice that we are returning two path elements to the client - both which describe changes that have occurred to our data set as a result of this new name. The first item in the set indicates that there is a new name added to the end of our names collection. The second item indicates that the number of names in our set has changed. If we were to add a new name of “Bob” to our existing names list of “Joe” and “Jane”, the response generated by this route would look like this:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">[</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span>
     <span class="p">{</span>
-        <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">],</span>
-        <span class="na">value</span><span class="p">:</span> <span class="s1">'Bob'</span>
+        <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">],</span>
+        <span class="na">value</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Bob</span><span class="dl">'</span>
     <span class="p">},</span>
     <span class="p">{</span>
-        <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="s1">'names'</span><span class="p">,</span> <span class="s1">'length'</span><span class="p">],</span>
+        <span class="na">path</span><span class="p">:</span> <span class="p">[</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">length</span><span class="dl">'</span><span class="p">],</span>
         <span class="na">value</span><span class="p">:</span> <span class="mi">3</span>
     <span class="p">}</span>
 <span class="p">]</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>So the client doesn’t have to ask the server about the index of this new name or the length of the names collection later on - it will be cached by Falcor client-side thanks to the information provided in the response to this “call” request. For small or simple data sets, it may make sense to return the changed paths <em>and</em> values, but for larger data sets it may be advisable to <em>only</em> return the changed paths. Your client may not care about <em>all</em> of the changed values, and this may unnecessarily waste bandwidth and processor cycles. Instead, you can simply return the changed paths, and the Falcor client will know to ask the server, instead of the cache, when/if your application needs a value that is associated with one of these changed paths.</p>
 
@@ -328,7 +318,7 @@
 
 <p><a href="https://github.com/Widen/fullstack-react/blob/1.2.1/index.html">Our index page</a> is <em>very</em> simple: just the usual HTML-related structuring along with one line to serve as the container for our entire React-generated app, followed by a second line that imports <em>all</em> of our JavaScript.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
 <span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
 <span class="nt">&lt;head&gt;</span>
     <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"UTF-8"</span><span class="nt">&gt;</span>
@@ -339,12 +329,11 @@
     <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"/site/bundle.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;/body&gt;</span>
 <span class="nt">&lt;/html&gt;</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>The only interesting lines reference the <code class="highlighter-rouge">&lt;div&gt;</code> and <code class="highlighter-rouge">&lt;script&gt;</code> elements. I can tell you that we <em>will</em> compose the source of our app among multiple JavaScript files, but in the end, we will only serve up one file that contains all of our code. There is some overhead associated with every HTTP request, so reducing the number of requests on page load is beneficial.</p>
+<p>The only interesting lines reference the <code class="language-plaintext highlighter-rouge">&lt;div&gt;</code> and <code class="language-plaintext highlighter-rouge">&lt;script&gt;</code> elements. I can tell you that we <em>will</em> compose the source of our app among multiple JavaScript files, but in the end, we will only serve up one file that contains all of our code. There is some overhead associated with every HTTP request, so reducing the number of requests on page load is beneficial.</p>
 
-<p>Perhaps you are wondering why the <code class="highlighter-rouge">&lt;script&gt;</code> tag is listed at the bottom of the document, instead of inside of the <code class="highlighter-rouge">&lt;head&gt;</code> tag, as is customary. First, this allows the static markup to be loaded and displayed to the user immediately, instead of after all of our JavaScript source is loaded and parsed. In this case, there isn’t much to speak of in terms of initial static content, but we could certainly add something that sets up the page, or perhaps even a “loading” message. Also, placing the script tag below the container element ensures this element is already available in the DOM by the time our code executes. Since our code will render all dynamic content inside of this container element, this is important.</p>
+<p>Perhaps you are wondering why the <code class="language-plaintext highlighter-rouge">&lt;script&gt;</code> tag is listed at the bottom of the document, instead of inside of the <code class="language-plaintext highlighter-rouge">&lt;head&gt;</code> tag, as is customary. First, this allows the static markup to be loaded and displayed to the user immediately, instead of after all of our JavaScript source is loaded and parsed. In this case, there isn’t much to speak of in terms of initial static content, but we could certainly add something that sets up the page, or perhaps even a “loading” message. Also, placing the script tag below the container element ensures this element is already available in the DOM by the time our code executes. Since our code will render all dynamic content inside of this container element, this is important.</p>
 
 <h4 id="dividing-ui-roles-into-components-with-react">Dividing UI roles into components with React</h4>
 
@@ -354,30 +343,29 @@
 
 <p>Falcor will not only make it easy for us to communicate with our server, it will also manage our data model and ensure that all trips to the server are both efficient and prudent. Our entire Falcor “helper” can be created with a few lines of code. We’ll do this in a <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/model.js">model.js file</a>:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">Falcor</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor'</span><span class="p">),</span>
-    <span class="nx">FalcorDataSource</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'falcor-http-datasource'</span><span class="p">),</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">Falcor</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">falcor</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">FalcorDataSource</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">falcor-http-datasource</span><span class="dl">'</span><span class="p">),</span>
     <span class="nx">model</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Falcor</span><span class="p">.</span><span class="nx">Model</span><span class="p">({</span>
-        <span class="na">source</span><span class="p">:</span> <span class="k">new</span> <span class="nx">FalcorDataSource</span><span class="p">(</span><span class="s1">'/model.json'</span><span class="p">)</span>
+        <span class="na">source</span><span class="p">:</span> <span class="k">new</span> <span class="nx">FalcorDataSource</span><span class="p">(</span><span class="dl">'</span><span class="s1">/model.json</span><span class="dl">'</span><span class="p">)</span>
     <span class="p">})</span>
 
 <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">model</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>If you are not very familiar with Node.js or its native module system - CommonJS - at least a few lines in the above code fragment may seem mysterious. The first two lines “import” Falcor and Falcor’s HTTP data source modules. We will need these to setup our Falcor “helper”. The last line in our file essentially creates a new module. This module represents our client-side Falcor model/helper, and can be <code class="highlighter-rouge">require</code>d by other modules that need to query the model through Falcor. Our exported module will be an object that has all of the properties defined in <a href="http://netflix.github.io/falcor/doc/DataSource.html">Falcor’s DataSource interface</a>. The methods on this interface will be used by our React components to communicate with our model. You’ll see how that works soon.</p>
+<p>If you are not very familiar with Node.js or its native module system - CommonJS - at least a few lines in the above code fragment may seem mysterious. The first two lines “import” Falcor and Falcor’s HTTP data source modules. We will need these to setup our Falcor “helper”. The last line in our file essentially creates a new module. This module represents our client-side Falcor model/helper, and can be <code class="language-plaintext highlighter-rouge">require</code>d by other modules that need to query the model through Falcor. Our exported module will be an object that has all of the properties defined in <a href="http://netflix.github.io/falcor/doc/DataSource.html">Falcor’s DataSource interface</a>. The methods on this interface will be used by our React components to communicate with our model. You’ll see how that works soon.</p>
 
-<p>Our <code class="highlighter-rouge">model</code> is defined to be a wrapper around a Falcor HTTP <code class="highlighter-rouge">DataSource</code>. When defining the <code class="highlighter-rouge">DataSource</code>, we’re including a path to our API server endpoint - “/model.json”. For all calls to our API, we have <em>one</em> HTTP endpoint. The type of operation and associated data is encoded as query parameters by Falcor for GET requests and the message body for POSTs.</p>
+<p>Our <code class="language-plaintext highlighter-rouge">model</code> is defined to be a wrapper around a Falcor HTTP <code class="language-plaintext highlighter-rouge">DataSource</code>. When defining the <code class="language-plaintext highlighter-rouge">DataSource</code>, we’re including a path to our API server endpoint - “/model.json”. For all calls to our API, we have <em>one</em> HTTP endpoint. The type of operation and associated data is encoded as query parameters by Falcor for GET requests and the message body for POSTs.</p>
 
 <h5 id="names-list-component">Names list component</h5>
 
 <p>Now that we have our model defined, let’s start building up our UI with a component that lists all of the names in our store. This will be a React component. We’ll keep it simple and implement it as a simple HTML list. This code is housed in a <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/names-list.jsx">names-list.jsx file</a>.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">),</span>
-    <span class="nx">model</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./model.js'</span><span class="p">);</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">model</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">./model.js</span><span class="dl">'</span><span class="p">);</span>
 
-<span class="kr">class</span> <span class="nx">NamesList</span> <span class="kr">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
-    <span class="nx">constructor</span><span class="p">()</span> <span class="p">{</span>
-        <span class="kr">super</span><span class="p">()</span>
+<span class="kd">class</span> <span class="nx">NamesList</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+    <span class="kd">constructor</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">super</span><span class="p">()</span>
         <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span><span class="na">names</span><span class="p">:</span> <span class="p">{}}</span>
     <span class="p">}</span>
 
@@ -395,27 +383,26 @@
     <span class="p">}</span>
 
     <span class="nx">update</span><span class="p">()</span> <span class="p">{</span>
-        <span class="nx">model</span><span class="p">.</span><span class="nx">getValue</span><span class="p">([</span><span class="s1">'names'</span><span class="p">,</span> <span class="s1">'length'</span><span class="p">])</span>
-           <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">length</span> <span class="o">=&gt;</span> <span class="nx">model</span><span class="p">.</span><span class="nx">get</span><span class="p">([</span><span class="s1">'names'</span><span class="p">,</span> <span class="p">{</span><span class="na">from</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="na">to</span><span class="p">:</span> <span class="nx">length</span><span class="o">-</span><span class="mi">1</span><span class="p">},</span> <span class="s1">'name'</span><span class="p">]))</span>
+        <span class="nx">model</span><span class="p">.</span><span class="nx">getValue</span><span class="p">([</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">length</span><span class="dl">'</span><span class="p">])</span>
+           <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">length</span> <span class="o">=&gt;</span> <span class="nx">model</span><span class="p">.</span><span class="kd">get</span><span class="p">([</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span><span class="na">from</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="na">to</span><span class="p">:</span> <span class="nx">length</span><span class="o">-</span><span class="mi">1</span><span class="p">},</span> <span class="dl">'</span><span class="s1">name</span><span class="dl">'</span><span class="p">]))</span>
            <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">response</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="na">names</span><span class="p">:</span> <span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">.</span><span class="nx">names</span><span class="p">}))</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
 <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">NamesList</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>In the first two lines, we’re importing the React module, for obvious reasons, along with the Falcor model we defined in the previous step. If you are a Java developer, the component definition looks surprisingly familiar. ECMAScript 6 brings classes to JavaScript, and we’re defining our names list component to be a type of React component. Again, similar to Java, we must define a constructor. We’ll simply initialize our <code class="highlighter-rouge">state</code> object in this constructor. The <code class="highlighter-rouge">state</code> object will be used to feed data to our rendered markup, which will be re-rendered (as efficiently as possible by React) whenever it changes. Note that we <em>must</em> invoke the <code class="highlighter-rouge">React.Component</code> constructor by calling <code class="highlighter-rouge">super()</code> <em>before</em> we can access the context of our component. We access the context of our component using the <code class="highlighter-rouge">this</code> keyword.</p>
+<p>In the first two lines, we’re importing the React module, for obvious reasons, along with the Falcor model we defined in the previous step. If you are a Java developer, the component definition looks surprisingly familiar. ECMAScript 6 brings classes to JavaScript, and we’re defining our names list component to be a type of React component. Again, similar to Java, we must define a constructor. We’ll simply initialize our <code class="language-plaintext highlighter-rouge">state</code> object in this constructor. The <code class="language-plaintext highlighter-rouge">state</code> object will be used to feed data to our rendered markup, which will be re-rendered (as efficiently as possible by React) whenever it changes. Note that we <em>must</em> invoke the <code class="language-plaintext highlighter-rouge">React.Component</code> constructor by calling <code class="language-plaintext highlighter-rouge">super()</code> <em>before</em> we can access the context of our component. We access the context of our component using the <code class="language-plaintext highlighter-rouge">this</code> keyword.</p>
 
-<p>Our first class method, <code class="highlighter-rouge">componentWillMount,</code> is inherited from the <code class="highlighter-rouge">React.Component</code> class. It will be called by React <em>just before</em> when our markup is first “rendered” by React. That is, before the <code class="highlighter-rouge">render</code> method is invoked for the first time and the markup has been added to the DOM. At this point, we’re calling the <code class="highlighter-rouge">update</code> method that grabs the list of names from Falcor.</p>
+<p>Our first class method, <code class="language-plaintext highlighter-rouge">componentWillMount,</code> is inherited from the <code class="language-plaintext highlighter-rouge">React.Component</code> class. It will be called by React <em>just before</em> when our markup is first “rendered” by React. That is, before the <code class="language-plaintext highlighter-rouge">render</code> method is invoked for the first time and the markup has been added to the DOM. At this point, we’re calling the <code class="language-plaintext highlighter-rouge">update</code> method that grabs the list of names from Falcor.</p>
 
-<p>The <code class="highlighter-rouge">update</code> method performs a few operations. First, it asks Faclor for the number of names in our list. Then, it sends a request for all names, given the result of the previous length request. Each of these calls returns a promise, since they are asynchronous. When the first call to get the number of names is resolved, our first <code class="highlighter-rouge">then</code> function is called with the result - the number of names in our list. Once we know that number of names, we go on to ask Falcor for all names between 0 and the last index of our list.</p>
+<p>The <code class="language-plaintext highlighter-rouge">update</code> method performs a few operations. First, it asks Faclor for the number of names in our list. Then, it sends a request for all names, given the result of the previous length request. Each of these calls returns a promise, since they are asynchronous. When the first call to get the number of names is resolved, our first <code class="language-plaintext highlighter-rouge">then</code> function is called with the result - the number of names in our list. Once we know that number of names, we go on to ask Falcor for all names between 0 and the last index of our list.</p>
 
-<p>There is an implicit <code class="highlighter-rouge">return</code> keyword in our single-line ES6 arrow functions - each of these returns a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise"><code class="highlighter-rouge">Promise</code></a>. Once the second promise is resolved for our names list request, the next and final handler in our chain of model operations is invoked. The call to our length route was made using <code class="highlighter-rouge">getValue</code> which results in a single value as the resolved response (in this case, the number of names in our list). But our call to retrieve all names in the list is a <code class="highlighter-rouge">get</code>, which will return a JSON response containing all matching name objects with the specific property, <code class="highlighter-rouge">name</code>, filled in with a value. Notice we are calling <code class="highlighter-rouge">setState</code> with this collection of names. This updates our component’s state object and instructs React to re-render the component with the new list of names.</p>
+<p>There is an implicit <code class="language-plaintext highlighter-rouge">return</code> keyword in our single-line ES6 arrow functions - each of these returns a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise"><code class="language-plaintext highlighter-rouge">Promise</code></a>. Once the second promise is resolved for our names list request, the next and final handler in our chain of model operations is invoked. The call to our length route was made using <code class="language-plaintext highlighter-rouge">getValue</code> which results in a single value as the resolved response (in this case, the number of names in our list). But our call to retrieve all names in the list is a <code class="language-plaintext highlighter-rouge">get</code>, which will return a JSON response containing all matching name objects with the specific property, <code class="language-plaintext highlighter-rouge">name</code>, filled in with a value. Notice we are calling <code class="language-plaintext highlighter-rouge">setState</code> with this collection of names. This updates our component’s state object and instructs React to re-render the component with the new list of names.</p>
 
-<p>Moving on to the <code class="highlighter-rouge">render</code> method - this is where the actual HTML elements are rendered to the DOM. React calls this when our component first mounts, and then again whenever our component’s <code class="highlighter-rouge">state</code> property changes. The <code class="highlighter-rouge">names</code> property, part of our component’s state, is an object with keys that represent the index of each name on our server and values containing each name record. Since we only asked Falcor for the <code class="highlighter-rouge">name</code> property in each record, that is the only property we will find in returned name record.</p>
+<p>Moving on to the <code class="language-plaintext highlighter-rouge">render</code> method - this is where the actual HTML elements are rendered to the DOM. React calls this when our component first mounts, and then again whenever our component’s <code class="language-plaintext highlighter-rouge">state</code> property changes. The <code class="language-plaintext highlighter-rouge">names</code> property, part of our component’s state, is an object with keys that represent the index of each name on our server and values containing each name record. Since we only asked Falcor for the <code class="language-plaintext highlighter-rouge">name</code> property in each record, that is the only property we will find in returned name record.</p>
 
-<p>The markup in our <code class="highlighter-rouge">render</code> method may look a bit strange - it’s JSX, which is an extension to the ECMAScript language specification created and maintained by Facebook. It allows you to easily include HTML-like content alongside JavaScript code. Before it is delivered to the browser, we will have webpack compile this JSX down to standardized JavaScript. More on that later. The result of this build step will look like a bunch of method calls that build up out HTML. We could have taken that approach as well and built up our HTML using React’s DOM API instead of using JSX, but JSX makes our lives a <em>lot</em> easier and the code much simpler to follow.</p>
+<p>The markup in our <code class="language-plaintext highlighter-rouge">render</code> method may look a bit strange - it’s JSX, which is an extension to the ECMAScript language specification created and maintained by Facebook. It allows you to easily include HTML-like content alongside JavaScript code. Before it is delivered to the browser, we will have webpack compile this JSX down to standardized JavaScript. More on that later. The result of this build step will look like a bunch of method calls that build up out HTML. We could have taken that approach as well and built up our HTML using React’s DOM API instead of using JSX, but JSX makes our lives a <em>lot</em> easier and the code much simpler to follow.</p>
 
 <p>The last line in our file allows our NamesList component to be pulled into another module and actually used. We’ll do just that very soon.</p>
 
@@ -423,19 +410,19 @@
 
 <p>We have a component that will list our names, but we also want to be able to add new names to our list. So, next we will need to create a “name adder” React component, which will be stored in a file appropriately called <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/name-adder.jsx">name-adder.jsx</a>.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">),</span>
-    <span class="nx">model</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./model.js'</span><span class="p">);</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">model</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">./model.js</span><span class="dl">'</span><span class="p">);</span>
 
-<span class="kr">class</span> <span class="nx">NameAdder</span> <span class="kr">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+<span class="kd">class</span> <span class="nx">NameAdder</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="nx">handleSubmit</span><span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="p">{</span>
         <span class="nx">event</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">()</span>
 
         <span class="kd">var</span> <span class="nx">input</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">refs</span><span class="p">.</span><span class="nx">input</span>
 
         <span class="nx">model</span><span class="p">.</span>
-            <span class="nx">call</span><span class="p">([</span><span class="s1">'names'</span><span class="p">,</span> <span class="s1">'add'</span><span class="p">],</span>
+            <span class="nx">call</span><span class="p">([</span><span class="dl">'</span><span class="s1">names</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">add</span><span class="dl">'</span><span class="p">],</span>
                 <span class="p">[</span><span class="nx">input</span><span class="p">.</span><span class="nx">value</span><span class="p">],</span>
-                <span class="p">[</span><span class="s2">"name"</span><span class="p">]).</span>
+                <span class="p">[</span><span class="dl">"</span><span class="s2">name</span><span class="dl">"</span><span class="p">]).</span>
             <span class="nx">then</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
                 <span class="nx">input</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="kc">null</span>
                 <span class="nx">input</span><span class="p">.</span><span class="nx">focus</span><span class="p">()</span>
@@ -446,7 +433,7 @@
     <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="o">&lt;</span><span class="nx">form</span> <span class="nx">onSubmit</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleSubmit</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">)}</span><span class="o">&gt;</span>
-                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">ref</span><span class="o">=</span><span class="s2">"input"</span><span class="o">/&gt;</span>
+                <span class="o">&lt;</span><span class="nx">input</span> <span class="nx">ref</span><span class="o">=</span><span class="dl">"</span><span class="s2">input</span><span class="dl">"</span><span class="o">/&gt;</span>
                 <span class="o">&lt;</span><span class="nx">button</span><span class="o">&gt;</span><span class="nx">add</span> <span class="nx">name</span><span class="o">&lt;</span><span class="sr">/button</span><span class="err">&gt;
 </span>                
             <span class="o">&lt;</span><span class="sr">/form</span><span class="err">&gt;
@@ -460,29 +447,28 @@
 <span class="p">}</span>
 
 <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">NameAdder</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>In our <code class="highlighter-rouge">render</code> method, we’re defining a simple HTML form that contains a text input and a submit button. The user is able to submit the form either by clicking the submit button or hitting the enter key after typing text into the input field. When the form is submitted, the <code class="highlighter-rouge">handleSubmit</code> method in our component class is called, passing the submit <a href="https://developer.mozilla.org/en-US/docs/Web/API/Event"><code class="highlighter-rouge">Event</code></a>. Notice we are creating a new function that binds the component as context. This is needed when utilizing ES6 classes in React components. Otherwise, the value of <code class="highlighter-rouge">this</code> inside our event handler will be <code class="highlighter-rouge">window</code> in this case, which is <em>not</em> what we want.</p>
+<p>In our <code class="language-plaintext highlighter-rouge">render</code> method, we’re defining a simple HTML form that contains a text input and a submit button. The user is able to submit the form either by clicking the submit button or hitting the enter key after typing text into the input field. When the form is submitted, the <code class="language-plaintext highlighter-rouge">handleSubmit</code> method in our component class is called, passing the submit <a href="https://developer.mozilla.org/en-US/docs/Web/API/Event"><code class="language-plaintext highlighter-rouge">Event</code></a>. Notice we are creating a new function that binds the component as context. This is needed when utilizing ES6 classes in React components. Otherwise, the value of <code class="language-plaintext highlighter-rouge">this</code> inside our event handler will be <code class="language-plaintext highlighter-rouge">window</code> in this case, which is <em>not</em> what we want.</p>
 
-<p>The other method in our React component is <code class="highlighter-rouge">handleSubmit</code>, which is called when our rendered form is submitted, as I mentioned above. First, we must prevent the browser’s default action. In other words, we don’t want to <em>actually</em> submit the form; we don’t want the page to reload. Instead, we need to funnel the submitted data to Falcor. Next, we must look up our input element. We’ll need this to determine what text the user entered. Notice that we included a <code class="highlighter-rouge">ref</code> attribute on the text input in our <code class="highlighter-rouge">render</code> method. This allows us to easily get a handle on the underlying DOM element without resorting to a CSS selector. Finally, we must send this new name to our server. We want to hit the “names.add” call route we defined earlier, passing the new name. Once our server persists the new name and responds, Falcor will update its internal representation of our model using the information provided by our server. It now knows that there is one more name in our list, and it knows the index of the name we just added. But why is this important?</p>
+<p>The other method in our React component is <code class="language-plaintext highlighter-rouge">handleSubmit</code>, which is called when our rendered form is submitted, as I mentioned above. First, we must prevent the browser’s default action. In other words, we don’t want to <em>actually</em> submit the form; we don’t want the page to reload. Instead, we need to funnel the submitted data to Falcor. Next, we must look up our input element. We’ll need this to determine what text the user entered. Notice that we included a <code class="language-plaintext highlighter-rouge">ref</code> attribute on the text input in our <code class="language-plaintext highlighter-rouge">render</code> method. This allows us to easily get a handle on the underlying DOM element without resorting to a CSS selector. Finally, we must send this new name to our server. We want to hit the “names.add” call route we defined earlier, passing the new name. Once our server persists the new name and responds, Falcor will update its internal representation of our model using the information provided by our server. It now knows that there is one more name in our list, and it knows the index of the name we just added. But why is this important?</p>
 
-<p>After Falcor has determined that the name has been successfully added to our server, it will invoke our “success” function, which is the first (and only) function we have passed when calling <code class="highlighter-rouge">then</code> after invoking <code class="highlighter-rouge">call</code> on our Falcor model. This gives us the opportunity to reset our text input and ensure it retains focus so that our user can easily enter a new name. But we also want to be sure our list of names is current. It looks like there is an <code class="highlighter-rouge">onAdded</code> function on a <code class="highlighter-rouge">props</code> property attached to our component. Where did that come from? The component that rendered our name adder component passed this to us, which we will see next. Any parameters passed to a React component are available on the <code class="highlighter-rouge">props</code> property. We can expect that an <code class="highlighter-rouge">onAdded</code> function is passed to our component, and we should always invoke it when a new name has been added. I can tell you now that this function will trigger the <code class="highlighter-rouge">update</code> method on our <code class="highlighter-rouge">NamesList</code> component, which, as you might remember, will result in a call to Falcor for our list of names. This is exactly what we want to do - update our list of names after a name is added so our user sees the current list. You might be surprised to know that, after adding this name, Falcor does <em>not</em> contact our server for this list of names. It already knows exactly how the list has changed, thanks to the information provided by our server’s response to the “names.add” call. It pulls this data from its internal representation of our model, saving a couple round-trips to the server (one for the length request, and another for the list of names).</p>
+<p>After Falcor has determined that the name has been successfully added to our server, it will invoke our “success” function, which is the first (and only) function we have passed when calling <code class="language-plaintext highlighter-rouge">then</code> after invoking <code class="language-plaintext highlighter-rouge">call</code> on our Falcor model. This gives us the opportunity to reset our text input and ensure it retains focus so that our user can easily enter a new name. But we also want to be sure our list of names is current. It looks like there is an <code class="language-plaintext highlighter-rouge">onAdded</code> function on a <code class="language-plaintext highlighter-rouge">props</code> property attached to our component. Where did that come from? The component that rendered our name adder component passed this to us, which we will see next. Any parameters passed to a React component are available on the <code class="language-plaintext highlighter-rouge">props</code> property. We can expect that an <code class="language-plaintext highlighter-rouge">onAdded</code> function is passed to our component, and we should always invoke it when a new name has been added. I can tell you now that this function will trigger the <code class="language-plaintext highlighter-rouge">update</code> method on our <code class="language-plaintext highlighter-rouge">NamesList</code> component, which, as you might remember, will result in a call to Falcor for our list of names. This is exactly what we want to do - update our list of names after a name is added so our user sees the current list. You might be surprised to know that, after adding this name, Falcor does <em>not</em> contact our server for this list of names. It already knows exactly how the list has changed, thanks to the information provided by our server’s response to the “names.add” call. It pulls this data from its internal representation of our model, saving a couple round-trips to the server (one for the length request, and another for the list of names).</p>
 
-<p>Finally, we are making use of <a href="https://facebook.github.io/react/docs/reusable-components.html#prop-validation">React’s property validation</a> feature. Have a look at the line at the end of the file that starts with <code class="highlighter-rouge">NameAdder.propTypes = {</code>. If the component that renders our <code class="highlighter-rouge">NameAdder</code> does not pass a callback function property to our component, React will log a warning message to the developer console in your browser. This is a useful way to alert any developers integrating your component when they have inadvertently omitted a vital property. Defining these property validations in your component also serves as a form of documentation.</p>
+<p>Finally, we are making use of <a href="https://facebook.github.io/react/docs/reusable-components.html#prop-validation">React’s property validation</a> feature. Have a look at the line at the end of the file that starts with <code class="language-plaintext highlighter-rouge">NameAdder.propTypes = {</code>. If the component that renders our <code class="language-plaintext highlighter-rouge">NameAdder</code> does not pass a callback function property to our component, React will log a warning message to the developer console in your browser. This is a useful way to alert any developers integrating your component when they have inadvertently omitted a vital property. Defining these property validations in your component also serves as a form of documentation.</p>
 
 <p>Perhaps you are starting to see the elegance of this modern stack. React allows us to compose our UI in terms of focused components, and Falcor lets us think about our model in terms of the actual model properties, all while ensuring that communication with the server is minimized.</p>
 
 <h5 id="name-manager-component">Name manager component</h5>
 
-<p>We have a component to list all of our names, and another to add a new name. These two components don’t have any direct knowledge of each other. This is a good thing, as it makes them easier to test and re-use. But we still need some way to tie these two components together. The solution: a “glue” component. We’ll call this third React component <code class="highlighter-rouge">NameManager</code>, stored in a <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/name-manager.jsx">name-manager.jsx</a> file.</p>
+<p>We have a component to list all of our names, and another to add a new name. These two components don’t have any direct knowledge of each other. This is a good thing, as it makes them easier to test and re-use. But we still need some way to tie these two components together. The solution: a “glue” component. We’ll call this third React component <code class="language-plaintext highlighter-rouge">NameManager</code>, stored in a <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/name-manager.jsx">name-manager.jsx</a> file.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react'</span><span class="p">),</span>
-    <span class="nx">ReactDom</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'react-dom'</span><span class="p">),</span>
-    <span class="nx">NameAdder</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./name-adder.jsx'</span><span class="p">),</span>
-    <span class="nx">NamesList</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'./names-list.jsx'</span><span class="p">);</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">React</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">ReactDom</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">react-dom</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">NameAdder</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">./name-adder.jsx</span><span class="dl">'</span><span class="p">),</span>
+    <span class="nx">NamesList</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">./names-list.jsx</span><span class="dl">'</span><span class="p">);</span>
 
-<span class="kr">class</span> <span class="nx">NameManager</span> <span class="kr">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+<span class="kd">class</span> <span class="nx">NameManager</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
     <span class="nx">handleNameAdded</span><span class="p">()</span> <span class="p">{</span>
         <span class="k">this</span><span class="p">.</span><span class="nx">refs</span><span class="p">.</span><span class="nx">namesList</span><span class="p">.</span><span class="nx">update</span><span class="p">()</span>
     <span class="p">}</span>
@@ -492,20 +478,19 @@
             <span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span>
                 <span class="o">&lt;</span><span class="nx">NameAdder</span> <span class="nx">onAdded</span><span class="o">=</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">handleNameAdded</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="k">this</span><span class="p">)}</span><span class="sr">/</span><span class="err">&gt;
 </span>                
-                <span class="o">&lt;</span><span class="nx">NamesList</span> <span class="nx">ref</span><span class="o">=</span><span class="s2">"namesList"</span><span class="o">/&gt;</span>
+                <span class="o">&lt;</span><span class="nx">NamesList</span> <span class="nx">ref</span><span class="o">=</span><span class="dl">"</span><span class="s2">namesList</span><span class="dl">"</span><span class="o">/&gt;</span>
             <span class="o">&lt;</span><span class="sr">/div</span><span class="err">&gt;
 </span>        
         <span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
-<span class="nx">ReactDom</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">NameManager</span><span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s1">'#demo'</span><span class="p">))</span>
-</code></pre>
-</div>
+<span class="nx">ReactDom</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="o">&lt;</span><span class="nx">NameManager</span><span class="o">/&gt;</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#demo</span><span class="dl">'</span><span class="p">))</span>
+</code></pre></div></div>
 
-<p>As expected, we must first import <code class="highlighter-rouge">React</code>, our <code class="highlighter-rouge">NameAdder</code>, and <code class="highlighter-rouge">NamesList</code> components. We’ll also need ReactDom, which we must use to render our finished UI into the DOM. Note that we are selecting the container element we defined in our <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/index.html">index.html</a> file earlier, and rendering our entire set of React components as children/descendants.</p>
+<p>As expected, we must first import <code class="language-plaintext highlighter-rouge">React</code>, our <code class="language-plaintext highlighter-rouge">NameAdder</code>, and <code class="language-plaintext highlighter-rouge">NamesList</code> components. We’ll also need ReactDom, which we must use to render our finished UI into the DOM. Note that we are selecting the container element we defined in our <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/index.html">index.html</a> file earlier, and rendering our entire set of React components as children/descendants.</p>
 
-<p>The <code class="highlighter-rouge">render</code> method, which is called when <code class="highlighter-rouge">ReactDom</code> attempts to render our component to the DOM, is largely a set of references to the two other components we already defined. Remember how our <code class="highlighter-rouge">NameAdder</code> component was able to ask the <code class="highlighter-rouge">NamesList</code> component to update its list of names? This is made possible by our <code class="highlighter-rouge">NameManager</code> component. You can see that is passed a property, <code class="highlighter-rouge">onAdded</code>, to this component. When it is called by <code class="highlighter-rouge">NameAdder</code>, the <code class="highlighter-rouge">handleNameAdded</code> method is called on <code class="highlighter-rouge">NameManager</code>, which in turn delegates to the <code class="highlighter-rouge">NamesList</code> component’s <code class="highlighter-rouge">update</code> method, which has been exposed as a public class instance method.</p>
+<p>The <code class="language-plaintext highlighter-rouge">render</code> method, which is called when <code class="language-plaintext highlighter-rouge">ReactDom</code> attempts to render our component to the DOM, is largely a set of references to the two other components we already defined. Remember how our <code class="language-plaintext highlighter-rouge">NameAdder</code> component was able to ask the <code class="language-plaintext highlighter-rouge">NamesList</code> component to update its list of names? This is made possible by our <code class="language-plaintext highlighter-rouge">NameManager</code> component. You can see that is passed a property, <code class="language-plaintext highlighter-rouge">onAdded</code>, to this component. When it is called by <code class="language-plaintext highlighter-rouge">NameAdder</code>, the <code class="language-plaintext highlighter-rouge">handleNameAdded</code> method is called on <code class="language-plaintext highlighter-rouge">NameManager</code>, which in turn delegates to the <code class="language-plaintext highlighter-rouge">NamesList</code> component’s <code class="language-plaintext highlighter-rouge">update</code> method, which has been exposed as a public class instance method.</p>
 
 <p>And that’s about it for our React components. Pretty simple, eh? The next section will cover how webpack allows us to build our frontend components into a single bundle file, which will be usable in all of our supported browsers.</p>
 
@@ -522,46 +507,44 @@
 
 <p>We have defined webpack, along with all other dependencies, in a <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/package.json">package.json file</a>. All that is left is a bit of configuration. Have a look:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="na">entry</span><span class="p">:</span> <span class="s1">'./name-manager.jsx'</span><span class="p">,</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">entry</span><span class="p">:</span> <span class="dl">'</span><span class="s1">./name-manager.jsx</span><span class="dl">'</span><span class="p">,</span>
     <span class="na">output</span><span class="p">:</span> <span class="p">{</span>
-        <span class="na">filename</span><span class="p">:</span> <span class="s1">'./site/bundle.js'</span>
+        <span class="na">filename</span><span class="p">:</span> <span class="dl">'</span><span class="s1">./site/bundle.js</span><span class="dl">'</span>
     <span class="p">},</span>
     <span class="na">module</span><span class="p">:</span> <span class="p">{</span>
         <span class="na">loaders</span><span class="p">:</span> <span class="p">[</span>
             <span class="p">{</span>
                 <span class="na">test</span><span class="p">:</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">js/</span><span class="p">,</span>
-                <span class="na">loader</span><span class="p">:</span> <span class="s1">'babel'</span><span class="p">,</span>
+                <span class="na">loader</span><span class="p">:</span> <span class="dl">'</span><span class="s1">babel</span><span class="dl">'</span><span class="p">,</span>
                 <span class="na">exclude</span><span class="p">:</span> <span class="sr">/node_modules/</span>
             <span class="p">}</span>
         <span class="p">]</span>
     <span class="p">},</span>
-    <span class="na">devtool</span><span class="p">:</span> <span class="s1">'source-map'</span>
+    <span class="na">devtool</span><span class="p">:</span> <span class="dl">'</span><span class="s1">source-map</span><span class="dl">'</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>If we name the file <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js">webpack.config.js</a>, webpack will be able to easily discover and use our configuration. The main entry point of our app, “name-manager.jsx” is used as the value of the <code class="highlighter-rouge">entry</code> configuration property. Webpack will use this “main” class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the <code class="highlighter-rouge">output.filename</code> config property.</p>
+<p>If we name the file <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/webpack.config.js">webpack.config.js</a>, webpack will be able to easily discover and use our configuration. The main entry point of our app, “name-manager.jsx” is used as the value of the <code class="language-plaintext highlighter-rouge">entry</code> configuration property. Webpack will use this “main” class to find all other project dependencies, which it will use to generate the final combined JavaScript file imported by our index.html page. The name of that combined file is set on the <code class="language-plaintext highlighter-rouge">output.filename</code> config property.</p>
 
-<p>Next, a set of “loaders” are specified. We’re using the babel loader, which ensures ECMAScript 6 code is compiled down to ECMAScript 5 syntax, which allows us to write purely ES6 code without having to worry about which portions of the spec our target browsers support. The <code class="highlighter-rouge">test</code> property on our loader is a regular expression, and it results in webpack passing any .js or .jsx files in our source tree to the babel loader for processing. The babel loader processes our source before webpack combines everything to a single resource.</p>
+<p>Next, a set of “loaders” are specified. We’re using the babel loader, which ensures ECMAScript 6 code is compiled down to ECMAScript 5 syntax, which allows us to write purely ES6 code without having to worry about which portions of the spec our target browsers support. The <code class="language-plaintext highlighter-rouge">test</code> property on our loader is a regular expression, and it results in webpack passing any .js or .jsx files in our source tree to the babel loader for processing. The babel loader processes our source before webpack combines everything to a single resource.</p>
 
-<p>Finally, the last line of our configuration instructs webpack to generate source maps. This satisfies #4 in our list of goals. Source maps are only loaded by the browser when the developer tools console is open, so you don’t have to worry about wasting bandwidth on page load when your users visit the app. These maps allow us to see the original source files, and even set breakpoints anywhere in these files. We don’t even have to look at the combined and compiled bundle.js file. Webpack will annotate the bottom of the generated bundle.js file with a pointer to the source map file, so our browser’s dev tools know how to find it. This becomes even more useful when we generate a minified bundle file for use in production. While I’m not generating a minified bundle in the example webpack config, you can easily do this simply by running webpack with a <code class="highlighter-rouge">-p</code> command-line option. The “p” is short for “production”.</p>
+<p>Finally, the last line of our configuration instructs webpack to generate source maps. This satisfies #4 in our list of goals. Source maps are only loaded by the browser when the developer tools console is open, so you don’t have to worry about wasting bandwidth on page load when your users visit the app. These maps allow us to see the original source files, and even set breakpoints anywhere in these files. We don’t even have to look at the combined and compiled bundle.js file. Webpack will annotate the bottom of the generated bundle.js file with a pointer to the source map file, so our browser’s dev tools know how to find it. This becomes even more useful when we generate a minified bundle file for use in production. While I’m not generating a minified bundle in the example webpack config, you can easily do this simply by running webpack with a <code class="language-plaintext highlighter-rouge">-p</code> command-line option. The “p” is short for “production”.</p>
 
 <h3 id="building-and-using-our-app">Building and using our app</h3>
 
 <p>All of our code is in place, our server is ready, <em>and</em> we have a build tool in place. How do we get our app up and running?</p>
 
-<p>First, we need to pull in all project dependencies. In the root of our project, we simply run <code class="highlighter-rouge">npm install</code>, which will parse our <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/package.json">package.json file</a> and install all registered dependencies inside of a “node_modules” folder. This will also install a webpack binary, which we will need to build the client-side source bundles.</p>
+<p>First, we need to pull in all project dependencies. In the root of our project, we simply run <code class="language-plaintext highlighter-rouge">npm install</code>, which will parse our <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/package.json">package.json file</a> and install all registered dependencies inside of a “node_modules” folder. This will also install a webpack binary, which we will need to build the client-side source bundles.</p>
 
-<p>The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing <code class="highlighter-rouge">$(npm bin)/webpack</code> from the root of our project. <code class="highlighter-rouge">$(npm bin)</code> expands to the directory that contains all binaries pulled in by <code class="highlighter-rouge">npm install</code>. Note that this path expansion only works in linux/unix environments. A cross-platform option involves adding a reference to the webpack binary inside of your <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/package.json">package.json file</a>. For example, if you include the following <code class="highlighter-rouge">"scripts"</code> property, you can run webpack <em>and</em> allow it to re-generate your bundles whenever code changes on <em>any</em> platform by running <code class="highlighter-rouge">npm run webpack</code>:</p>
+<p>The next step is to generate the source bundle referenced by our index.html file. All we need to do here is to run webpack by executing <code class="language-plaintext highlighter-rouge">$(npm bin)/webpack</code> from the root of our project. <code class="language-plaintext highlighter-rouge">$(npm bin)</code> expands to the directory that contains all binaries pulled in by <code class="language-plaintext highlighter-rouge">npm install</code>. Note that this path expansion only works in linux/unix environments. A cross-platform option involves adding a reference to the webpack binary inside of your <a href="https://github.com/Widen/fullstack-react/blob/1.2.1/package.json">package.json file</a>. For example, if you include the following <code class="language-plaintext highlighter-rouge">"scripts"</code> property, you can run webpack <em>and</em> allow it to re-generate your bundles whenever code changes on <em>any</em> platform by running <code class="language-plaintext highlighter-rouge">npm run webpack</code>:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="s2">"scripts"</span><span class="err">:</span> <span class="p">{</span>
-    <span class="s2">"webpack"</span><span class="err">:</span> <span class="s2">"webpack -w"</span> 
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">"</span><span class="s2">scripts</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">webpack</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">webpack -w</span><span class="dl">"</span> 
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
-<p>Finally, we need to start our web server, which handles API requests and serves up our index.html, bundle.js, and source map files. To start the Node.js server, execute <code class="highlighter-rouge">node --harmony server</code>. The <code class="highlighter-rouge">--harmony</code> switch tells node that we are using syntax included in the newest ECMAScript specifications, known as “harmony”. ECMAScript 6 is one such entry in the harmony set of specifications. You may not need this switch if you are using a very recent version of node.js.</p>
+<p>Finally, we need to start our web server, which handles API requests and serves up our index.html, bundle.js, and source map files. To start the Node.js server, execute <code class="language-plaintext highlighter-rouge">node --harmony server</code>. The <code class="language-plaintext highlighter-rouge">--harmony</code> switch tells node that we are using syntax included in the newest ECMAScript specifications, known as “harmony”. ECMAScript 6 is one such entry in the harmony set of specifications. You may not need this switch if you are using a very recent version of node.js.</p>
 
 <p>After starting up the server, our app will be accessible on port 9090. So, navigate to http://localhost:9090 and test it out!</p>
 
@@ -588,15 +571,12 @@
 <div class="comments">
 	<div id="disqus_thread"></div>
 	<script type="text/javascript">
-
 	    var disqus_shortname = 'widen-engineering';
-
 	    (function() {
 	        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
 	        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
 	        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
 	    })();
-
 	</script>
 	<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
@@ -624,13 +604,17 @@
           
             
           
+            
+          
+            
+          
           </ul>
           <br/>
         </nav >
         <nav>
           <ul class="site-social-links inline">
               <li><a target="_blank" title="RSS Feed" href="/feed.xml" class="ion-social-rss"></a></li>
-              <li><a target="_blank" title="GitHub" href="https://github.com/Widen" class="ion-social-github"></a></li>
+              <li><a target="_blank" title="GitHub" href="https://github.com/widen" class="ion-social-github"></a></li>
               <li><a target="_blank" title="Twitter" href="https://twitter.com/widendev" class="ion-social-twitter"></a></li>
           </ul>
         </nav>
@@ -642,19 +626,19 @@
 <nav>
   <ul class="inline">
     <li>
-        <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io/">source</a>
+        <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io">source</a>
     </li>
     <li>
-        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/develop/_posts/2015-10-12-future-of-the-web-react-falcor.md">view</a>
+        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/master/_posts/2015-10-12-future-of-the-web-react-falcor.md">view</a>
     </li>
     <li>
-        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/_posts/2015-10-12-future-of-the-web-react-falcor.md">edit</a>
+        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/master/_posts/2015-10-12-future-of-the-web-react-falcor.md">edit</a>
     </li>
     <li>
-        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/0e8f8d6">0e8f8d6</a>
+        <a target="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/"></a>
     </li>
     <li>
-        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/abffe46">abffe46</a>
+        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/"></a>
     </li>
   </ul>
   </nav >
@@ -665,8 +649,8 @@
 
     </div>
 
-    <script type="text/javascript">
-
+    
+<script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-1206716-19']);
   _gaq.push(['_trackPageview']);
@@ -676,8 +660,8 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
-
 </script>
+
 
 
   </body>

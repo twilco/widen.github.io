@@ -9,27 +9,27 @@
   <title>AWS CloudFront User Authentication using Lambda@Edge | Widen Engineering</title>
   <meta name="description" content="We want to protect private S3 content distributed by Amazon's CloudFront service, but we don't want to run a proxy server to authenticate requests. We explai...">
 
-  <link rel="apple-touch-icon" sizes="57x57" href="/assets/favicon/apple-icon-57x57-ff42219994f7b0f656ffcad0ba264a75.png">
-<link rel="apple-touch-icon" sizes="60x60" href="/assets/favicon/apple-icon-60x60-ab8b491cd6f98d7a529486efabe4acdb.png">
-<link rel="apple-touch-icon" sizes="72x72" href="/assets/favicon/apple-icon-72x72-f91dd5bd6c559a9e40a08b1deed6e431.png">
-<link rel="apple-touch-icon" sizes="76x76" href="/assets/favicon/apple-icon-76x76-707077860f7779206dba9bb48d19a512.png">
-<link rel="apple-touch-icon" sizes="114x114" href="/assets/favicon/apple-icon-114x114-14db05cbd372a5d6a08da6bc73ddc34b.png">
-<link rel="apple-touch-icon" sizes="120x120" href="/assets/favicon/apple-icon-120x120-23990f59e240ceed96367c004a5e7fb2.png">
-<link rel="apple-touch-icon" sizes="144x144" href="/assets/favicon/apple-icon-144x144-3d533b233e4578032b5dfc6d5c0efcaa.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/assets/favicon/apple-icon-152x152-444f94897e7ef7e70831f735c7c62a5e.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-icon-180x180-c14938a49be032ffbea32c8aedc5cb91.png">
-<link rel="icon" type="image/png" sizes="192x192"  href="/assets/favicon/android-icon-192x192-cc3dce93709d292d764aac5decf8049a.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32-02f9df411973b3e68a1209a864af9ffd.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon/favicon-96x96-e973328488d9787937aadf45798e569d.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16-5558f12adefff3f88493750388234933.png">
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/images/favicon/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicon/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicon/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicon/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicon/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicon/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicon/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicon/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="/assets/images/favicon/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png">
 
-<link rel="manifest" href="/assets/favicon/manifest-f5ec1febffe24c0f830fd7907521de82.json">
+<link rel="manifest" href="/assets/images/favicon/manifest.json">
 
 <meta name="msapplication-TileColor" content="#B72822">
-<meta name="msapplication-TileImage" content="/assets/favicon/ms-icon-144x144-3d533b233e4578032b5dfc6d5c0efcaa.png">
+<meta name="msapplication-TileImage" content="/assets/images/favicon/ms-icon-144x144.png">
 <meta name="theme-color" content="#B72822">
 
-  <link rel="stylesheet" href="/assets/app-e8f20f52771ff90bfe6c533f8adc01b7.css">
+  <link rel="stylesheet" href="/assets/css/app.css">
   <link rel="canonical" href="https://engineering.widen.com/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/">
   <link rel="alternate" type="application/rss+xml" title="Widen Engineering" href="https://engineering.widen.com/feed.xml" />
 </head>
@@ -39,15 +39,14 @@
 
     <div class="full-width">
       <header class="site-header" role="banner">
-    <div class="wrapper">
-        <div class="logo">
-            <a href="/">
-                <img width="400" alt="Widen-Engineering-White-Logo" src="https://embed.widencdn.net/img/widen/c17yrvuaac/400px@2x/Widen Engineering White Logo.png?u=mcuc7i">
-            </a>
-        </div>
-        <br class="clear"/>
+  <div class="wrapper">
+    <div class="logo">
+      <a href="/">
+        <img width="400" alt="Widen Engineering Logo" src="https://embed.widencdn.net/img/widen/c17yrvuaac/400px@2x/Widen Engineering White Logo.png?u=mcuc7i">
+      </a>
+    </div>
+    <br class="clear"/>
   </div>
-
 </header>
 
     </div>
@@ -70,28 +69,28 @@
 
 <p>Having the ability to execute Lambda functions upon <em><a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-cloudfront-trigger-events.html">viewer request</a></em> gives us the opportunity to authenticate the request in any way we wish. For our initial proof of concept, we checked for basic authentication with a static username/password.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="s1">'use strict'</span><span class="p">;</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">'</span><span class="s1">use strict</span><span class="dl">'</span><span class="p">;</span>
 <span class="nx">exports</span><span class="p">.</span><span class="nx">handler</span> <span class="o">=</span> <span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">context</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
 
-    <span class="kr">const</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">Records</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">cf</span><span class="p">.</span><span class="nx">request</span><span class="p">;</span>
-    <span class="kr">const</span> <span class="nx">headers</span> <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">headers</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">event</span><span class="p">.</span><span class="nx">Records</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">cf</span><span class="p">.</span><span class="nx">request</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">headers</span> <span class="o">=</span> <span class="nx">request</span><span class="p">.</span><span class="nx">headers</span><span class="p">;</span>
 
     <span class="c1">// Configure authentication</span>
-    <span class="kr">const</span> <span class="nx">authUser</span> <span class="o">=</span> <span class="s1">'widen-user'</span><span class="p">;</span>
-    <span class="kr">const</span> <span class="nx">authPass</span> <span class="o">=</span> <span class="s1">'secret-password'</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">authUser</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">widen-user</span><span class="dl">'</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">authPass</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">secret-password</span><span class="dl">'</span><span class="p">;</span>
 
     <span class="c1">// Construct expected basic auth header value</span>
-    <span class="kr">const</span> <span class="nx">authString</span> <span class="o">=</span> <span class="s1">'Basic '</span> <span class="o">+</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">authUser</span> <span class="o">+</span> <span class="s1">':'</span> <span class="o">+</span> <span class="nx">authPass</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="s1">'base64'</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">authString</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Basic </span><span class="dl">'</span> <span class="o">+</span> <span class="k">new</span> <span class="nx">Buffer</span><span class="p">(</span><span class="nx">authUser</span> <span class="o">+</span> <span class="dl">'</span><span class="s1">:</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">authPass</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="dl">'</span><span class="s1">base64</span><span class="dl">'</span><span class="p">);</span>
 
     <span class="c1">// If basic auth header does not match, send WWW-Authenticate response</span>
-    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">headers</span><span class="p">.</span><span class="nx">authorization</span> <span class="o">==</span> <span class="s1">'undefined'</span> <span class="o">||</span> <span class="nx">headers</span><span class="p">.</span><span class="nx">authorization</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span> <span class="o">!=</span> <span class="nx">authString</span><span class="p">)</span> <span class="p">{</span>
-        <span class="kr">const</span> <span class="nx">body</span> <span class="o">=</span> <span class="s1">'Unauthorized'</span><span class="p">;</span>
-        <span class="kr">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="na">status</span><span class="p">:</span> <span class="s1">'401'</span><span class="p">,</span>
-            <span class="na">statusDescription</span><span class="p">:</span> <span class="s1">'Unauthorized'</span><span class="p">,</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">headers</span><span class="p">.</span><span class="nx">authorization</span> <span class="o">==</span> <span class="dl">'</span><span class="s1">undefined</span><span class="dl">'</span> <span class="o">||</span> <span class="nx">headers</span><span class="p">.</span><span class="nx">authorization</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span> <span class="o">!=</span> <span class="nx">authString</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">const</span> <span class="nx">body</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Unauthorized</span><span class="dl">'</span><span class="p">;</span>
+        <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="na">status</span><span class="p">:</span> <span class="dl">'</span><span class="s1">401</span><span class="dl">'</span><span class="p">,</span>
+            <span class="na">statusDescription</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Unauthorized</span><span class="dl">'</span><span class="p">,</span>
             <span class="na">body</span><span class="p">:</span> <span class="nx">body</span><span class="p">,</span>
             <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s1">'www-authenticate'</span><span class="p">:</span> <span class="p">[{</span><span class="na">key</span><span class="p">:</span> <span class="s1">'WWW-Authenticate'</span><span class="p">,</span> <span class="na">value</span><span class="p">:</span><span class="s1">'Basic realm="Widen CI Artifacts"'</span><span class="p">}]</span>
+                <span class="dl">'</span><span class="s1">www-authenticate</span><span class="dl">'</span><span class="p">:</span> <span class="p">[{</span><span class="na">key</span><span class="p">:</span> <span class="dl">'</span><span class="s1">WWW-Authenticate</span><span class="dl">'</span><span class="p">,</span> <span class="na">value</span><span class="p">:</span><span class="dl">'</span><span class="s1">Basic realm="Widen CI Artifacts"</span><span class="dl">'</span><span class="p">}]</span>
             <span class="p">},</span>
         <span class="p">};</span>
         <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">response</span><span class="p">);</span>
@@ -100,8 +99,7 @@
     <span class="c1">// Continue request processing if authentication passed</span>
     <span class="nx">callback</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">request</span><span class="p">);</span>
 <span class="p">};</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This works surprisingly well; however, there was a lot of room for improvement. The most glaring obvious scalability problem is having a single shared password. One option we considered was to extend this code to improve the loading of passwords; the major downsides were still needing to manually manage user credentials and requiring users to remember yet another password.</p>
 
@@ -166,13 +164,17 @@
           
             
           
+            
+          
+            
+          
           </ul>
           <br/>
         </nav >
         <nav>
           <ul class="site-social-links inline">
               <li><a target="_blank" title="RSS Feed" href="/feed.xml" class="ion-social-rss"></a></li>
-              <li><a target="_blank" title="GitHub" href="https://github.com/Widen" class="ion-social-github"></a></li>
+              <li><a target="_blank" title="GitHub" href="https://github.com/widen" class="ion-social-github"></a></li>
               <li><a target="_blank" title="Twitter" href="https://twitter.com/widendev" class="ion-social-twitter"></a></li>
           </ul>
         </nav>
@@ -184,19 +186,19 @@
 <nav>
   <ul class="inline">
     <li>
-        <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io/">source</a>
+        <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io">source</a>
     </li>
     <li>
-        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/develop/_posts/2018-02-07-AWS-CloudFront-User-Authentication-using-Lambda@Edge.md">view</a>
+        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/master/_posts/2018-02-07-AWS-CloudFront-User-Authentication-using-Lambda@Edge.md">view</a>
     </li>
     <li>
-        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/develop/_posts/2018-02-07-AWS-CloudFront-User-Authentication-using-Lambda@Edge.md">edit</a>
+        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/master/_posts/2018-02-07-AWS-CloudFront-User-Authentication-using-Lambda@Edge.md">edit</a>
     </li>
     <li>
-        <a ="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/0e8f8d6">0e8f8d6</a>
+        <a target="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/"></a>
     </li>
     <li>
-        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/361f32c">361f32c</a>
+        <a target="_blank" title="Last page commit" href="https://github.com/widen/widen.github.io/commit/"></a>
     </li>
   </ul>
   </nav >
@@ -207,8 +209,8 @@
 
     </div>
 
-    <script type="text/javascript">
-
+    
+<script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-1206716-19']);
   _gaq.push(['_trackPageview']);
@@ -218,8 +220,8 @@
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
-
 </script>
+
 
 
   </body>

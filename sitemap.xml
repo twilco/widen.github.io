@@ -1,34 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://engineering.widen.com/blog/A-Tale-of-Performance---Javascript,-Rust,-and-WebAssembly/</loc>
-    <lastmod>2019-01-14T00:00:00-06:00</lastmod>
-  </url>
-  <url>
-    <loc>https://engineering.widen.com/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/</loc>
-    <lastmod>2018-02-07T00:00:00-06:00</lastmod>
-  </url>
-  <url>
-    <loc>https://engineering.widen.com/blog/Maker-Day-2017/</loc>
-    <lastmod>2017-08-11T00:00:00-05:00</lastmod>
-  </url>
-  <url>
-    <loc>https://engineering.widen.com/blog/testing-future-web-stack/</loc>
-    <lastmod>2016-02-12T00:00:00-06:00</lastmod>
-  </url>
-  <url>
-    <loc>https://engineering.widen.com/blog/future-of-the-web-react-falcor/</loc>
-    <lastmod>2015-10-12T00:00:00-05:00</lastmod>
-  </url>
-  <url>
-    <loc>https://engineering.widen.com/blog/tomcat-slashes/</loc>
-    <lastmod>2015-09-02T00:00:00-05:00</lastmod>
-  </url>
-  <url>
-    <loc>https://engineering.widen.com/blog/2015/08/27/AWS-Lambda-Runtime-Configuration</loc>
-    <lastmod>2015-08-27T00:00:00-05:00</lastmod>
-  </url>
-  <url>
-    <loc>https://engineering.widen.com/</loc>
-  </url>
+<url>
+<loc>https://engineering.widen.com/blog/2015/08/27/AWS-Lambda-Runtime-Configuration</loc>
+<lastmod>2015-08-27T00:00:00-05:00</lastmod>
+</url>
+<url>
+<loc>https://engineering.widen.com/blog/tomcat-slashes/</loc>
+<lastmod>2015-09-02T00:00:00-05:00</lastmod>
+</url>
+<url>
+<loc>https://engineering.widen.com/blog/future-of-the-web-react-falcor/</loc>
+<lastmod>2015-10-12T00:00:00-05:00</lastmod>
+</url>
+<url>
+<loc>https://engineering.widen.com/blog/testing-future-web-stack/</loc>
+<lastmod>2016-02-12T00:00:00-06:00</lastmod>
+</url>
+<url>
+<loc>https://engineering.widen.com/blog/Maker-Day-2017/</loc>
+<lastmod>2017-08-11T00:00:00-05:00</lastmod>
+</url>
+<url>
+<loc>https://engineering.widen.com/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/</loc>
+<lastmod>2018-02-07T00:00:00-06:00</lastmod>
+</url>
+<url>
+<loc>https://engineering.widen.com/blog/A-Tale-of-Performance-Javascript,-Rust,-and-WebAssembly/</loc>
+<lastmod>2019-01-14T00:00:00-06:00</lastmod>
+</url>
+<url>
+<loc>https://engineering.widen.com/</loc>
+</url>
+<url>
+<loc>https://engineering.widen.com/blog/page2/</loc>
+</url>
 </urlset>
