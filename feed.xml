@@ -5,9 +5,9 @@
     <description>The blog of the Widen Engineering Team.</description>
     <link>https://engineering.widen.com/</link>
     <atom:link href="https://engineering.widen.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 31 Aug 2020 14:09:57 -0500</pubDate>
-    <lastBuildDate>Mon, 31 Aug 2020 14:09:57 -0500</lastBuildDate>
-    <generator>Jekyll v3.8.7</generator>
+    <pubDate>Mon, 31 Aug 2020 14:35:22 -0500</pubDate>
+    <lastBuildDate>Mon, 31 Aug 2020 14:35:22 -0500</lastBuildDate>
+    <generator>Jekyll v3.9.0</generator>
     
       <item>
         <title>A Tale of Performance - JavaScript, Rust, and WebAssembly</title>
