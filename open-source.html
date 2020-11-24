@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Widen Engineering</title>
+  <title>Open Source Guidelines | Widen Engineering</title>
   <meta name="description" content="The blog of the Widen Engineering Team.">
 
   <link rel="apple-touch-icon" sizes="57x57" href="/assets/images/favicon/apple-icon-57x57.png">
@@ -30,7 +30,7 @@
 <meta name="theme-color" content="#B72822">
 
   <link rel="stylesheet" href="/assets/css/app.css">
-  <link rel="canonical" href="https://engineering.widen.com/">
+  <link rel="canonical" href="https://engineering.widen.com/open-source">
   <link rel="alternate" type="application/rss+xml" title="Widen Engineering" href="/feed.xml" />
 </head>
 
@@ -57,110 +57,94 @@
 
       <main class="content" role="main">
 
-        <div class="posts">
+        <div class="page">
+    <header>
+        <h1><a title="Open Source Guidelines" href="/open-source">Open Source Guidelines</a></h1>
+    
+    
+    </header>
+
+    
+        <aside class="toc">
+            <ul class="section-nav">
+<li class="toc-entry toc-h1"><a href="#community-guidelines">Community Guidelines</a></li>
+<li class="toc-entry toc-h1"><a href="#project-guidelines">Project Guidelines</a>
+<ul>
+<li class="toc-entry toc-h2"><a href="#what-can-i-release-as-open-source">What can I release as open-source?</a></li>
+<li class="toc-entry toc-h2"><a href="#licensing">Licensing</a></li>
+<li class="toc-entry toc-h2"><a href="#infrastructure">Infrastructure</a></li>
+<li class="toc-entry toc-h2"><a href="#secrets">Secrets</a></li>
+</ul>
+</li>
+</ul>
+        </aside>
+        <article role="article">
+          <h1 id="community-guidelines">
+<a class="anchor" href="#community-guidelines" aria-hidden="true"><span class="octicon octicon-link"></span></a>Community Guidelines</h1>
+
+<p>Anyone is welcome to contribute in a positive way to our open-source
+repositories.</p>
+
+<p>As we develop our own guidelines, please refer to the following as references
+on how we expect contributors and maintainers to conduct themselves:</p>
+
+<ul>
+  <li><a href="https://www.contributor-covenant.org/">Contributor Covenant</a></li>
+  <li><a href="https://opensource.google/conduct/">Google’s Community Guidelines</a></li>
+</ul>
+
+<p>Keep in mind every commit message, comment, and issue are both public and
+linked to the Widen brand.</p>
+
+<h1 id="project-guidelines">
+<a class="anchor" href="#project-guidelines" aria-hidden="true"><span class="octicon octicon-link"></span></a>Project Guidelines</h1>
+
+<p>See <a href="http://github.com/Widen/new-public-project">http://github.com/Widen/new-public-project</a>
+for boilerplate for starting an effective open-source project.</p>
+
+<h2 id="what-can-i-release-as-open-source">
+<a class="anchor" href="#what-can-i-release-as-open-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>What can I release as open-source?</h2>
+
+<p>Your project shall not contain any proprietary information related to
+the core business functionality of Widen.</p>
+
+<ul>
+  <li>Examples of good things to open source:
     <ul>
-      
-        <article>
-          <h1>
-            <a href="/blog/A-Tale-of-Performance-Javascript,-Rust,-and-WebAssembly/">A Tale of Performance - JavaScript, Rust, and WebAssembly</a>
-          </h1>
-
-          <p class="posts-excerpt">
-            
-              Embark on a journey of optimization with me, learning in great detail about Rust, WebAssembly, and lots more along the way.  We will compare and contrast multiple approaches to solving a performance problem, from native browser APIs to both naive and complex Rust and WebAssembly implementations.
-            
-          </p>
-
-          <time>Jan 14, 2019</time> • Tyler Wilcock
-        </article>
-      
-        <article>
-          <h1>
-            <a href="/blog/AWS-CloudFront-User-Authentication-using-Lambda@Edge/">AWS CloudFront User Authentication using Lambda@Edge</a>
-          </h1>
-
-          <p class="posts-excerpt">
-            
-              We want to protect private S3 content distributed by Amazon's CloudFront service, but we don't want to run a proxy server to authenticate requests. We explain the development process of creating a dynamic Lambda function that authenticates viewer requests utilizing the AWS CloudFront feature, Lambda@Edge.
-            
-          </p>
-
-          <time>Feb 7, 2018</time> • Payton Garland
-        </article>
-      
-        <article>
-          <h1>
-            <a href="/blog/Maker-Day-2017/">Maker Day 2017</a>
-          </h1>
-
-          <p class="posts-excerpt">
-            
-              On August 10, 2017, Widen held its inaugural Maker Day team building exercise for the Development team to partake in an adventure building physical hardware components for a day.
-            
-          </p>
-
-          <time>Aug 11, 2017</time> • Ben Dotte
-        </article>
-      
-        <article>
-          <h1>
-            <a href="/blog/testing-future-web-stack/">The Future of Web Development (Part 2)&#58; Full-Stack Automated JavaScript Testing</a>
-          </h1>
-
-          <p class="posts-excerpt">
-            
-              In my last article, I showed you how to develop a full-stack JavaScript web application using some pretty interesting and futuristic libraries and web specifications. In this follow-up, I'm going to demonstrate how you can write server-side and client-side unit and integration/Selenium tests for that app entirely in JavaScript.
-            
-          </p>
-
-          <time>Feb 12, 2016</time> • Ray Nicholus
-        </article>
-      
-        <article>
-          <h1>
-            <a href="/blog/future-of-the-web-react-falcor/">The Future of Web Development - React, Falcor, and ES6</a>
-          </h1>
-
-          <p class="posts-excerpt">
-            
-              The future of web application development looks a bit different than what we are all used to. I'll show you how to build a simple full-stack JavaScript app using Node.js on the backend, React on the frontend, Webpack for client-side module support, and Netflix's Falcor as an efficient and intuitive...
-            
-          </p>
-
-          <time>Oct 12, 2015</time> • Ray Nicholus
-        </article>
-      
-        <article>
-          <h1>
-            <a href="/blog/tomcat-slashes/">Tomcat Hates Encoded Slashes</a>
-          </h1>
-
-          <p class="posts-excerpt">
-            
-              After sending a GET request containing escaped slashes to our Tomcat-hosted endpoint, we expect to receive a 2xx response. But instead, our server responds with a 404. What happened?
-            
-          </p>
-
-          <time>Sep 2, 2015</time> • Ray Nicholus
-        </article>
-      
-        <article>
-          <h1>
-            <a href="/blog/2015/08/27/AWS-Lambda-Runtime-Configuration">Runtime Configuration for AWS' Lambda</a>
-          </h1>
-
-          <p class="posts-excerpt">
-            
-              A while ago Amazon released its <a href="http://aws.amazon.com/lambda/">Lambda</a> service. Lambdas are simple, stateless  functions that get executed as callbacks to arbitrary AWS events.
-
-
-            
-          </p>
-
-          <time>Aug 27, 2015</time> • Mark Feltner
-        </article>
-      
+      <li>Utilities</li>
+      <li>Integrations with our APIs</li>
+      <li>Code samples</li>
+      <li>Style guides</li>
     </ul>
+  </li>
+</ul>
+
+<p>If you have any questions, please reach out to your manager or the Developer
+Relations Committee for guidance.</p>
+
+<h2 id="licensing">
+<a class="anchor" href="#licensing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Licensing</h2>
+
+<p>Widen recommends the ISC. MIT and Apache are also viable. Talk with the <a href="mailto://engineering@widen.com">Widen Developer Relations Committee</a> if you have any questions.</p>
+
+<h2 id="infrastructure">
+<a class="anchor" href="#infrastructure" aria-hidden="true"><span class="octicon octicon-link"></span></a>Infrastructure</h2>
+
+<p>Projects should not depend on internal Widen infrastructure. Making something
+that interacts with our public APIs and sites is fine, but a project that
+launches EC2 instances in our cloud is not.</p>
+
+<h2 id="secrets">
+<a class="anchor" href="#secrets" aria-hidden="true"><span class="octicon octicon-link"></span></a>Secrets</h2>
+
+<p>No secrets in code or commit messages. This includes commits from the past –
+it might be worth erasing the entire commit history, or using an automated
+tool to scrub past commits.</p>
+
+        </article>
+    
+
+
 </div>
 
 
@@ -213,10 +197,10 @@
         <a target="_blank" title="View site source on GitHub" href="https://github.com/widen/widen.github.io">source</a>
     </li>
     <li>
-        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/master/index.html">view</a>
+        <a target="_blank" title="View current page on GitHub" href="https://github.com/widen/widen.github.io/blob/master/open-source.md">view</a>
     </li>
     <li>
-        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/master/index.html">edit</a>
+        <a target="_blank" title="Edit current page on GitHub" href="https://github.com/widen/widen.github.io/edit/master/open-source.md">edit</a>
     </li>
     <li>
         <a target="_blank" title="Last site commit" href="https://github.com/widen/widen.github.io/commit/"></a>

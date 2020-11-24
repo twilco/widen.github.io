@@ -193,8 +193,13 @@ li { padding-bottom: 5px; }
 
 .git-info:hover { opacity: 0.5; }
 
-header.site-header { background-color: #3d495c; background-image: url("https://embed.widencdn.net/img/widen/m4ml1kuspv/exact/1680x90_Engineering Blog Banner.png?keep=c&crop=yes&u=ksmgip"); padding: 20px 0 18px 0; }
-header.site-header .logo a { float: left; display: inline-block; color: #fff; }
+header.site-header { background-color: #3d495c; background-image: url("https://embed.widencdn.net/img/widen/m4ml1kuspv/exact/1680x90_Engineering Blog Banner.png?keep=c&crop=yes&u=ksmgip"); background-size: cover; padding: 20px 0 18px 0; }
+header.site-header .wrapper { align-items: center; display: flex; justify-content: space-between; }
+@media (max-width: 767px) { header.site-header .wrapper { flex-direction: column; } }
+header.site-header .logo a { display: inline-block; }
+@media (max-width: 767px) { header.site-header .logo { margin-bottom: 8px; } }
+header.site-header .subscribe { padding: 10px 12px; background-color: #fff; border-radius: 4px; font-size: 10px; font-weight: 400; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1); text-transform: uppercase; letter-spacing: 2px; }
+header.site-header .subscribe:hover { background-color: #f2f2f2; }
 header.site-header h2 { display: inline; position: relative; float: left; font-size: 3rem; margin-left: 13px; color: #fff; }
 header.site-header h2 a { color: #fff; }
 header.site-header nav { color: #000; display: inline; }
@@ -218,3 +223,8 @@ footer.site-footer .site-social-links { font-size: 3rem; }
 .posts ul { padding-left: 0; }
 .posts article { margin-bottom: 30px; }
 .posts .posts-excerpt { font-style: italic; font-size: 1.65rem; color: #3d495c; }
+
+.toc { background-color: #f6f7f9; padding: 8px; }
+.toc ul, .toc li { list-style-type: none; }
+
+li.toc-entry { padding-top: 8px; }
