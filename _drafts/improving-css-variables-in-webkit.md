@@ -24,7 +24,7 @@ made to the CSS variables implementation in WebKit.
 
 [WebKit](https://webkit.org/) is an open-source browser engine that is most famous for powering Safari.  Safari is far from the only place
  you'll find WebKit, however — it is behind every browser on iOS, all web content displayed on PlayStation systems, and in various GTK-based browsers
-such as [Epiphany](https://github.com/GNOME/epiphany).  WebKit is also deployed to millions of embedded
+such as [Gnome Web](https://github.com/GNOME/epiphany).  WebKit is also deployed to millions of embedded
 devices via the [WPE](https://webkit.org/wpe/) port (**W**ebKit **P**ort for **E**mbedded).
 
 ### CSS has variables?
@@ -135,11 +135,11 @@ div {
 }
 ```
 
-Then the URL should be evaluated relative to the directory the `url()` originates in, which is the `styles` directory in this case.  However, prior to this patch, whenever a variable was present in a rule, `url()`s would unconditionally resolve relative to the base document URL (that of `index.html` here).
+Then the URL should be resolved relative to the directory the `url()` originates in, which is the `styles` directory in this case.  However, prior to this patch, whenever a variable was present in a rule, `url()`s in that rule would unconditionally resolve relative to the base document URL (that of `index.html` here).
 This means that neither `background` rule above would've been able to correctly resolve the path of our precious `ducky.png`.
 
 To fix this, WebKit's representation of [pending-substitution values](https://drafts.csswg.org/css-variables/#pending-substitution-value) now
-tracks the base URL that should be used to resolve any `url()`, rather than unconditionally resolving against the
+tracks the base URL that should be used to resolve any `url()` in the value, rather than unconditionally resolving them against the
 base document URL.
 
 #### Prevent :visited styles from erroneously being applied to non-visited links when CSS variables are present in the rule
@@ -164,8 +164,9 @@ Given:
 ```
 
 WebKit used to erroneously apply the `:visited` styles for non-visited links when variables were part of the rule, meaning
-the color of this link would be red.  In
-WebKit's style-building code, there is a piece of state that manages whether the styles it is evaluating should be applied
+the color of this link would always be red.
+
+In WebKit's style-building code, there is a piece of state that manages whether the styles it is evaluating should be applied
 to the set of normal, non-visited styles, to the set of `:visited` styles, or to both sets of styles.
 
 The manifestation of the bug looked like this:
@@ -174,14 +175,14 @@ The manifestation of the bug looked like this:
 2. A CSS variable is encountered, so work begins to expand it
 3. As part of this expansion, the aforementioned style-state is manipulated to various values, and unconditionally reset
 to point at the non-visited style set
-4. Variable resolution completes, but because of the unconditional reset to non-visited style-state in the previous step,
+4. Variable expansion completes, but because of the unconditional reset to non-visited style-state in the previous step,
 it is erroneously applied to the non-visited style set
 
-One solution would be to keep track of the value of this style-state before variable resolution begins, and reset it back to this
+One solution would be to keep track of the value of this style-state before variable expansion begins, and reset it back to this
 value in step 3.  I did try this, but it isn't the cleanest solution, as one would have to remember to reset this state
 any time the function returns.
 
-Instead, any time this state is mutated during variable resolution, it is now done so with a utility within WebKit called
+Instead, any time this state is mutated during variable expansion, it is now done so with a utility within WebKit called
 `SetForScope`, which automatically rolls the changed state back to its original value when the `SetForScope` is destroyed.
 
 ### Future work
